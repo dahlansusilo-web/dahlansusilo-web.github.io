@@ -1,15 +1,43 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dalam Pengembangan</title>
+<html lang="id"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buku - Dahlan Susilo</title>
+<link rel="stylesheet" href="../style.css">
 <style>
-body{font-family:Inter,sans-serif;background:#f9f5f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-.card{background:white;padding:50px 30px;border-radius:24px;text-align:center;box-shadow:0 20px 60px rgba(60,20,10,0.08);max-width:400px}
-.card h1{color:#7c2d12;font-size:22px;margin-bottom:12px}
-.card p{color:#6b5a52;font-size:14px;line-height:1.6}
-a.btn{display:inline-block;margin-top:24px;padding:12px 24px;background:#7c2d12;color:white;border-radius:24px;text-decoration:none;font-weight:600;font-size:14px}
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;padding:20px 0}
+.book-card{border:1px solid #e5e7eb;border-radius:16px;padding:16px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.book-card img{width:100%;height:180px;object-fit:cover;border-radius:12px}
+.book-card h3{margin:12px 0 4px;font-size:18px}
+.book-card .meta{font-size:13px;color:#6b7280;margin-bottom:8px}
+.btn{display:inline-block;padding:8px 14px;border-radius:8px;background:#0f172a;color:#fff;text-decoration:none;font-size:14px}
+.search{width:100%;padding:12px 16px;border-radius:12px;border:1px solid #e5e7eb;margin:20px 0}
 </style></head><body>
-<div class="card">
-<h1>🚧 Dalam Pengembangan</h1>
-<p>Halaman ini dalam pengembangan, terima kasih<br>atas pengertiannya.</p>
-<a class="btn" href="../">← Kembali ke Beranda</a>
-</div></body></html>
+<div class="container" style="max-width:1100px;margin:auto;padding:20px">
+<a href="../">← Beranda</a>
+<h1>📚 Koleksi Buku</h1>
+<input id="q" class="search" placeholder="Cari judul, tahun, penerbit...">
+<div id="list" class="book-grid"></div>
+</div>
+<script>
+async function loadBooks(){
+  let local = localStorage.getItem('books_dahlan');
+  if(local) return JSON.parse(local);
+  let res = await fetch('books.json'); return await res.json();
+}
+function render(books, filter=''){
+  const c = document.getElementById('list');
+  let f = books.filter(b => (b.judul+b.tahun+b.penerbit).toLowerCase().includes(filter.toLowerCase()));
+  c.innerHTML = f.map(b=>`
+    <div class="book-card">
+      <img src="${b.cover||'https://via.placeholder.com/300x180?text=No+Cover'}">
+      <h3>${b.judul}</h3>
+      <div class="meta">${b.tahun} • ${b.penerbit} • ${b.isbn||''}</div>
+      <p style="font-size:14px;color:#374151">${b.deskripsi||''}</p>
+      <a class="btn" href="${b.link||'#'}" target="_blank">Lihat / Download</a>
+    </div>`).join('') || '<p>Belum ada buku.</p>';
+}
+loadBooks().then(books=>{
+  render(books);
+  document.getElementById('q').addEventListener('input', e=>render(books, e.target.value));
+});
+</script></body></html>
