@@ -1,35 +1,61 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Buku - Dahlan Susilo</title>
+<style>
+body{font-family:sans-serif;max-width:800px;margin:auto;padding:20px;background:#f8fafc}
+h2{text-align:center}
+#search{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:15px 0}
+.book{background:#fff;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.book h3{margin:0 0 5px 0}
+.book small{color:#64748b;line-height:1.5}
+</style>
+</head><body>
+<h2>📚 Daftar Buku Karya Dahlan Susilo</h2>
+<input id="search" placeholder="Cari judul, penulis, tahun, jenis (Buku Ajar/Referensi/Monograf/Book Chapter), ISBN...">
+<div id="list">Loading...</div>
+
 <script>
 let allBooks = [];
-
-async function loadBooks(){
-  const res = await fetch('books.json?v='+Date.now());
-  allBooks = await res.json();
-  // URUT TAHUN TERBARU DI ATAS
-  allBooks.sort((a,b)=> parseInt(b.tahun) - parseInt(a.tahun));
-  render(allBooks);
+async function load(){
+  try{
+    let res = await fetch('books.json?v='+Date.now());
+    if(!res.ok) throw new Error('books.json tidak ditemukan');
+    allBooks = await res.json();
+    // urut tahun terbaru dulu
+    allBooks.sort((a,b)=> parseInt(b.tahun||0) - parseInt(a.tahun||0));
+    if(allBooks.length===0) throw new Error('kosong');
+    render(allBooks);
+  }catch(e){
+    document.getElementById('list').innerHTML = `
+    <div style="background:#fff;padding:20px;border-radius:12px;text-align:center">
+    <b>Belum ada data buku</b><br><br>
+    Penyebab: ${e.message}<br><br>
+    1. Pastikan file <code>books.json</code> ada di folder <code>/buku/</code><br>
+    2. Isi awal minimal []<br>
+    3. Buka <a href="admin.html">admin.html</a> untuk tambah buku
+    </div>`;
+  }
 }
-
-function render(books){
-  const c = document.getElementById('list');
-  c.innerHTML = books.map(b=>`
+function render(data){
+  document.getElementById('list').innerHTML = data.map(b=>`
     <div class="book">
-      <h3>${b.judul}</h3>
+      <h3>${b.judul||'-'}</h3>
       <small>
-        ${b.penulis} • ${b.tahun} • ${b.penerbit} • ISBN: ${b.isbn}<br>
-        ${b.jenis} • ${b.halaman} hlm
+      ✍️ ${b.penulis||'-'} | 📅 ${b.tahun||'-'} | 📖 ${b.halaman||'-'} hlm<br>
+      🏢 ${b.penerbit||'-'} | 🔖 ${b.isbn||'-'}<br>
+      <span style="background:#0f172a;color:#fff;padding:2px 8px;border-radius:20px;font-size:11px">${b.jenis||'Buku'}</span>
+      <br>${b.deskripsi||''}
       </small>
+      ${b.link?`<br><a href="${b.link}" target="_blank">Lihat Buku</a>`:''}
     </div>
   `).join('');
 }
-
-// FILTER DARI PENCARIAN (bisa cari jenis, tahun, penulis, judul)
-document.getElementById('search').addEventListener('input', e=>{
-  let q = e.target.value.toLowerCase();
-  let filtered = allBooks.filter(b => 
-    (b.judul+b.penulis+b.tahun+b.jenis+b.penerbit+b.isbn).toLowerCase().includes(q)
-  );
-  render(filtered);
+document.getElementById('search').addEventListener('input',e=>{
+  let q=e.target.value.toLowerCase();
+  let f=allBooks.filter(b=>Object.values(b).join(' ').toLowerCase().includes(q));
+  render(f);
 });
-
-loadBooks();
+load();
 </script>
+</body></html>
