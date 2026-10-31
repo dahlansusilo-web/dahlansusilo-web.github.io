@@ -1,103 +1,11 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Katalog Buku - Tabel</title>
-<style>
-body{margin:0;font-family:Inter,sans-serif;background:#fdfaf6;color:#1e293b}
-header{background:#fff;padding:16px 20px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10}
-.wrap{max-width:1300px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.wrap b{font-size:20px}
-.wrap input{flex:1;max-width:500px;padding:11px 14px;border:1px solid #ddd;border-radius:10px}
-.table-wrap{max-width:1300px;margin:20px auto;padding:0 16px;overflow:auto}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.06);min-width:900px}
-th{background:#0f172a;color:#fff;padding:12px 10px;text-align:left;font-size:13px;white-space:nowrap}
-td{padding:10px;border-bottom:1px solid #f1f5f9;font-size:13px;vertical-align:top}
-td img{width:60px;height:80px;object-fit:cover;border-radius:6px;background:#eee}
-tr:hover{background:#f8fafc}
-.btn{padding:6px 10px;background:#0f172a;color:#fff;border-radius:6px;text-decoration:none;font-size:11px;display:inline-block}
-.small{color:#64748b;font-size:11px}
-</style>
-</head>
-<body>
-<header>
-  <div class="wrap">
-    <b>📚 Katalog Buku</b>
-    <input id="cari" placeholder="Cari judul, penulis, tahun, penerbit..." oninput="filterBuku()">
-    <span id="status" style="font-size:12px;color:#0ea5e9"></span>
-  </div>
-</header>
-
-<div class="table-wrap">
-<table id="tabel">
-  <thead>
-    <tr>
-      <th>No</th>
-      <th>Cover</th>
-      <th>Judul</th>
-      <th>Penulis</th>
-      <th>Tahun</th>
-      <th>Penerbit</th>
-      <th>ISBN / Jenis / Hal</th>
-      <th>Aksi</th>
-    </tr>
-  </thead>
-  <tbody id="tbody">
-    <tr><td colspan="8" style="text-align:center;padding:30px;color:#999">Loading dari Google Sheet...</td></tr>
-  </tbody>
-</table>
-</div>
-
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Katalog Buku</title><style>body{margin:0;font-family:sans-serif;background:#fdfaf6}header{background:#fff;padding:16px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10}.wrap{max-width:1300px;margin:auto;display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center}.wrap input{flex:1;padding:11px;border:1px solid #ddd;border-radius:10px;max-width:500px}.table-wrap{max-width:1300px;margin:20px auto;padding:0 16px;overflow:auto}table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.06);min-width:900px}th{background:#0f172a;color:#fff;padding:12px 10px;text-align:left;font-size:13px}td{padding:10px;border-bottom:1px solid #f1f5f9;font-size:13px;vertical-align:top}td img{width:60px;height:80px;object-fit:cover;border-radius:6px}tr:hover{background:#f8fafc}.btn{padding:6px 10px;background:#0f172a;color:#fff;border-radius:6px;text-decoration:none;font-size:11px;display:inline-block}</style></head><body>
+<header><div class="wrap"><b>📚 Katalog Buku</b><input id="cari" placeholder="Cari judul, penulis, tahun..." oninput="filterBuku()"><span id="status" style="font-size:12px;color:#0ea5e9"></span></div></header>
+<div class="table-wrap"><table><thead><tr><th>No</th><th>Cover</th><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Penerbit</th><th>ISBN / Jenis / Hal</th><th>Aksi</th></tr></thead><tbody id="tbody"><tr><td colspan="8" style="text-align:center;padding:30px;color:#999">Loading...</td></tr></tbody></table></div>
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbw0SZBZdt8MFIuIBWF5X2FeNegBmmS647NkAmpai35WeIrL2Fcv5_mIj2BgB1WYVlgn/exec";
-let books=[];
-
-async function loadBuku(){
-  try{
-    let res = await fetch(SHEET_URL+"?t="+Date.now());
-    books = await res.json();
-    document.getElementById('status').textContent = "Live: "+books.length+" buku";
-  }catch(e){
-    document.getElementById('status').textContent = "Gagal GS";
-    books = JSON.parse(localStorage.getItem('books')||'[]');
-  }
-  tampil(books);
-}
-
-function tampil(data){
-  let tbody = document.getElementById('tbody');
-  if(!data.length){
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#999">Belum ada buku di Sheet</td></tr>';
-    return;
-  }
-  tbody.innerHTML = data.map((b,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td><img src="${b.cover||''}" onerror="this.src='https://via.placeholder.com/60x80?text=No'"></td>
-      <td><b>${b.judul||''}</b><br><span class="small">${(b.deskripsi||'').slice(0,80)}</span></td>
-      <td>${b.penulis||''}</td>
-      <td>${b.tahun||''}</td>
-      <td>${b.penerbit||''}</td>
-      <td>
-        ${b.isbn?`ISBN: ${b.isbn}<br>`:''}
-        ${b.jenis||''}<br>
-        ${b.halaman?`${b.halaman} Hal`:''}
-      </td>
-      <td>
-        ${b.link?`<a class="btn" href="${b.link}" target="_blank">Baca</a>`:''}
-        ${b.cover?`<br><a class="small" href="${b.cover}" target="_blank">Cover</a>`:''}
-      </td>
-    </tr>
-  `).join('');
-}
-
-function filterBuku(){
-  let q = document.getElementById('cari').value.toLowerCase();
-  let hasil = books.filter(b=> `${b.judul} ${b.penulis} ${b.tahun} ${b.penerbit} ${b.isbn}`.toLowerCase().includes(q));
-  tampil(hasil);
-}
-
+const SHEET_URL = "https://script.google.com/macros/s/AKfycby7JzeKzZSW3j_1WkO3UOoklN_tjEpklaCztTBJjhPc1KeUn5uVtwPKSVfLmjhVHATk/exec";
+let books=[];async function loadBuku(){try{let r=await fetch(SHEET_URL+"?t="+Date.now());books=await r.json();status.textContent="Live: "+books.length+" buku";}catch(e){status.textContent="Gagal GS, pakai backup";books=JSON.parse(localStorage.getItem('books')||'[]');}tampil(books);}
+function tampil(d){let tb=document.getElementById('tbody');if(!d.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center">Belum ada buku</td></tr>';return}tb.innerHTML=d.map((b,i)=>`<tr><td>${i+1}</td><td><img src="${b.cover||''}" onerror="this.src='https://via.placeholder.com/60x80?text=No'"></td><td><b>${b.judul||''}</b></td><td>${b.penulis||''}</td><td>${b.tahun||''}</td><td>${b.penerbit||''}</td><td>${b.isbn||''}<br>${b.jenis||''} ${b.halaman?`• ${b.halaman} hal`:''}</td><td>${b.link?`<a class="btn" href="${b.link}" target="_blank">Baca</a>`:''}</td></tr>`).join('');}
+function filterBuku(){let q=cari.value.toLowerCase();tampil(books.filter(b=>`${b.judul} ${b.penulis} ${b.tahun} ${b.isbn}`.toLowerCase().includes(q)));}
 loadBuku();
-</script>
-</body>
-</html>
+</script></body></html>
