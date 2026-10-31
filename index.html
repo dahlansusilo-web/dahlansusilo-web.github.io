@@ -33,6 +33,9 @@ h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:48px;margin-top:20px;let
 .grid{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .card{width:130px;height:110px;background:white;border-radius:16px;border:1px solid #e9ddd0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#4a2c1d;transition:.2s}
 .card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.06);border-color:#7c2d12}
+.profil-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.profil-links a{padding:10px 18px;border-radius:20px;text-decoration:none;font-weight:600;font-size:13px;color:white;transition:.2s}
+.profil-links a:hover{transform:translateY(-2px);opacity:0.9}
 footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:20px}
 </style>
 </head>
@@ -53,8 +56,17 @@ footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size
 <div class="stat"><div class="icon">🎓</div><b>30+</b><span>Tahun Mengajar</span></div>
 <div class="stat"><div class="icon">🔬</div><b>10+</b><span>Proyek Riset</span></div>
 </div>
-<div class="btns">
-<a class="btn btn-primary" href="#profil">Lihat Profil Lengkap</a>
+
+<div id="profil">
+<div class="profil-links">
+<a href="https://sinta.kemdiktisaintek.go.id/authors/profile/6087970" target="_blank" style="background:#c1272d">📊 SINTA</a>
+<a href="https://garuda.kemdiktisaintek.go.id/author/view/396457" target="_blank" style="background:#1a73e8">📚 GARUDA</a>
+<a href="https://pddikti.kemdiktisaintek.go.id/detail-dosen/8JJGH4nUkx77lEu-8eZp4G6if-hBGJ90Ny4Do1gKFwGxXt9QH8oThUA7_aomZD0_LpARoA==" target="_blank" style="background:#f4a300;color:#3a2100">🎓 PDDIKTI</a>
+</div>
+</div>
+
+<div class="btns" style="margin-top:28px">
+<a class="btn btn-primary" href="#kuliah">Lihat Profil Lengkap</a>
 <a class="btn btn-outline" href="#karya">Portofolio & Publikasi</a>
 </div>
 </div>
