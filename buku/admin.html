@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Buku</title>
+<style>body{font-family:sans-serif;max-width:700px;margin:auto;padding:20px}input,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px}button{padding:10px 16px;border:0;border-radius:8px;background:#0f172a;color:#fff;cursor:pointer}.item{border:1px solid #eee;padding:12px;border-radius:12px;margin:10px 0}</style>
+</head><body>
+<h2>Admin Buku - Tambah / Edit</h2>
+<input id="judul" placeholder="Judul Buku">
+<input id="tahun" placeholder="Tahun">
+<input id="penerbit" placeholder="Penerbit">
+<input id="isbn" placeholder="ISBN">
+<input id="cover" placeholder="Link Cover (URL gambar)">
+<input id="link" placeholder="Link Download / Google Drive">
+<textarea id="deskripsi" placeholder="Deskripsi"></textarea>
+<button onclick="save()">Simpan Buku</button>
+<button onclick="exportJSON()" style="background:#16a34a">Export books.json</button>
+<hr><div id="list"></div>
+<script>
+let books = JSON.parse(localStorage.getItem('books_dahlan')||'[]');
+let editIndex = -1;
+function refresh(){document.getElementById('list').innerHTML=books.map((b,i)=>`<div class="item"><b>${b.judul}</b> (${b.tahun})<br><button onclick="edit(${i})">Edit</button> <button onclick="del(${i})" style="background:#dc2626">Hapus</button></div>`).join('')}
+function save(){
+  let data={judul:judul.value,tahun:tahun.value,penerbit:penerbit.value,isbn:isbn.value,cover:cover.value,link:link.value,deskripsi:deskripsi.value};
+  if(!data.judul) return alert('Judul wajib');
+  if(editIndex>=0) books[editIndex]=data; else books.push(data);
+  localStorage.setItem('books_dahlan',JSON.stringify(books)); editIndex=-1; refresh(); clearForm();
+}
+function edit(i){let b=books[i]; judul.value=b.judul;tahun.value=b.tahun;penerbit.value=b.penerbit;isbn.value=b.isbn;cover.value=b.cover;link.value=b.link;deskripsi.value=b.deskripsi;editIndex=i;window.scrollTo(0,0)}
+function del(i){if(confirm('Hapus?')){books.splice(i,1);localStorage.setItem('books_dahlan',JSON.stringify(books));refresh()}}
+function clearForm(){['judul','tahun','penerbit','isbn','cover','link','deskripsi'].forEach(id=>document.getElementById(id).value='')}
+function exportJSON(){let blob=new Blob([JSON.stringify(books,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='books.json';a.click();alert('Upload file books.json ini ke folder buku/ di GitHub untuk update permanen')}
+refresh();
+</script></body></html>
