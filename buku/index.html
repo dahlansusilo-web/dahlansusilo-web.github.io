@@ -1,43 +1,33 @@
-<!DOCTYPE html>
-<html lang="id"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buku - Dahlan Susilo</title>
-<link rel="stylesheet" href="../style.css">
-<style>
-.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;padding:20px 0}
-.book-card{border:1px solid #e5e7eb;border-radius:16px;padding:16px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.05)}
-.book-card img{width:100%;height:180px;object-fit:cover;border-radius:12px}
-.book-card h3{margin:12px 0 4px;font-size:18px}
-.book-card .meta{font-size:13px;color:#6b7280;margin-bottom:8px}
-.btn{display:inline-block;padding:8px 14px;border-radius:8px;background:#0f172a;color:#fff;text-decoration:none;font-size:14px}
-.search{width:100%;padding:12px 16px;border-radius:12px;border:1px solid #e5e7eb;margin:20px 0}
-</style></head><body>
-<div class="container" style="max-width:1100px;margin:auto;padding:20px">
-<a href="../">← Beranda</a>
-<h1>📚 Koleksi Buku</h1>
-<input id="q" class="search" placeholder="Cari judul, tahun, penerbit...">
-<div id="list" class="book-grid"></div>
+<div style="margin:20px 0;display:flex;gap:10px;flex-wrap:wrap">
+  <select id="filterJenis" style="padding:10px;border-radius:8px;border:1px solid #ddd">
+    <option value="">Semua Jenis</option>
+    <option>Buku Ajar</option>
+    <option>Buku Referensi</option>
+    <option>Buku Monograf</option>
+    <option>Book Chapter</option>
+  </select>
 </div>
+
 <script>
-async function loadBooks(){
-  let local = localStorage.getItem('books_dahlan');
-  if(local) return JSON.parse(local);
-  let res = await fetch('books.json'); return await res.json();
-}
-function render(books, filter=''){
+function render(books, q='', jenis=''){
   const c = document.getElementById('list');
-  let f = books.filter(b => (b.judul+b.tahun+b.penerbit).toLowerCase().includes(filter.toLowerCase()));
+  let f = books.filter(b => {
+    let matchQ = (b.judul+b.penulis+b.tahun+b.isbn).toLowerCase().includes(q.toLowerCase());
+    let matchJenis = jenis ? b.jenis === jenis : true;
+    return matchQ && matchJenis;
+  });
   c.innerHTML = f.map(b=>`
     <div class="book-card">
       <img src="${b.cover||'https://via.placeholder.com/300x180?text=No+Cover'}">
+      <span style="font-size:11px;background:#0f172a;color:#fff;padding:4px 8px;border-radius:20px">${b.jenis||'Buku'}</span>
       <h3>${b.judul}</h3>
-      <div class="meta">${b.tahun} • ${b.penerbit} • ${b.isbn||''}</div>
-      <p style="font-size:14px;color:#374151">${b.deskripsi||''}</p>
-      <a class="btn" href="${b.link||'#'}" target="_blank">Lihat / Download</a>
-    </div>`).join('') || '<p>Belum ada buku.</p>';
+      <div class="meta">
+        ✍️ ${b.penulis}<br>
+        📅 ${b.tahun} • 📖 ${b.halaman||'-'} hlm • ${b.penerbit}<br>
+        🔖 ISBN: ${b.isbn||'-'}
+      </div>
+      <p style="font-size:14px">${b.deskripsi||''}</p>
+      <a class="btn" href="${b.link||'#'}" target="_blank">Lihat Buku</a>
+    </div>`).join('');
 }
-loadBooks().then(books=>{
-  render(books);
-  document.getElementById('q').addEventListener('input', e=>render(books, e.target.value));
-});
-</script></body></html>
+</script>
