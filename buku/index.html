@@ -1,61 +1,104 @@
 <!DOCTYPE html>
-<html lang="id"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daftar Buku - Dahlan Susilo</title>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin Buku Lengkap</title>
 <style>
-body{font-family:sans-serif;max-width:800px;margin:auto;padding:20px;background:#f8fafc}
-h2{text-align:center}
-#search{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:15px 0}
-.book{background:#fff;padding:15px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-.book h3{margin:0 0 5px 0}
-.book small{color:#64748b;line-height:1.5}
+body{font-family:sans-serif;max-width:650px;margin:40px auto;padding:20px}
+input,select,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8px;box-sizing:border-box}
+button{padding:10px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin-right:6px;margin-top:6px}
+.btn-dark{background:#0f172a;color:white}
+.btn-green{background:#16a34a;color:white}
+.btn-blue{background:#0ea5e9;color:white}
+.btn-orange{background:#f59e0b;color:white}
+.btn-red{background:#dc2626;color:white;float:right}
+#list{margin-top:20px}
+.item{border-bottom:1px solid #eee;padding:10px 0;font-size:13px;display:flex;justify-content:space-between}
 </style>
-</head><body>
-<h2>📚 Daftar Buku Karya Dahlan Susilo</h2>
-<input id="search" placeholder="Cari judul, penulis, tahun, jenis (Buku Ajar/Referensi/Monograf/Book Chapter), ISBN...">
-<div id="list">Loading...</div>
+</head>
+<body>
+
+<a href="#" onclick="logout()" class="btn-red" style="text-decoration:none;padding:8px 16px;border-radius:8px">Logout</a>
+<h2>Admin Buku Lengkap</h2>
+
+<input id="penulis" placeholder="Penulis">
+<input id="tahun" type="number" placeholder="Tahun">
+<input id="judul" placeholder="Judul Buku">
+<input id="penerbit" placeholder="Penerbit">
+<input id="isbn" placeholder="ISBN">
+<select id="jenis">
+  <option value="">-- Pilih Jenis --</option>
+  <option>Buku Ajar</option>
+  <option>Buku Referensi</option>
+  <option>Monograf</option>
+  <option>Modul</option>
+</select>
+<input id="halaman" type="number" placeholder="Jumlah Halaman">
+<input id="cover" placeholder="Link Cover / cover1.jpg">
+<input id="drive" placeholder="Link Drive">
+<textarea id="deskripsi" placeholder="Deskripsi" rows="3"></textarea>
+
+<button class="btn-dark" onclick="simpanBuku()">Simpan Buku</button>
+<button class="btn-green" onclick="exportJson()">Export books.json</button>
+<button class="btn-blue" onclick="exportToSheet()">📊 Export ke Google Sheet</button>
+<button class="btn-orange" onclick="exportCSV()">📄 Export CSV</button>
+
+<div id="list"></div>
 
 <script>
-let allBooks = [];
-async function load(){
+// GANTI URL INI DENGAN URL WEB APP DARI GOOGLE SHEET SAMPEAN
+const SHEET_URL = "https://script.google.com/macros/s/XXXX/exec";
+
+let books = JSON.parse(localStorage.getItem("books") || "[]");
+
+function render(){
+  document.getElementById("list").innerHTML = books.map((b,i)=>`
+    <div class="item"><span>${b.tahun} - ${b.judul}</span> <a href="#" onclick="hapus(${i})">hapus</a></div>
+  `).join("");
+}
+render();
+
+function simpanBuku(){
+  const b = {
+    penulis: penulis.value, tahun: tahun.value, judul: judul.value,
+    penerbit: penerbit.value, isbn: isbn.value, jenis: jenis.value,
+    halaman: halaman.value, cover: cover.value, link: drive.value,
+    deskripsi: deskripsi.value
+  };
+  if(!b.judul) return alert("Judul wajib diisi");
+  books.push(b);
+  localStorage.setItem("books", JSON.stringify(books));
+  render();
+  alert("Tersimpan! Total: "+books.length+" buku");
+  // kosongkan
+  judul.value=""; deskripsi.value="";
+}
+
+function exportJson(){
+  let blob = new Blob([JSON.stringify(books,null,2)], {type:"application/json"});
+  let a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "books.json"; a.click();
+}
+
+async function exportToSheet(){
+  if(books.length==0) return alert("Belum ada data!");
+  if(SHEET_URL.includes("XXXX")) return alert("Bro, ganti dulu SHEET_URL nya dengan URL Web App dari Google Sheet!");
   try{
-    let res = await fetch('books.json?v='+Date.now());
-    if(!res.ok) throw new Error('books.json tidak ditemukan');
-    allBooks = await res.json();
-    // urut tahun terbaru dulu
-    allBooks.sort((a,b)=> parseInt(b.tahun||0) - parseInt(a.tahun||0));
-    if(allBooks.length===0) throw new Error('kosong');
-    render(allBooks);
-  }catch(e){
-    document.getElementById('list').innerHTML = `
-    <div style="background:#fff;padding:20px;border-radius:12px;text-align:center">
-    <b>Belum ada data buku</b><br><br>
-    Penyebab: ${e.message}<br><br>
-    1. Pastikan file <code>books.json</code> ada di folder <code>/buku/</code><br>
-    2. Isi awal minimal []<br>
-    3. Buka <a href="admin.html">admin.html</a> untuk tambah buku
-    </div>`;
-  }
+    await fetch(SHEET_URL, {method:"POST", mode:"no-cors", body: JSON.stringify(books)});
+    alert("Berhasil dikirim ke Google Sheet! Cek Sheet sampean bro.");
+  }catch(e){ alert("Gagal: "+e.message); }
 }
-function render(data){
-  document.getElementById('list').innerHTML = data.map(b=>`
-    <div class="book">
-      <h3>${b.judul||'-'}</h3>
-      <small>
-      ✍️ ${b.penulis||'-'} | 📅 ${b.tahun||'-'} | 📖 ${b.halaman||'-'} hlm<br>
-      🏢 ${b.penerbit||'-'} | 🔖 ${b.isbn||'-'}<br>
-      <span style="background:#0f172a;color:#fff;padding:2px 8px;border-radius:20px;font-size:11px">${b.jenis||'Buku'}</span>
-      <br>${b.deskripsi||''}
-      </small>
-      ${b.link?`<br><a href="${b.link}" target="_blank">Lihat Buku</a>`:''}
-    </div>
-  `).join('');
+
+function exportCSV(){
+  let csv = "Penulis,Tahun,Judul,Penerbit,ISBN,Jenis,Halaman,Cover,Drive,Deskripsi\n";
+  books.forEach(b=>{ csv += `"${b.penulis}","${b.tahun}","${b.judul}","${b.penerbit}","${b.isbn}","${b.jenis}","${b.halaman}","${b.cover}","${b.link}","${(b.deskripsi||'').replace(/\"/g,'')}"\n`; });
+  let blob = new Blob([csv], {type:"text/csv"});
+  let a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "buku-dahlan.csv"; a.click();
 }
-document.getElementById('search').addEventListener('input',e=>{
-  let q=e.target.value.toLowerCase();
-  let f=allBooks.filter(b=>Object.values(b).join(' ').toLowerCase().includes(q));
-  render(f);
-});
-load();
+
+function hapus(i){ if(confirm("Hapus?")){ books.splice(i,1); localStorage.setItem("books", JSON.stringify(books)); render(); } }
+function logout(){ localStorage.removeItem("isLogin"); location.href="login.html"; }
 </script>
-</body></html>
+</body>
+</html>
