@@ -1,14 +1,26 @@
 [
   {
-    "penulis": "Dahlan Susilo",
-    "tahun": "2024",
-    "judul": "Contoh Buku Ajar",
-    "penerbit": "USahid",
-    "isbn": "978-xxx",
-    "jenis": "Buku Ajar",
-    "halaman": "200",
-    "cover": "",
-    "link": "#",
-    "deskripsi": "Contoh data"
+    "penulis": "Risma Petrus, S.Kom., M.MT., Ir. Ali Impron, S.Kom., M.Kom., Mustamin, S.Pd., M.T., M.Pd., Levina Marthina Rumaropen, S.E., M.MT., Casriati, S.Pd.I., M.M. ; editor, Ir. Dahlan Susilo, M.Kom",
+    "tahun": "2026",
+    "judul": "Informatika dalam kehidupan sehari-hari",
+    "penerbit": "CV. Inovasi Publishing Indonesia",
+    "isbn": "9786347943644",
+    "jenis": "Buku Referensi",
+    "halaman": "259",
+    "cover": "https://sinta-document-650498682909-ap-southeast-3-an.s3.ap-southeast-3.amazonaws.com/public/books/1792736433102-7906902395.png",
+    "link": "",
+    "deskripsi": "Informatika dalam kehidupan sehari-hari"
+  },
+  {
+    "penulis": "Putri Ramadani, S.Kom., M.Kom., Atika Sadariah Nasution, S.Pd., M.Pd., Suerni, S.S., M.Li., Ir. Dahlan Susilo, M.Kom., Nurul Aulya, S.Kom., M.Kom. [dan 2 lainnya] ; editor, Putri Ramadani, S.Kom., M.Kom",
+    "tahun": "2026",
+    "judul": "Metodologi penelitian sistem informasi : dari formulasi masalah hingga pelaporan ilmiah pendekatan kuantitatif, kualitatif, dan mixed-method",
+    "penerbit": "Bashaedu",
+    "isbn": "9786340561678",
+    "jenis": "Buku Referensi",
+    "halaman": "164",
+    "cover": "https://sinta-document-650498682909-ap-southeast-3-an.s3.ap-southeast-3.amazonaws.com/public/books/1791361617873-6727485836.jpg",
+    "link": "",
+    "deskripsi": "Metodologi penelitian sistem informasi"
   }
 ]
