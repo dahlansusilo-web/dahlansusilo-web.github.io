@@ -1,93 +1,39 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Katalog Buku - Dahlan Susilo</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:'Inter',sans-serif;background:#fdfaf6;color:#1e293b}
-header{background:white;border-bottom:1px solid #eee;padding:16px 20px;position:sticky;top:0;z-index:10}
-.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.top h1{margin:0;font-size:22px}
-.top input{flex:1;max-width:420px;padding:12px 14px;border:1px solid #e2e8f0;border-radius:10px;outline:none}
-.top input:focus{border-color:#0f172a}
-.grid{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;padding:0 16px}
-.card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.06);transition:.2s;display:flex;flex-direction:column}
-.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.1)}
-.cover{width:100%;height:320px;object-fit:cover;background:#f1f5f9}
-.body{padding:14px}
-.body h3{margin:0 0 6px;font-size:15px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.meta{font-size:12px;color:#64748b;line-height:1.4}
-.meta b{color:#334155}
-.desc{font-size:12.5px;color:#475569;margin:8px 0 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.actions{margin-top:12px;display:flex;gap:8px}
-.btn{flex:1;text-align:center;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none}
-.btn-read{background:#0f172a;color:white}.btn-cover{background:#f1f5f9;color:#334155}
-.empty{text-align:center;color:#94a3b8;margin-top:60px;grid-column:1/-1}
-</style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katalog Buku</title>
+<style>body{margin:0;font-family:sans-serif;background:#fdfaf6}header{background:#fff;padding:16px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10}.wrap{max-width:1100px;margin:auto;display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center}.wrap input{flex:1;padding:11px;border:1px solid #ddd;border-radius:10px;max-width:420px} .grid{max-width:1100px;margin:20px auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;padding:0 16px}.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.06)}.cover{width:100%;height:320px;object-fit:cover;background:#eee}.body{padding:12px}.btn{display:block;margin-top:8px;padding:8px;background:#0f172a;color:#fff;text-align:center;border-radius:8px;text-decoration:none;font-size:12px} #status{font-size:12px;color:#0ea5e9}</style>
 </head>
 <body>
-<header>
-  <div class="wrap top">
-    <h1>📚 Katalog Buku</h1>
-    <input id="cari" placeholder="Cari judul, penulis, tahun, penerbit..." oninput="filterBuku()">
-  </div>
-</header>
-
+<header><div class="wrap"><b>📚 Katalog Buku</b><input id="cari" placeholder="Cari judul / penulis..." oninput="filterBuku()"><span id="status">Loading...</span></div></header>
 <div id="grid" class="grid"></div>
-
 <script>
-let books = [];
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbw0SZBZdt8MFIuIBWF5X2FeNegBmmS647NkAmpai35WeIrL2Fcv5_mIj2BgB1WYVlgn/exec";
+let books=[];
 async function loadBuku(){
   try{
-    // Ambil dari books.json (hasil export dari admin)
-    const res = await fetch('books.json?v='+Date.now());
-    if(res.ok){ books = await res.json(); }
-  }catch(e){}
-  // fallback kalau books.json belum ada, ambil dari localStorage
-  if(books.length===0){
+    let res = await fetch(SHEET_URL+"?t="+Date.now());
+    books = await res.json();
+    document.getElementById('status').textContent = "Live GS: "+books.length+" buku";
+  }catch(e){
+    document.getElementById('status').textContent = "Gagal GS, pakai backup";
     books = JSON.parse(localStorage.getItem('books')||'[]');
   }
   tampil(books);
 }
-
-function tampil(data){
-  const grid = document.getElementById('grid');
-  if(data.length===0){
-    grid.innerHTML = `<div class="empty">Belum ada buku. Silahkan tambah di <a href="admin.html">admin.html</a></div>`;
-    return;
-  }
-  grid.innerHTML = data.map(b=>`
+function tampil(d){
+  let g=document.getElementById('grid');
+  if(!d.length){g.innerHTML='<p style="text-align:center;color:#999;grid-column:1/-1">Belum ada buku di Google Sheet. Tambah di admin.html</p>';return}
+  g.innerHTML=d.map(b=>`
     <div class="card">
-      <img class="cover" src="${b.cover||''}" alt="${b.judul||''}" onerror="this.src='https://via.placeholder.com/300x420?text=No+Cover'">
-      <div class="body">
-        <h3>${b.judul||'Tanpa Judul'}</h3>
-        <div class="meta">
-          <b>${b.penulis||'-'}</b><br>
-          ${b.tahun||''} • ${b.penerbit||''} • ${b.jenis||''}<br>
-          ${b.isbn?`ISBN: ${b.isbn}<br>`:''}
-          ${b.halaman?`${b.halaman} Hal` :''}
-        </div>
-        ${b.deskripsi?`<div class="desc">${b.deskripsi}</div>`:''}
-        <div class="actions">
-          ${b.link?`<a class="btn btn-read" href="${b.link}" target="_blank">📄 Baca</a>`:''}
-          ${b.cover?`<a class="btn btn-cover" href="${b.cover}" target="_blank">Cover</a>`:''}
-        </div>
+      <img class="cover" src="${b.cover||''}" onerror="this.src='https://via.placeholder.com/300x420?text=No+Cover'">
+      <div class="body"><b>${b.judul}</b><br><small>${b.penulis||''} - ${b.tahun||''}</small><br><small style="color:#666">${b.penerbit||''} • ${b.jenis||''}</small>
+      ${b.link?`<a class="btn" href="${b.link}" target="_blank">📄 Baca</a>`:''}
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
-function filterBuku(){
-  const q = document.getElementById('cari').value.toLowerCase();
-  const hasil = books.filter(b=> 
-    `${b.judul} ${b.penulis} ${b.tahun} ${b.penerbit} ${b.jenis} ${b.isbn}`.toLowerCase().includes(q)
-  );
-  tampil(hasil);
-}
-
+function filterBuku(){let q=document.getElementById('cari').value.toLowerCase(); tampil(books.filter(b=>`${b.judul} ${b.penulis} ${b.tahun}`.toLowerCase().includes(q)))}
 loadBuku();
 </script>
 </body>
