@@ -1,14 +1,14 @@
 [
   {
-    "judul": "Informatika Dasar",
-    "penulis": "Dahlan Susilo, M.Kom",
-    "tahun": "2023",
-    "penerbit": "USahid Press",
+    "penulis": "Dahlan Susilo",
+    "tahun": "2024",
+    "judul": "Contoh Buku Ajar",
+    "penerbit": "USahid",
     "isbn": "978-xxx",
     "jenis": "Buku Ajar",
-    "halaman": "210",
+    "halaman": "200",
     "cover": "",
     "link": "#",
-    "deskripsi": ""
+    "deskripsi": "Contoh data"
   }
 ]
