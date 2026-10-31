@@ -1,14 +1,14 @@
 [
   {
-    "penulis": "Dahlan Susilo, M.Kom.",
-    "tahun": "2023",
     "judul": "Informatika Dasar",
+    "penulis": "Dahlan Susilo, M.Kom",
+    "tahun": "2023",
     "penerbit": "USahid Press",
-    "isbn": "978-623-xxx-xxx-x",
+    "isbn": "978-xxx",
     "jenis": "Buku Ajar",
     "halaman": "210",
-    "cover": "cover1.jpg",
-    "deskripsi": "Buku ajar untuk mata kuliah pengantar informatika",
-    "link": "https://drive.google.com/..."
+    "cover": "",
+    "link": "#",
+    "deskripsi": ""
   }
 ]
