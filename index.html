@@ -6,41 +6,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-<!-- TOMBOL MELAYANG KANAN -->
-<style>
-.fab-admin{
-  position:fixed;
-  right:20px;
-  top:50%;
-  transform:translateY(-50%);
-  background:#0f172a;
-  color:#fff;
-  padding:12px 14px;
-  border-radius:50px;
-  text-decoration:none;
-  box-shadow:0 6px 20px rgba(0,0,0,.2);
-  font-size:14px;
-  z-index:99;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.fab-admin:hover{background:#1e293b}
-@media(max-width:600px){
-  .fab-admin{
-    top:auto;
-    bottom:20px;
-    right:20px;
-    transform:none;
-    border-radius:50%;
-    width:56px;
-    height:56px;
-    justify-content:center;
-  }
-  .fab-admin span{display:none}
-}
-</style>
-<a href="admin.html" class="fab-admin" title="Kelola Buku">⚙️ <span>Admin</span></a>
 body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
 header{background:white;padding:14px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:10}
 .logo{font-weight:700;color:#7c2d12;display:flex;align-items:center;gap:8px;font-size:14px;line-height:1.1}
@@ -72,6 +37,19 @@ h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:48px;margin-top:20px;let
 .profil-links a{padding:10px 18px;border-radius:20px;text-decoration:none;font-weight:600;font-size:13px;color:white;transition:.2s}
 .profil-links a:hover{transform:translateY(-2px);opacity:0.9}
 footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:20px}
+
+/* TOMBOL MELAYANG - TARUH DI KANAN */
+.fab-admin{
+  position:fixed;right:20px;top:50%;transform:translateY(-50%);
+  background:#0f172a;color:#fff;padding:12px 14px;border-radius:50px;
+  text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.2);
+  font-size:14px;z-index:99;display:flex;align-items:center;gap:6px
+}
+.fab-admin:hover{background:#1e293b}
+@media(max-width:600px){
+  .fab-admin{top:auto;bottom:20px;right:20px;transform:none;border-radius:50%;width:56px;height:56px;justify-content:center}
+  .fab-admin span{display:none}
+}
 </style>
 </head>
 <body>
@@ -91,7 +69,6 @@ footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size
 <div class="stat"><div class="icon">🎓</div><b>30+</b><span>Tahun Mengajar</span></div>
 <div class="stat"><div class="icon">🔬</div><b>10+</b><span>Proyek Riset</span></div>
 </div>
-
 <div id="profil">
 <div class="profil-links">
 <a href="https://sinta.kemdiktisaintek.go.id/authors/profile/6087970" target="_blank" style="background:#c1272d">📊 SINTA</a>
@@ -99,7 +76,6 @@ footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size
 <a href="https://pddikti.kemdiktisaintek.go.id/detail-dosen/8JJGH4nUkx77lEu-8eZp4G6if-hBGJ90Ny4Do1gKFwGxXt9QH8oThUA7_aomZD0_LpARoA==" target="_blank" style="background:#f4a300;color:#3a2100">🎓 PDDIKTI</a>
 </div>
 </div>
-
 <div class="btns" style="margin-top:28px">
 <a class="btn btn-primary" href="#kuliah">Lihat Profil Lengkap</a>
 <a class="btn btn-outline" href="#karya">Portofolio & Publikasi</a>
@@ -116,6 +92,10 @@ footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size
 <a class="card" href="karya/" style="background:#7c2d12;color:white">💡<br><span>Karya</span></a>
 </div>
 </div>
+
+<!-- TOMBOL MELAYANG HARUS DI BODY, BUKAN DI STYLE -->
+<a href="buku/admin.html" class="fab-admin" title="Kelola Buku">⚙️ <span>Admin</span></a>
+
 <footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta • dahlansusilo-web.github.io</footer>
 </body>
 </html>
