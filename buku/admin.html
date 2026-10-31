@@ -1,33 +1,66 @@
-<!DOCTYPE html>
-<html lang="id"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Buku</title>
-<style>body{font-family:sans-serif;max-width:700px;margin:auto;padding:20px}input,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px}button{padding:10px 16px;border:0;border-radius:8px;background:#0f172a;color:#fff;cursor:pointer}.item{border:1px solid #eee;padding:12px;border-radius:12px;margin:10px 0}</style>
-</head><body>
-<h2>Admin Buku - Tambah / Edit</h2>
-<input id="judul" placeholder="Judul Buku">
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Buku</title>
+<style>
+body{font-family:sans-serif;max-width:700px;margin:auto;padding:20px}
+input,select,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px}
+button{padding:10px 16px;border:0;border-radius:8px;background:#0f172a;color:#fff;cursor:pointer}
+.item{border:1px solid #eee;padding:12px;border-radius:12px;margin:10px 0}
+#loginBox{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:999}
+.login-card{background:#fff;padding:30px;border-radius:16px;width:90%;max-width:350px;text-align:center}
+</style></head><body>
+
+<div id="loginBox">
+  <div class="login-card">
+    <h3>🔒 Admin Buku</h3>
+    <p style="font-size:14px;color:#666">Masukkan password untuk kelola buku</p>
+    <input type="password" id="passInput" placeholder="Password">
+    <button onclick="checkPass()" style="width:100%;margin-top:10px">Masuk</button>
+    <p id="err" style="color:red;font-size:13px;display:none">Password salah bro!</p>
+  </div>
+</div>
+
+<div id="adminContent" style="display:none">
+<h2>Admin Buku Lengkap <button onclick="logout()" style="background:#dc2626;float:right;font-size:12px">Logout</button></h2>
+<input id="penulis" placeholder="Penulis">
 <input id="tahun" placeholder="Tahun">
+<input id="judul" placeholder="Judul Buku">
 <input id="penerbit" placeholder="Penerbit">
 <input id="isbn" placeholder="ISBN">
-<input id="cover" placeholder="Link Cover (URL gambar)">
-<input id="link" placeholder="Link Download / Google Drive">
+<select id="jenis"><option value="">-- Pilih Jenis --</option><option>Buku Ajar</option><option>Buku Referensi</option><option>Buku Monograf</option><option>Book Chapter</option></select>
+<input id="halaman" placeholder="Jumlah Halaman">
+<input id="cover" placeholder="Link Cover / cover1.jpg">
+<input id="link" placeholder="Link Drive">
 <textarea id="deskripsi" placeholder="Deskripsi"></textarea>
 <button onclick="save()">Simpan Buku</button>
 <button onclick="exportJSON()" style="background:#16a34a">Export books.json</button>
 <hr><div id="list"></div>
+</div>
+
 <script>
-let books = JSON.parse(localStorage.getItem('books_dahlan')||'[]');
-let editIndex = -1;
-function refresh(){document.getElementById('list').innerHTML=books.map((b,i)=>`<div class="item"><b>${b.judul}</b> (${b.tahun})<br><button onclick="edit(${i})">Edit</button> <button onclick="del(${i})" style="background:#dc2626">Hapus</button></div>`).join('')}
-function save(){
-  let data={judul:judul.value,tahun:tahun.value,penerbit:penerbit.value,isbn:isbn.value,cover:cover.value,link:link.value,deskripsi:deskripsi.value};
-  if(!data.judul) return alert('Judul wajib');
-  if(editIndex>=0) books[editIndex]=data; else books.push(data);
-  localStorage.setItem('books_dahlan',JSON.stringify(books)); editIndex=-1; refresh(); clearForm();
+// GANTI PASSWORD DI SINI BRO
+const PASSWORD_ADMIN = "usahid2024";
+
+function checkPass(){
+  if(document.getElementById('passInput').value === PASSWORD_ADMIN){
+    sessionStorage.setItem('admin_login','ok');
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('adminContent').style.display='block';
+  }else{
+    document.getElementById('err').style.display='block';
+  }
 }
-function edit(i){let b=books[i]; judul.value=b.judul;tahun.value=b.tahun;penerbit.value=b.penerbit;isbn.value=b.isbn;cover.value=b.cover;link.value=b.link;deskripsi.value=b.deskripsi;editIndex=i;window.scrollTo(0,0)}
+function logout(){sessionStorage.removeItem('admin_login');location.reload()}
+if(sessionStorage.getItem('admin_login')==='ok'){
+  document.getElementById('loginBox').style.display='none';
+  document.getElementById('adminContent').style.display='block';
+}
+document.getElementById('passInput').addEventListener('keypress',e=>{if(e.key==='Enter')checkPass()});
+
+// LOGIC BUKU SAMA KAYAK SEBELUMNYA
+let books=JSON.parse(localStorage.getItem('books_dahlan')||'[]');let editIndex=-1;
+function refresh(){document.getElementById('list').innerHTML=books.map((b,i)=>`<div class="item"><span style="background:#0f172a;color:#fff;padding:2px 6px;border-radius:10px;font-size:11px">${b.jenis}</span> <b>${b.judul}</b> - ${b.penulis} (${b.tahun})<br><button onclick="edit(${i})">Edit</button> <button onclick="del(${i})" style="background:#dc2626">Hapus</button></div>`).join('')}
+function save(){let data={penulis:penulis.value,tahun:tahun.value,judul:judul.value,penerbit:penerbit.value,isbn:isbn.value,jenis:jenis.value,halaman:halaman.value,cover:cover.value,link:link.value,deskripsi:deskripsi.value};if(!data.judul)return alert('Judul wajib');if(editIndex>=0)books[editIndex]=data;else books.push(data);localStorage.setItem('books_dahlan',JSON.stringify(books));editIndex=-1;refresh();['penulis','tahun','judul','penerbit','isbn','halaman','cover','link','deskripsi'].forEach(id=>document.getElementById(id).value='');jenis.value='';}
+function edit(i){let b=books[i];penulis.value=b.penulis;tahun.value=b.tahun;judul.value=b.judul;penerbit.value=b.penerbit;isbn.value=b.isbn;jenis.value=b.jenis;halaman.value=b.halaman;cover.value=b.cover;link.value=b.link;deskripsi.value=b.deskripsi;editIndex=i;window.scrollTo(0,0)}
 function del(i){if(confirm('Hapus?')){books.splice(i,1);localStorage.setItem('books_dahlan',JSON.stringify(books));refresh()}}
-function clearForm(){['judul','tahun','penerbit','isbn','cover','link','deskripsi'].forEach(id=>document.getElementById(id).value='')}
-function exportJSON(){let blob=new Blob([JSON.stringify(books,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='books.json';a.click();alert('Upload file books.json ini ke folder buku/ di GitHub untuk update permanen')}
+function exportJSON(){let blob=new Blob([JSON.stringify(books,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='books.json';a.click();}
 refresh();
 </script></body></html>
