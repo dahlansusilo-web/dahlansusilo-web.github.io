@@ -2,110 +2,41 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Buku</title>
-<style>
-*{box-sizing:border-box} body{margin:0;font-family:sans-serif;background:#0f172a;min-height:100vh}
-.center{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-.login-box{background:white;border-radius:16px;padding:32px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.3)}
-.login-box input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;margin:14px 0}
-.login-box button{width:100%;padding:12px;background:#0f172a;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer}
-#admin-page{display:none;background:#f9f5f0;min-height:100vh;padding:20px}
-.admin-wrap{max-width:650px;margin:30px auto;background:white;padding:24px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
-.admin-wrap input,select,textarea{width:100%;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8px}
-.btn{padding:10px 16px;border:none;border-radius:8px;cursor:pointer;font-weight:600;margin:4px 4px 0 0}
-.btn-dark{background:#0f172a;color:white} .btn-green{background:#16a34a;color:white} .btn-blue{background:#0ea5e9;color:white} .btn-orange{background:#f59e0b;color:white} .btn-red{background:#dc2626;color:white}
-.item{border-bottom:1px solid #eee;padding:8px 0;font-size:13px;display:flex;justify-content:space-between}
-</style>
+<title>Katalog Buku</title>
+<style>body{font-family:sans-serif;background:#f9f5f0;margin:0;padding:20px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;max-width:1000px;margin:auto}.card{background:white;border-radius:12px;padding:14px;box-shadow:0 4px 12px rgba(0,0,0,.06)}.card img{width:100%;height:280px;object-fit:cover;border-radius:8px;background:#eee}input{width:100%;max-width:1000px;margin:0 auto 20px;display:block;padding:12px;border-radius:8px;border:1px solid #ddd}</style>
 </head>
 <body>
-
-<!-- LOGIN SCREEN (yang di screenshot lu) -->
-<div id="login-page" class="center">
-  <div class="login-box">
-    <h3 style="margin:0">🔒 Admin Buku</h3>
-    <p style="color:#666;font-size:13px">Masukkan password untuk kelola buku</p>
-    <input id="pass" type="password" placeholder="Password">
-    <button onclick="doLogin()">Masuk</button>
-    <p id="msg" style="color:red;font-size:12px;margin-top:10px"></p>
-  </div>
-</div>
-
-<!-- ADMIN FORM SCREEN -->
-<div id="admin-page">
-  <div class="admin-wrap">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <h2 style="margin:0">Admin Buku Lengkap</h2>
-      <button class="btn btn-red" onclick="doLogout()">Logout</button>
-    </div>
-    <input id="penulis" placeholder="Penulis">
-    <input id="tahun" type="number" placeholder="Tahun">
-    <input id="judul" placeholder="Judul Buku">
-    <input id="penerbit" placeholder="Penerbit">
-    <input id="isbn" placeholder="ISBN">
-    <select id="jenis"><option value="">-- Pilih Jenis --</option><option>Buku Ajar</option><option>Buku Referensi</option><option>Monograf</option><option>Modul</option></select>
-    <input id="halaman" type="number" placeholder="Jumlah Halaman">
-    <input id="cover" placeholder="Link Cover / cover1.jpg">
-    <input id="drive" placeholder="Link Drive">
-    <textarea id="deskripsi" placeholder="Deskripsi" rows="3"></textarea>
-    <div>
-      <button class="btn btn-dark" onclick="simpanBuku()">Simpan Buku</button>
-      <button class="btn btn-green" onclick="exportJson()">Export books.json</button>
-      <button class="btn btn-blue" onclick="exportToSheet()">📊 Google Sheet</button>
-      <button class="btn btn-orange" onclick="exportCSV()">📄 CSV</button>
-    </div>
-    <div id="list" style="margin-top:20px"></div>
-  </div>
-</div>
-
+<h2 style="text-align:center">📚 Katalog Buku</h2>
+<input id="cari" placeholder="Cari judul, penulis, tahun..." oninput="filterBuku()">
+<div id="grid" class="grid"></div>
 <script>
-const PASSWORD = "usahid123"; // <-- GANTI PASSWORD DI SINI BRO
-const SHEET_URL = "https://script.google.com/macros/s/XXXX/exec";
-let books = JSON.parse(localStorage.getItem("books") || "[]");
-
-function checkLogin(){
-  if(localStorage.getItem("buku_login")==="ok"){
-    document.getElementById("login-page").style.display="none";
-    document.getElementById("admin-page").style.display="block";
-    render();
-  }else{
-    document.getElementById("login-page").style.display="flex";
-    document.getElementById("admin-page").style.display="none";
+let books=[];
+async function load(){
+  try{
+    let res = await fetch('books.json?v='+Date.now());
+    books = await res.json();
+  }catch(e){
+    books = JSON.parse(localStorage.getItem('books')||'[]');
   }
+  tampil(books);
 }
-checkLogin();
-
-function doLogin(){
-  if(document.getElementById("pass").value===PASSWORD){
-    localStorage.setItem("buku_login","ok");
-    checkLogin();
-  }else{
-    document.getElementById("msg").textContent="Password salah bro!";
-  }
+function tampil(data){
+  document.getElementById('grid').innerHTML = data.map(b=>`
+    <div class="card">
+      <img src="${b.cover||'https://via.placeholder.com/200x280?text=No+Cover'}" onerror="this.src='https://via.placeholder.com/200x280?text=No+Cover'">
+      <h4 style="margin:8px 0 4px">${b.judul||'-'}</h4>
+      <small>${b.penulis||''} - ${b.tahun||''}</small><br>
+      <small style="color:#666">${b.penerbit||''} | ${b.jenis||''}</small>
+      <p style="font-size:12px;color:#444">${(b.deskripsi||'').slice(0,80)}</p>
+      ${b.link?`<a href="${b.link}" target="_blank" style="font-size:12px;color:#0ea5e9">📄 Baca</a>`:''}
+    </div>
+  `).join('') || '<p style="text-align:center;color:#999">Belum ada buku. Tambah di /admin.html</p>';
 }
-function doLogout(){
-  localStorage.removeItem("buku_login");
-  checkLogin(); // ini yang bener bro, balik ke layar login yang di screenshot lu, bukan ke login.html
-  document.getElementById("pass").value="";
+function filterBuku(){
+  let q = cari.value.toLowerCase();
+  tampil(books.filter(b=> (b.judul+b.penulis+b.tahun).toLowerCase().includes(q) ));
 }
-
-function render(){ document.getElementById("list").innerHTML = books.map((b,i)=>`<div class="item"><span>${b.tahun||''} - ${b.judul}</span><a href="#" onclick="hapus(${i})">hapus</a></div>`).join(""); }
-function simpanBuku(){
-  const b={penulis:penulis.value,tahun:tahun.value,judul:judul.value,penerbit:penerbit.value,isbn:isbn.value,jenis:jenis.value,halaman:halaman.value,cover:cover.value,link:drive.value,deskripsi:deskripsi.value};
-  if(!b.judul) return alert("Judul wajib!");
-  books.push(b); localStorage.setItem("books",JSON.stringify(books)); render(); alert("Tersimpan!");
-}
-function exportJson(){ let blob=new Blob([JSON.stringify(books,null,2)],{type:"application/json"}); let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="books.json"; a.click(); }
-async function exportToSheet(){
-  if(books.length==0) return alert("Kosong!"); 
-  if(SHEET_URL.includes("XXXX")) return alert("Isi dulu SHEET_URL nya bro!");
-  await fetch(SHEET_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(books)}); alert("Terkirim ke Google Sheet!");
-}
-function exportCSV(){
-  let csv="Penulis,Tahun,Judul,Penerbit,ISBN,Jenis,Halaman,Cover,Drive,Deskripsi\n";
-  books.forEach(b=>{ csv+=`"${b.penulis}","${b.tahun}","${b.judul}","${b.penerbit}","${b.isbn}","${b.jenis}","${b.halaman}","${b.cover}","${b.link}","${b.deskripsi}"\n`; });
-  let blob=new Blob([csv],{type:"text/csv"}); let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="buku.csv"; a.click();
-}
-function hapus(i){ if(confirm("Hapus?")){ books.splice(i,1); localStorage.setItem("books",JSON.stringify(books)); render(); } }
+load();
 </script>
 </body>
 </html>
