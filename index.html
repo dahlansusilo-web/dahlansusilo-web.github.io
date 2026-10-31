@@ -1,101 +1,54 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dahlan Susilo - Universitas Sahid Surakarta</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
-header{background:white;padding:14px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:10}
-.logo{font-weight:700;color:#7c2d12;display:flex;align-items:center;gap:8px;font-size:14px;line-height:1.1}
-nav a{margin-left:20px;text-decoration:none;color:#6b5a52;font-size:14px}
-nav a:hover{color:#7c2d12}
-.hero{padding:40px 20px;display:flex;justify-content:center}
-.hero-card{background:white;border-radius:32px;max-width:900px;width:100%;padding:60px 30px 40px;text-align:center;box-shadow:0 20px 60px rgba(60,20,10,0.07);position:relative;margin-top:80px}
-.avatar-wrap{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:160px;height:160px;border-radius:50%;border:8px solid #7c2d12;overflow:hidden;background:white;box-shadow:0 10px 30px rgba(0,0,0,0.15)}
-.avatar-wrap img{width:100%;height:100%;object-fit:cover}
-h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:48px;margin-top:20px;letter-spacing:1px}
-.badge{display:inline-block;background:#7c2d12;color:white;padding:8px 22px;border-radius:20px;font-size:14px;margin-top:14px;font-weight:600}
-.sub{margin-top:16px;color:#4a3a32;font-weight:600}
-.desc{margin-top:6px;color:#7a6e69;font-size:14px}
-.stats{display:flex;justify-content:center;gap:40px;margin:36px 0;flex-wrap:wrap;border-top:1px solid #f0e6d3;border-bottom:1px solid #f0e6d3;padding:28px 0}
-.stat{text-align:center;min-width:120px}
-.stat .icon{width:56px;height:56px;background:#7c2d12;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px}
-.stat b{font-size:28px;display:block}
-.stat span{font-size:13px;color:#6b5a52}
-.btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.btn{padding:14px 28px;border-radius:28px;text-decoration:none;font-weight:600;font-size:14px}
-.btn-primary{background:#7c2d12;color:white}
-.btn-outline{border:1.5px solid #7c2d12;color:#7c2d12;background:white}
-.grid-section{max-width:900px;margin:0 auto;padding:0 20px 40px}
-.grid-title{text-align:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;color:#7c2d12;margin:30px 0 20px}
-.grid{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.card{width:130px;height:110px;background:white;border-radius:16px;border:1px solid #e9ddd0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#4a2c1d;transition:.2s}
-.card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.06);border-color:#7c2d12}
-.profil-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
-.profil-links a{padding:10px 18px;border-radius:20px;text-decoration:none;font-weight:600;font-size:13px;color:white;transition:.2s}
-.profil-links a:hover{transform:translateY(-2px);opacity:0.9}
-footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:20px}
-
-/* TOMBOL MELAYANG - TARUH DI KANAN */
-.fab-admin{
-  position:fixed;right:20px;top:50%;transform:translateY(-50%);
-  background:#0f172a;color:#fff;padding:12px 14px;border-radius:50px;
-  text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.2);
-  font-size:14px;z-index:99;display:flex;align-items:center;gap:6px
-}
-.fab-admin:hover{background:#1e293b}
-@media(max-width:600px){
-  .fab-admin{top:auto;bottom:20px;right:20px;transform:none;border-radius:50%;width:56px;height:56px;justify-content:center}
-  .fab-admin span{display:none}
+/* LAYOUT BARU: KIRI PROFIL, KANAN AKSES CEPAT */
+.main-wrap{max-width:1150px;margin:0 auto;display:flex;gap:24px;align-items:flex-start;padding:0 20px}
+.main-wrap .hero{flex:2}
+.main-wrap .grid-section{flex:1;position:sticky;top:90px}
+.main-wrap .grid{flex-direction:column}
+.main-wrap .card{width:100%;height:70px;flex-direction:row;gap:10px;justify-content:flex-start;padding-left:20px}
+@media(max-width:900px){
+  .main-wrap{flex-direction:column}
+  .main-wrap .grid-section{position:static;width:100%}
+  .main-wrap .grid{flex-direction:row}
+  .main-wrap .card{width:130px;height:110px;flex-direction:column;justify-content:center;padding-left:0}
 }
 </style>
-</head>
-<body>
-<header>
-<div class="logo"><img src="logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain"> UNIVERSITAS SAHID<br>SURAKARTA</div>
-<nav><a href="#">Beranda</a><a href="#kuliah">Kuliah</a><a href="#karya">Karya</a><a href="#kontak">Kontak</a></nav>
-</header>
-<div class="hero">
-<div class="hero-card">
-<div class="avatar-wrap"><img src="Foto 11 KB.jpeg" alt="Dahlan Susilo"></div>
-<h1>DAHLAN SUSILO</h1>
-<div class="badge">Dosen • Akademik • Peneliti</div>
-<div class="sub">Universitas Sahid Surakarta</div>
-<div class="desc">Pengajar & Peneliti — Ilmu Sosial & Kebijakan Publik</div>
-<div class="stats">
-<div class="stat"><div class="icon">📄</div><b>50+</b><span>Publikasi Ilmiah</span></div>
-<div class="stat"><div class="icon">🎓</div><b>30+</b><span>Tahun Mengajar</span></div>
-<div class="stat"><div class="icon">🔬</div><b>10+</b><span>Proyek Riset</span></div>
-</div>
-<div id="profil">
-<div class="profil-links">
-<a href="https://sinta.kemdiktisaintek.go.id/authors/profile/6087970" target="_blank" style="background:#c1272d">📊 SINTA</a>
-<a href="https://garuda.kemdiktisaintek.go.id/author/view/396457" target="_blank" style="background:#1a73e8">📚 GARUDA</a>
-<a href="https://pddikti.kemdiktisaintek.go.id/detail-dosen/8JJGH4nUkx77lEu-8eZp4G6if-hBGJ90Ny4Do1gKFwGxXt9QH8oThUA7_aomZD0_LpARoA==" target="_blank" style="background:#f4a300;color:#3a2100">🎓 PDDIKTI</a>
-</div>
-</div>
-<div class="btns" style="margin-top:28px">
-<a class="btn btn-primary" href="#kuliah">Lihat Profil Lengkap</a>
-<a class="btn btn-outline" href="#karya">Portofolio & Publikasi</a>
-</div>
-</div>
-</div>
-<div class="grid-section" id="kuliah">
-<h2 class="grid-title">Akses Cepat</h2>
-<div class="grid">
-<a class="card" href="kuliah/">📖<br><span>Kuliah</span></a>
-<a class="card" href="praktikum/">🧪<br><span>Praktikum</span></a>
-<a class="card" href="ujian/">📋<br><span>Ujian</span></a>
-<a class="card" href="buku/">📚<br><span>Buku</span></a>
-<a class="card" href="karya/" style="background:#7c2d12;color:white">💡<br><span>Karya</span></a>
-</div>
-</div>
 
-<!-- TOMBOL MELAYANG HARUS DI BODY, BUKAN DI STYLE -->
-<a href="buku/admin.html" class="fab-admin" title="Kelola Buku">⚙️ <span>Admin</span></a>
+<div class="main-wrap">
+  <div class="hero">
+    <div class="hero-card">
+      <!-- ISI PROFIL SAMPEAN TETAP SAMA KAYAK TADI -->
+      <div class="avatar-wrap"><img src="Foto 11 KB.jpeg" alt="Dahlan Susilo"></div>
+      <h1>DAHLAN SUSILO</h1>
+      <div class="badge">Dosen • Akademik • Peneliti</div>
+      <div class="sub">Universitas Sahid Surakarta</div>
+      <div class="desc">Pengajar & Peneliti — Ilmu Sosial & Kebijakan Publik</div>
+      <div class="stats">
+        <div class="stat"><div class="icon">📄</div><b>50+</b><span>Publikasi Ilmiah</span></div>
+        <div class="stat"><div class="icon">🎓</div><b>30+</b><span>Tahun Mengajar</span></div>
+        <div class="stat"><div class="icon">🔬</div><b>10+</b><span>Proyek Riset</span></div>
+      </div>
+      <div id="profil">
+        <div class="profil-links">
+          <a href="https://sinta.kemdiktisaintek.go.id/authors/profile/6087970" target="_blank" style="background:#c1272d">📊 SINTA</a>
+          <a href="https://garuda.kemdiktisaintek.go.id/author/view/396457" target="_blank" style="background:#1a73e8">📚 GARUDA</a>
+          <a href="https://pddikti.kemdiktisaintek.go.id/detail-dosen/8JJGH4nUkx77lEu-8eZp4G6if-hBGJ90Ny4Do1gKFwGxXt9QH8oThUA7_aomZD0_LpARoA==" target="_blank" style="background:#f4a300;color:#3a2100">🎓 PDDIKTI</a>
+        </div>
+      </div>
+      <div class="btns" style="margin-top:28px">
+        <a class="btn btn-primary" href="#kuliah">Lihat Profil Lengkap</a>
+        <a class="btn btn-outline" href="#karya">Portofolio & Publikasi</a>
+      </div>
+    </div>
+  </div>
 
-<footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta • dahlansusilo-web.github.io</footer>
-</body>
-</html>
+  <div class="grid-section" id="kuliah">
+    <h2 class="grid-title" style="margin-top:80px;text-align:left">Akses Cepat</h2>
+    <div class="grid">
+      <a class="card" href="kuliah/">📖 <span>Kuliah</span></a>
+      <a class="card" href="praktikum/">🧪 <span>Praktikum</span></a>
+      <a class="card" href="ujian/">📋 <span>Ujian</span></a>
+      <a class="card" href="buku/">📚 <span>Buku</span></a>
+      <a class="card" href="karya/" style="background:#7c2d12;color:white">💡 <span>Karya</span></a>
+    </div>
+  </div>
+</div>
