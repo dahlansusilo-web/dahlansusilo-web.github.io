@@ -1,33 +1,35 @@
-<div style="margin:20px 0;display:flex;gap:10px;flex-wrap:wrap">
-  <select id="filterJenis" style="padding:10px;border-radius:8px;border:1px solid #ddd">
-    <option value="">Semua Jenis</option>
-    <option>Buku Ajar</option>
-    <option>Buku Referensi</option>
-    <option>Buku Monograf</option>
-    <option>Book Chapter</option>
-  </select>
-</div>
-
 <script>
-function render(books, q='', jenis=''){
-  const c = document.getElementById('list');
-  let f = books.filter(b => {
-    let matchQ = (b.judul+b.penulis+b.tahun+b.isbn).toLowerCase().includes(q.toLowerCase());
-    let matchJenis = jenis ? b.jenis === jenis : true;
-    return matchQ && matchJenis;
-  });
-  c.innerHTML = f.map(b=>`
-    <div class="book-card">
-      <img src="${b.cover||'https://via.placeholder.com/300x180?text=No+Cover'}">
-      <span style="font-size:11px;background:#0f172a;color:#fff;padding:4px 8px;border-radius:20px">${b.jenis||'Buku'}</span>
-      <h3>${b.judul}</h3>
-      <div class="meta">
-        ✍️ ${b.penulis}<br>
-        📅 ${b.tahun} • 📖 ${b.halaman||'-'} hlm • ${b.penerbit}<br>
-        🔖 ISBN: ${b.isbn||'-'}
-      </div>
-      <p style="font-size:14px">${b.deskripsi||''}</p>
-      <a class="btn" href="${b.link||'#'}" target="_blank">Lihat Buku</a>
-    </div>`).join('');
+let allBooks = [];
+
+async function loadBooks(){
+  const res = await fetch('books.json?v='+Date.now());
+  allBooks = await res.json();
+  // URUT TAHUN TERBARU DI ATAS
+  allBooks.sort((a,b)=> parseInt(b.tahun) - parseInt(a.tahun));
+  render(allBooks);
 }
+
+function render(books){
+  const c = document.getElementById('list');
+  c.innerHTML = books.map(b=>`
+    <div class="book">
+      <h3>${b.judul}</h3>
+      <small>
+        ${b.penulis} • ${b.tahun} • ${b.penerbit} • ISBN: ${b.isbn}<br>
+        ${b.jenis} • ${b.halaman} hlm
+      </small>
+    </div>
+  `).join('');
+}
+
+// FILTER DARI PENCARIAN (bisa cari jenis, tahun, penulis, judul)
+document.getElementById('search').addEventListener('input', e=>{
+  let q = e.target.value.toLowerCase();
+  let filtered = allBooks.filter(b => 
+    (b.judul+b.penulis+b.tahun+b.jenis+b.penerbit+b.isbn).toLowerCase().includes(q)
+  );
+  render(filtered);
+});
+
+loadBooks();
 </script>
