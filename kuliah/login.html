@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Login Kuliah</title>
+<style>body{background:#f9f5f0;margin:0;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh}.box{background:white;padding:32px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.1);width:90%;max-width:360px;border:1px solid #e9ddd0}input{width:100%;padding:12px;border-radius:10px;border:1px solid #e9ddd0;margin-top:8px;box-sizing:border-box}button{width:100%;background:#7c2d12;color:white;padding:12px;border:none;border-radius:10px;font-weight:800;margin-top:16px;cursor:pointer}</style></head><body>
+<div class="box">
+<div style="text-align:center;color:#7c2d12;font-weight:800;font-size:18px;margin-bottom:16px">🔒 LOGIN KULIAH USAHID</div>
+<label>NIM / NIDN</label><input id="nim" placeholder="2023004">
+<label style="margin-top:12px;display:block">Password</label><input id="pass" type="password" placeholder="****">
+<button onclick="login()">Masuk</button>
+<p id="msg" style="color:red;text-align:center;font-size:13px;margin-top:12px"></p>
+<div style="text-align:center;margin-top:12px"><a href="/kuliah/" style="color:#7c2d12;font-size:13px">← Kembali</a></div>
+</div>
+<script>
+const API="https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
+async function login(){
+  let nim=document.getElementById('nim').value.trim();
+  let pass=document.getElementById('pass').value.trim();
+  if(!nim||!pass){document.getElementById('msg').innerText='Isi NIM & password!';return;}
+  document.getElementById('msg').innerText='⏳ Cek...';
+  let data=await fetch(API+"?page=mahasiswa&t="+Date.now()).then(r=>r.json());
+  let user=data.find(x=> x.nim.toString().toLowerCase()==nim.toLowerCase() && x.password.toString()==pass );
+  if(user){
+    localStorage.setItem('kuliah_user', JSON.stringify(user));
+    location.href='/kuliah/';
+  } else {
+    document.getElementById('msg').innerText='NIM / Password salah!';
+  }
+}
+</script></body></html>
