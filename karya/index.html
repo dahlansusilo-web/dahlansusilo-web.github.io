@@ -1,10 +1,13 @@
 <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Karya</title>
-<style>body{background:#f9f5f0;margin:0;font-family:sans-serif}header{background:white;padding:12px 20px;display:flex;justify-content:space-between} .wrap{max-width:1000px;margin:20px auto;padding:0 16px} .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px} .card{background:white;border-radius:16px;padding:18px;border:1px solid #e9ddd0} .card h3{color:#7c2d12;margin:0} .btn{background:#0f172a;color:white;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;margin-top:20px}</style></head><body>
-<header><b style="color:#7c2d12">USAHID SOLO</b><a href="/" style="text-decoration:none;font-weight:700;color:#7c2d12">Beranda</a></header>
-<div class="wrap"><h2 style="color:#7c2d12">Karya (dari Sheet Karya)</h2><div id="list">Loading Sheet Karya...</div><div style="text-align:center"><a class="btn" href="/">⬅ Kembali ke Beranda</a></div></div>
+<style>body{background:#f9f5f0;margin:0;font-family:sans-serif}header{background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.05)} .wrap{max-width:1000px;margin:20px auto;padding:0 16px} .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:14px} .card{background:white;border-radius:16px;padding:18px;border:1px solid #e9ddd0;box-shadow:0 6px 18px rgba(0,0,0,.05)} .card h3{color:#7c2d12;margin:0 0 8px} .badge{background:#f0e6d3;color:#7c2d12;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-right:4px} .btn{background:#7c2d12;color:white;padding:12px 22px;border-radius:12px;text-decoration:none;font-weight:700;display:inline-block} .btn-dark{background:#0f172a}</style></head><body>
+<header><b style="color:#7c2d12">USAHID SOLO</b><a href="/" style="color:#7c2d12;font-weight:700;text-decoration:none">Beranda</a></header>
+<div class="wrap"><h2 style="color:#7c2d12">Karya</h2><div id="list">⏳ Memuat Sheet Karya...</div><div style="text-align:center;margin-top:24px"><a class="btn" href="/">⬅ Kembali ke Beranda</a> <a class="btn" style="background:#7c2d12;margin-left:8px" href="/buku/">📚 Buku</a></div></div>
 <script>
-const API="https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
+const API="GANTI_DENGAN_URL_BARU_TADI";
 fetch(API+"?page=karya&t="+Date.now()).then(r=>r.json()).then(d=>{
-  document.getElementById('list').innerHTML='<div class="grid">'+d.map(x=>`<div class="card"><h3>${x.judul||x.title||'-'}</h3><p style="font-size:13px">${x.keterangan||''}</p><div style="margin-top:8px"><span style="background:#f0e6d3;padding:4px 8px;border-radius:10px;font-size:11px">${x.tahun||''}</span> <span style="background:#f0e6d3;padding:4px 8px;border-radius:10px;font-size:11px">${x.jenis||''}</span></div><small>No: ${x.nonor||''}</small></div>`).join('')+'</div>';
+  console.log(d);
+  let el=document.getElementById('list');
+  if(!d || d.length==0){el.innerHTML='Kosong';return}
+  el.innerHTML='<div class="grid">'+d.map(x=>`<div class="card"><h3>${x.judul||'-'}</h3><p style="font-size:13px;color:#555;margin:8px 0">${x.keterangan||''}</p><div><span class="badge">${x.tahun||''}</span> <span class="badge">${x.jenis||''}</span> <span class="badge">No ${x.nonor||''}</span></div></div>`).join('')+'</div>';
 });
 </script></body></html>
