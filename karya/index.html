@@ -1,20 +1,51 @@
-<header style="background:white;padding:10px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:99">
-  <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12;font-size:14px">
-    <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain"> USAHID SOLO
-  </div>
-  <div style="display:flex;align-items:center;gap:18px">
-    <nav id="autoNav" style="display:flex;gap:20px"></nav>
-    <img id="fotoTop" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #f5e6d3;display:none">
-  </div>
-</header>
-<script src="/menu.js"></script>
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karya - Dahlan Susilo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:#f9f5f0;color:#2d1a12}
+header{background:white;padding:14px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);position:sticky;top:0;z-index:10}
+.wrap{max-width:1150px;margin:28px auto;padding:0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{background:white;border-radius:18px;padding:20px;box-shadow:0 10px 30px rgba(60,20,10,0.07);border:1px solid #e9ddd0}
+.card h3{color:#7c2d12;margin-bottom:8px;font-size:18px}
+.card p{font-size:13px;color:#6b5a52;line-height:1.5}
+.badge{display:inline-block;background:#f0e6d3;color:#7c2d12;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-right:6px;margin-top:8px}
+.btn-kembali{display:inline-block;margin-top:28px;background:#0f172a;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px}
+.btn-kembali:hover{background:#7c2d12}
+</style></head><body>
+<header><div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12">USAHID SOLO</div><nav id="autoNav"></nav></header>
+<div class="wrap">
+<h2 style="color:#7c2d12;margin-bottom:16px">Karya</h2>
+<div id="grid" class="grid">Memuat...</div>
+
+<!-- TOMBOL KEMBALI DI BAWAH BRO -->
+<div style="text-align:center">
+  <a href="/" class="btn-kembali">⬅ Kembali ke Beranda</a>
+  <a href="/buku/" class="btn-kembali" style="background:#7c2d12;margin-left:8px">📚 Lihat Buku</a>
+</div>
+
+</div>
 <script>
-// Ambil foto dari Sheet Profil biar otomatis foto sampean yang muncul
-const URL_PROFIL = "https://script.google.com/macros/s/AKfycbwVBcduHoQsSjV21I28w8zljg_ulQkB1y6-kew-cgLAi_I6NutbEqQZcPi2db1nn-Kz/exec";
-fetch(URL_PROFIL+"?page=profil&t="+Date.now()).then(r=>r.json()).then(p=>{
-  if(p.foto){
-    document.getElementById('fotoTop').src = p.foto;
-    document.getElementById('fotoTop').style.display = 'block';
-  }
-});
+const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
+async function load(){
+  let r = await fetch(API+"?page=karya&t="+Date.now());
+  let d = await r.json();
+  let g = document.getElementById('grid');
+  if(!d || d.length==0) { g.innerHTML='Belum ada data'; return; }
+  g.innerHTML = d.map(x=>`
+    <div class="card">
+      <h3>${x.judul || '-'}</h3>
+      <p>${x.keterangan || ''}</p>
+      <div>
+        <span class="badge">No: ${x.nonor || ''}</span>
+        <span class="badge">${x.tahun || ''}</span>
+        <span class="badge">${x.jenis || ''}</span>
+      </div>
+    </div>
+  `).join('');
+}
+load();
 </script>
+<script src="/menu.js"></script>
+</body></html>
