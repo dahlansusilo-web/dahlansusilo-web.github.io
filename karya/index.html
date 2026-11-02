@@ -1,27 +1,12 @@
 <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Karya</title>
-<style>
-body{font-family:sans-serif;background:#f9f5f0;margin:0}
-header{background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-.wrap{max-width:1000px;margin:20px auto;padding:0 16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:16px}
-.card{background:white;border-radius:16px;padding:18px;box-shadow:0 8px 20px rgba(0,0,0,.06);border:1px solid #e9ddd0}
-.card h3{color:#7c2d12;margin:0 0 8px}
-.badge{background:#f0e6d3;color:#7c2d12;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700;margin-right:4px}
-.btn{display:inline-block;margin-top:20px;background:#0f172a;color:white;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:700}
-</style></head><body>
-<header><div style="font-weight:700;color:#7c2d12;display:flex;align-items:center;gap:8px"><img src="../logo-usahidsolo.png" style="width:36px"> USAHID SOLO</div><div><a href="/" style="text-decoration:none;color:#7c2d12;font-weight:700">Beranda</a> <a href="/buku/" style="margin-left:12px;text-decoration:none;color:#7c2d12;font-weight:700">Buku</a></div></header>
-<div class="wrap">
-<h2 style="color:#7c2d12">Karya</h2>
-<div id="grid">⏳ Memuat dari Sheet Karya...</div>
-<div style="text-align:center"><a href="/" class="btn">⬅ Kembali ke Beranda</a></div>
-</div>
+<style>body{font-family:sans-serif;background:#f9f5f0;margin:0}header{background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center} .wrap{max-width:1000px;margin:20px auto;padding:0 16px} .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px} .card{background:white;border-radius:16px;padding:18px;border:1px solid #e9ddd0} .card h3{color:#7c2d12} .badge{background:#f0e6d3;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700} .btn{display:inline-block;margin-top:24px;background:#0f172a;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:700}</style></head><body>
+<header><b style="color:#7c2d12">USAHID SOLO</b><div><a href="/" style="color:#7c2d12;font-weight:700;text-decoration:none">Beranda</a></div></header>
+<div class="wrap"><h2 style="color:#7c2d12">Karya</h2><div id="list">Loading...</div><div style="text-align:center"><a href="/" class="btn">⬅ Kembali ke Beranda</a> <a href="/buku/" class="btn" style="background:#7c2d12;margin-left:8px">📚 Buku</a></div></div>
 <script>
 const API="https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
 fetch(API+"?page=karya&t="+Date.now()).then(r=>r.json()).then(d=>{
-  console.log(d);
-  let g=document.getElementById('grid');
-  if(!d || d.length==0 || d.error){g.innerHTML='Kosong. Cek Sheet Karya header: Nonor | Judul | Tahun | Jenis | Keterangan';return}
-  g.innerHTML='<div class="grid">'+d.map(x=>`<div class="card"><h3>${x.judul||'-'}</h3><p style="font-size:13px;color:#555">${x.keterangan||''}</p><div style="margin-top:8px"><span class="badge">${x.tahun||''}</span><span class="badge">${x.jenis||''}</span><span class="badge">No ${x.nonor||''}</span></div></div>`).join('')+'</div>';
-}).catch(e=>{document.getElementById('grid').innerHTML='Gagal: '+e});
-</script>
-</body></html>
+  let el=document.getElementById('list');
+  if(!d.length){el.innerHTML='Belum ada karya';return}
+  el.innerHTML='<div class="grid">'+d.map(x=>`<div class="card"><h3>${x.judul}</h3><p style="font-size:13px;color:#555;margin:8px 0">${x.keterangan||''}</p><span class="badge">${x.tahun}</span> <span class="badge">${x.jenis}</span> <span class="badge">No ${x.nonor}</span></div>`).join('')+'</div>';
+});
+</script></body></html>
