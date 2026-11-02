@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Detail Kuliah</title>
+<style>body{background:#f9f5f0;margin:0;font-family:Inter,sans-serif}header{background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0}.wrap{max-width:1100px;margin:20px auto;padding:0 16px}.table-wrap{background:white;border-radius:18px;overflow:hidden;border:1px solid #e9ddd0;margin-bottom:20px;overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:600px}th{background:#7c2d12;color:white;padding:12px;text-align:left;font-size:12px}td{padding:12px;border-bottom:1px solid #f0e6d3;font-size:14px}.btn{background:#7c2d12;color:white;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:700}</style></head><body>
+<header><div style="display:flex;align-items:center;gap:10px;font-weight:800;color:#7c2d12"><img src="../logo-usahidsolo.png" onerror="this.src='/logo-usahidsolo.png'" style="width:42px"> USAHID SOLO</div><a href="/kuliah/" style="color:#7c2d12;font-weight:700;text-decoration:none">← Daftar MK</a></header>
+<div class="wrap">
+<h2 id="title" style="color:#7c2d12">Detail MK</h2>
+<h3 style="color:#7c2d12">📚 Materi / Pertemuan</h3>
+<div class="table-wrap"><table><thead><tr><th>Pert</th><th>Judul Materi</th><th>Tanggal</th><th>Link</th></tr></thead><tbody id="materi"><tr><td colspan="4">⏳ Memuat...</td></tr></tbody></table></div>
+<h3 style="color:#7c2d12">👥 Mahasiswa Peserta</h3>
+<div class="table-wrap"><table><thead><tr><th>NIM</th><th>Nama</th></tr></thead><tbody id="peserta"><tr><td colspan="2">⏳ Memuat...</td></tr></tbody></table></div>
+<div style="text-align:center"><a class="btn" href="/kuliah/">⬅ Kembali</a></div>
+</div>
+<script>
+const API="https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
+const mk=new URLSearchParams(location.search).get('mk');
+document.getElementById('title').innerHTML='Detail Kuliah: '+mk;
+fetch(API+"?page=materikuliah&mk="+mk+"&t="+Date.now()).then(r=>r.json()).then(d=>{
+  document.getElementById('materi').innerHTML = d.length? d.map(x=>`<tr><td>${x.pertemuan}</td><td>${x.judul_materi}</td><td>${x.tanggal||''}</td><td><a href="${x.link_drive}" target="_blank">Buka</a></td></tr>`).join('') : '<tr><td colspan=4>Belum ada materi</td></tr>';
+});
+fetch(API+"?page=pesertakuliah&mk="+mk+"&t="+Date.now()).then(r=>r.json()).then(d=>{
+  document.getElementById('peserta').innerHTML = d.length? d.map(x=>`<tr><td>${x.nim}</td><td>${x.nama||x.nama_mahasiswa||''}</td></tr>`).join('') : '<tr><td colspan=2>Belum ada peserta</td></tr>';
+});
+</script></body></html>
