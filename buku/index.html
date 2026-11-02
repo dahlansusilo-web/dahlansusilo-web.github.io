@@ -1,19 +1,74 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Katalog Buku</title><style>body{margin:0;font-family:sans-serif;background:#fdfaf6}header{background:#fff;padding:16px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10}.wrap{max-width:1300px;margin:auto;display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center}.wrap input{flex:1;padding:11px;border:1px solid #ddd;border-radius:10px;max-width:500px}.table-wrap{max-width:1300px;margin:20px auto;padding:0 16px;overflow:auto}table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.06);min-width:900px}th{background:#0f172a;color:#fff;padding:12px 10px;text-align:left;font-size:13px}td{padding:10px;border-bottom:1px solid #f1f5f9;font-size:13px;vertical-align:top}td img{width:60px;height:80px;object-fit:cover;border-radius:6px}tr:hover{background:#f8fafc}.btn{padding:6px 10px;background:#0f172a;color:#fff;border-radius:6px;text-decoration:none;font-size:11px;display:inline-block}</style></head><body>
-<header style="background:white;padding:10px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:99">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katalog Buku - Dahlan Susilo</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
+header{background:white;padding:14px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:10}
+.wrap{max-width:1150px;margin:30px auto;padding:0 20px}
+.card-table{background:white;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(60,20,10,0.06)}
+table{width:100%;border-collapse:collapse}
+th{background:#0f172a;color:white;padding:12px 10px;font-size:13px;text-align:center}
+td{padding:12px 10px;font-size:13px;border-bottom:1px solid #f0e6d3;text-align:center;vertical-align:top}
+tr:last-child td{border:0}
+.cover{width:50px;height:70px;object-fit:cover;border-radius:4px;background:#eee}
+.judul{font-weight:700;text-align:left}
+.btn-link{background:#7c2d12;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;font-size:12px}
+.loading{padding:40px;text-align:center;color:#7a6e69}
+</style>
+</head>
+<body>
+<header>
   <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12;font-size:14px">
     <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain"> USAHID SOLO
   </div>
-  <div style="display:flex;align-items:center;gap:18px">
-    <nav id="autoNav" style="display:flex;gap:20px"></nav>
-    <img id="fotoTop" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #f5e6d3;display:none">
-  </div>
+  <nav id="autoNav"></nav>
 </header>
-<script src="/menu.js"></script>
-<div class="table-wrap"><table><thead><tr><th>No</th><th>Cover</th><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Penerbit</th><th>ISBN / Jenis / Hal</th><th>Aksi</th></tr></thead><tbody id="tbody"><tr><td colspan="8" style="text-align:center;padding:30px;color:#999">Loading...</td></tr></tbody></table></div>
+<div class="wrap">
+  <h2 style="font-family:'Plus Jakarta Sans';color:#7c2d12;margin-bottom:16px">Katalog Buku</h2>
+  <div class="card-table">
+    <table>
+      <thead>
+        <tr><th>No</th><th>Cover</th><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Penerbit</th><th>ISBN / Jenis / Hal</th><th>Aksi</th></tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="8" class="loading">Memuat buku...</td></tr></tbody>
+    </table>
+  </div>
+</div>
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwVBcduHoQsSjV21I28w8zljg_ulQkB1y6-kew-cgLAi_I6NutbEqQZcPi2db1nn-Kz/exec";
-let books=[];async function loadBuku(){try{let r=await fetch(SHEET_URL+"?t="+Date.now());books=await r.json();status.textContent="Live: "+books.length+" buku";}catch(e){status.textContent="Gagal GS, pakai backup";books=JSON.parse(localStorage.getItem('books')||'[]');}tampil(books);}
-function tampil(d){let tb=document.getElementById('tbody');if(!d.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center">Belum ada buku</td></tr>';return}tb.innerHTML=d.map((b,i)=>`<tr><td>${i+1}</td><td><img src="${b.cover||''}" onerror="this.src='https://via.placeholder.com/60x80?text=No'"></td><td><b>${b.judul||''}</b></td><td>${b.penulis||''}</td><td>${b.tahun||''}</td><td>${b.penerbit||''}</td><td>${b.isbn||''}<br>${b.jenis||''} ${b.halaman?`• ${b.halaman} hal`:''}</td><td>${b.link?`<a class="btn" href="${b.link}" target="_blank">Baca</a>`:''}</td></tr>`).join('');}
-function filterBuku(){let q=cari.value.toLowerCase();tampil(books.filter(b=>`${b.judul} ${b.penulis} ${b.tahun} ${b.isbn}`.toLowerCase().includes(q)));}
+const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
+
+async function loadBuku(){
+  try{
+    const res = await fetch(API + "?page=buku");
+    const data = await res.json();
+    console.log(data);
+    const tbody = document.getElementById('tbody');
+    if(!data || data.length==0 || data.error){
+      tbody.innerHTML = '<tr><td colspan="8">Belum ada buku - '+(data.error||'kosong')+'</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map((b,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${b.cover ? `<img src="${b.cover}" class="cover">` : '-'}</td>
+        <td class="judul">${b.judul||'-'}<br><small style="color:#7a6e69">${(b.deskripsi||'').substring(0,80)}</small></td>
+        <td style="text-align:left;font-size:12px">${b.penulis||'-'}</td>
+        <td>${b.tahun||'-'}</td>
+        <td style="text-align:left">${b.penerbit||'-'}</td>
+        <td style="text-align:left;font-size:11px">${b.isbn||'-'}<br>${b.jenis||''}<br>${b.halaman||''} Hal</td>
+        <td>${b.link ? `<a href="${b.link}" target="_blank" class="btn-link">Lihat</a>` : '-'}</td>
+      </tr>
+    `).join('');
+  }catch(e){
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="8">Gagal load: '+e+'</td></tr>';
+  }
+}
 loadBuku();
-</script></body></html>
+</script>
+<script src="/menu.js"></script>
+</body>
+</html>
