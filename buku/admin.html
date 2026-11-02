@@ -1,11 +1,29 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Buku</title><style>body{font-family:sans-serif;background:#f8fafc;padding:20px;max-width:620px;margin:auto}input,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px}button{padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600} .btn-save{background:#0f172a;color:#fff;width:100%;padding:12px} .btn-logout{background:#ef4444;color:#fff;float:right}</style></head><body>
-<button class="btn-logout" onclick="localStorage.removeItem('adminBuku');location.reload()">Logout</button><h2>Admin Buku</h2>
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Admin Buku</title><style>body{font-family:sans-serif;background:#f8fafc;padding:20px;max-width:620px;margin:auto}input,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px;box-sizing:border-box}button{padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600} .btn-save{background:#0f172a;color:#fff;width:100%;padding:12px} .btn-logout{background:#ef4444;color:#fff;float:right}</style></head><body>
+<button class="btn-logout" onclick="localStorage.removeItem('adminBuku');location.reload()">Logout</button><h2>Admin Buku - DB Buku</h2>
 <div id="loginBox"><input type="password" id="pass" placeholder="Password"><button onclick="if(pass.value==='admin123'){localStorage.setItem('adminBuku','ok');location.reload()}else alert('Salah')">Masuk</button></div>
-<div id="formBox" style="display:none"><input id="penulis" placeholder="Penulis"><input id="tahun" placeholder="Tahun"><input id="judul" placeholder="Judul *"><input id="penerbit" placeholder="Penerbit"><input id="isbn" placeholder="ISBN *"><input id="jenis" placeholder="Jenis"><input id="halaman" placeholder="Halaman"><input id="cover" placeholder="Link Cover"><input id="drive" placeholder="Link Drive"><textarea id="deskripsi" placeholder="Deskripsi"></textarea><button id="btnSave" class="btn-save" onclick="simpan()">💾 Simpan ke Google Sheet</button><p id="msg" style="font-size:13px"></p><div id="list" style="font-size:13px"></div><p><a href="index.html" target="_blank">→ Lihat Katalog</a></p></div>
+<div id="formBox" style="display:none"><input id="penulis" placeholder="Penulis"><input id="tahun" placeholder="Tahun"><input id="judul" placeholder="Judul *"><input id="penerbit" placeholder="Penerbit"><input id="isbn" placeholder="ISBN *"><input id="jenis" placeholder="Jenis"><input id="halaman" placeholder="Halaman"><input id="cover" placeholder="Link Cover"><input id="drive" placeholder="Link Drive"><textarea id="deskripsi" placeholder="Deskripsi"></textarea><button id="btnSave" class="btn-save" onclick="simpan()">💾 Simpan ke Google Sheet</button><p id="msg" style="font-size:13px;color:#7c2d12;font-weight:600"></p><div id="list" style="font-size:13px;margin-top:12px;background:white;padding:12px;border-radius:8px"></div><p><a href="index.html" target="_blank">→ Lihat Katalog</a> | <a href="https://docs.google.com/spreadsheets/d/1U5m2Y1lBz1n..." target="_blank">→ Buka Sheet</a></p></div>
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbwVBcduHoQsSjV21I28w8zljg_ulQkB1y6-kew-cgLAi_I6NutbEqQZcPi2db1nn-Kz/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
 let cache=[];if(localStorage.getItem('adminBuku')==='ok'){loginBox.style.display='none';formBox.style.display='block';load();}
 function kosong(){penulis.value=tahun.value=judul.value=penerbit.value=isbn.value=jenis.value=halaman.value=cover.value=drive.value=deskripsi.value='';}
-async function load(){try{let r=await fetch(SHEET_URL+"?t="+Date.now());let d=await r.json();cache=d;list.innerHTML='<b>Total: '+d.length+'</b><br>'+d.slice(-5).reverse().map(x=>`• ${x.judul} - ${x.isbn}`).join('<br>');}catch(e){list.innerHTML='Sheet offline, tapi simpan tetap jalan';cache=JSON.parse(localStorage.getItem('books')||'[]');}}
-async function simpan(){let b={penulis:penulis.value.trim(),tahun:tahun.value.trim(),judul:judul.value.trim(),penerbit:penerbit.value.trim(),isbn:isbn.value.trim(),jenis:jenis.value.trim(),halaman:halaman.value.trim(),cover:cover.value.trim(),link:drive.value.trim(),deskripsi:deskripsi.value.trim()};if(!b.judul||!b.isbn)return alert('Judul & ISBN wajib');if(cache.some(x=>x.isbn===b.isbn))return alert('ISBN sudah ada!');msg.textContent='⏳ Menyimpan...';try{await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(b)});let l=JSON.parse(localStorage.getItem('books')||'[]');l.push(b);localStorage.setItem('books',JSON.stringify(l));cache.push(b);msg.textContent='✅ Berhasil! Form dikosongkan.';kosong();load();}catch(e){msg.textContent='❌ '+e;}}
+async function load(){
+  try{
+    let r=await fetch(SHEET_URL+"?page=buku&t="+Date.now());
+    let d=await r.json();
+    cache=d;
+    list.innerHTML='<b>Total di Sheet DB Buku: '+d.length+'</b><br>'+d.slice(-10).reverse().map(x=>`• ${x.judul} - ${x.isbn}`).join('<br>');
+  }catch(e){list.innerHTML='Gagal load: '+e}
+}
+async function simpan(){
+  let b={penulis:penulis.value.trim(),tahun:tahun.value.trim(),judul:judul.value.trim(),penerbit:penerbit.value.trim(),isbn:isbn.value.trim(),jenis:jenis.value.trim(),halaman:halaman.value.trim(),cover:cover.value.trim(),link:drive.value.trim(),deskripsi:deskripsi.value.trim()};
+  if(!b.judul||!b.isbn)return alert('Judul & ISBN wajib');
+  if(cache.some(x=>String(x.isbn)===b.isbn))return alert('ISBN sudah ada di Sheet!');
+  msg.textContent='⏳ Menyimpan ke DB Buku...';
+  try{
+    await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(b)});
+    msg.textContent='✅ Terkirim! Tunggu 3 detik lalu cek Sheet & Katalog. Form dikosongkan.';
+    kosong();
+    setTimeout(load,3000);
+  }catch(e){msg.textContent='❌ '+e;}
+}
 </script></body></html>
