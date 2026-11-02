@@ -1,13 +1,18 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Kuliah</title>
-let u = JSON.parse(localStorage.getItem('kuliah_user')||'null');
-if(!u) location.href='/kuliah/login.html';
-<style>body{background:#f9f5f0;margin:0;font-family:Inter,sans-serif}header{background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0}.wrap{max-width:1100px;margin:20px auto;padding:0 16px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.card{background:white;border-radius:18px;padding:20px;border:1px solid #e9ddd0;box-shadow:0 6px 18px rgba(0,0,0,.05)}.card h3{color:#7c2d12;margin:0}.btn{background:#7c2d12;color:white;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;margin-top:10px}.badge{background:#f0e6d3;color:#7c2d12;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}</style></head><body>
-<header><div style="display:flex;align-items:center;gap:10px;font-weight:800;color:#7c2d12"><img src="../logo-usahidsolo.png" onerror="this.src='/logo-usahidsolo.png'" style="width:42px;height:42px"> USAHID SOLO</div><a href="/" style="color:#7c2d12;font-weight:700;text-decoration:none">Beranda</a></header>
-<div class="wrap"><h2 style="color:#7c2d12">Mata Kuliah</h2><div id="list" class="grid">⏳ Memuat...</div>
-<div style="text-align:center;margin-top:20px"><a class="btn" href="/">⬅ Beranda</a></div></div>
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Kuliah USAHID</title>
+<style>body{background:#f9f5f0;margin:0;font-family:Inter,sans-serif}header{background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}.wrap{max-width:1150px;margin:20px auto;padding:0 16px}.table-wrap{background:white;border-radius:18px;overflow:hidden;border:1px solid #e9ddd0;overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:600px}th{background:#7c2d12;color:white;padding:12px;text-align:left;font-size:12px}td{padding:12px;border-bottom:1px solid #f0e6d3;font-size:14px}a.btn-detail{background:#7c2d12;color:white;padding:6px 14px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px}</style></head><body>
+<header><div style="display:flex;align-items:center;gap:10px;font-weight:800;color:#7c2d12"><img src="../logo-usahidsolo.png" onerror="this.src='/logo-usahidsolo.png'" style="width:42px"> USAHID SOLO - KULIAH</div><div style="display:flex;align-items:center;gap:8px"><span id="userInfo" style="font-size:12px;background:#f0e6d3;padding:6px 12px;border-radius:20px;color:#7c2d12;font-weight:700"></span> <a href="#" onclick="logout()" style="font-size:12px;color:white;background:#7c2d12;padding:6px 12px;border-radius:20px;text-decoration:none;font-weight:700">Logout</a></div></header>
+<div class="wrap">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="color:#7c2d12;margin:0">Daftar Mata Kuliah</h2><a href="/" style="text-decoration:none;color:#7c2d12;font-size:13px">← Home</a></div>
+<div class="table-wrap"><table><thead><tr><th>Kode</th><th>Nama MK</th><th>SKS</th><th>Semester</th><th>Aksi</th></tr></thead><tbody id="list"><tr><td colspan="5">⏳ Memuat...</td></tr></tbody></table></div>
+</div>
 <script>
 const API="https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-fetch(API+"?page=matakuliah&t="+Date.now()).then(r=>r.json()).then(d=>{
-  document.getElementById('list').innerHTML=d.map(x=>`<div class="card"><h3>${x.kode} - ${x.nama}</h3><p><span class="badge">${x.sks} SKS</span> <span class="badge">Semester ${x.semester}</span> <span class="badge">Kelas ${x.kelas}</span></p><a class="btn" href="/kuliah/detail.html?mk=${x.kode}">Lihat Materi & Mahasiswa →</a></div>`).join('');
+let user = JSON.parse(localStorage.getItem('kuliah_user')||'null');
+if(!user){ location.href='/kuliah/login.html'; }
+document.getElementById('userInfo').innerText=user.nama+' ('+user.role+')';
+function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
+fetch(API+"?page=matakuliah&t="+Date.now()).then(r=>r.json()).then(data=>{
+  if(!data.length){ document.getElementById('list').innerHTML='<tr><td colspan=5>Tidak ada MK</td></tr>'; return; }
+  document.getElementById('list').innerHTML=data.map(x=>`<tr><td><b>${x.kode_mk||''}</b></td><td>${x.nama_mk||''}</td><td>${x.sks||''}</td><td>${x.semester||''}</td><td><a class="btn-detail" href="detail.html?mk=${x.kode_mk}">Buka</a></td></tr>`).join('');
 });
 </script></body></html>
