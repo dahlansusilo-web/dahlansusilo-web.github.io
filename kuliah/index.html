@@ -1,4 +1,5 @@
 <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Kuliah USAHID</title>
+<!-- VERSI-DIAG-NIM-2026-11-05 -->
 <style>
 *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f9f5f0;color:#222}
 header{background:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
@@ -25,6 +26,7 @@ td{padding:12px 14px;border-bottom:1px solid #eee}
 <div class="wrap">
   <h2>Daftar Mata Kuliah</h2>
   <p class="sub"><a href="/" style="color:#7c2d12;text-decoration:none">← Beranda</a> • Silakan pilih mata kuliah untuk melihat materi dan tugas</p>
+  <p id="diag-nim" style="font-size:11px;color:#999">Memeriksa NIM login...</p>
   <div id="error-box"></div>
   <div class="card">
     <table>
@@ -40,14 +42,29 @@ function setHTML(id, html){ var el=document.getElementById(id); if(el) el.innerH
 let rawUser = JSON.parse(localStorage.getItem('kuliah_user')||'null');
 if(!rawUser){ location.href='/kuliah/login.html'; }
 let user = rawUser.user || rawUser;
-if(!user.nim){ location.href='/kuliah/login.html'; }
-setText('user-info', (user.nama||'')+' ('+(user.role||'')+')');
+// Perbaikan: cari NIM dari semua kemungkinan nama kunci, huruf besar/kecil
+function cariNIM(obj){
+  if(!obj) return "";
+  for(let k in obj){
+    if(String(k).trim().toLowerCase()==="nim") return String(obj[k]||"").trim();
+  }
+  return String(obj.nim||obj.NIM||obj.nim_mahasiswa||"").trim();
+}
+function cariRole(obj){
+  if(!obj) return "";
+  for(let k in obj){
+    if(String(k).trim().toLowerCase()==="role") return String(obj[k]||"").trim();
+  }
+  return String(obj.role||obj.peran||"").trim();
+}
+let nimLogin = cariNIM(user);
+let roleLogin = cariRole(user).toLowerCase();
+if(!nimLogin){ location.href='/kuliah/login.html'; }
+setText('user-info', (user.nama||user.Nama||'')+' ('+(roleLogin||'')+')');
+setText('diag-nim', 'Login sebagai NIM: ['+nimLogin+'] | Role: ['+roleLogin+']');
 function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
-
 async function loadMatakuliah(){
   try{
-    const nimLogin = String(user.nim || "").trim();
-    const roleLogin = String(user.role || "").trim().toLowerCase();
     const rMK = await fetch(API+"?page=matakuliah&t="+Date.now());
     if(!rMK.ok) throw new Error('Gagal terhubung ke server');
     const dataMK = await rMK.json();
@@ -56,17 +73,16 @@ async function loadMatakuliah(){
       const rPeserta = await fetch(API+"?page=peserta&t="+Date.now());
       const dataPeserta = await rPeserta.json();
       const listPeserta = Array.isArray(dataPeserta) ? dataPeserta : (dataPeserta.data || []);
-      const kodeDiikuti = listPeserta
-        .filter(function(p){
+      const kodeDiikuti = listPeserta.filter(function(p){
           const kunci = {};
           for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
           return String(kunci["nim"] || "").trim() === nimLogin;
-        })
-        .map(function(p){
+        }).map(function(p){
           const kunci = {};
           for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
           return String(kunci["kode_mk"] || "").trim();
         });
+      setText('diag-nim', 'Login sebagai NIM: ['+nimLogin+'] | Role: ['+roleLogin+'] | Diikuti: ['+kodeDiikuti.join(', ')+'] | Total Peserta: '+listPeserta.length);
       list = list.filter(function(x){ return kodeDiikuti.includes(String(x.kode_mk || "").trim()); });
     }
     if(!list.length){
