@@ -1,21 +1,82 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Detail Kuliah USAHID</title></head>
+<body style="background:#f9f5f0;margin:0;font-family:Inter,sans-serif">
+<header style="background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;">
+  <a href="/kuliah/" style="display:flex;align-items:center;gap:10px;font-weight:800;color:#7c2d12;text-decoration:none">
+    <img src="/logo-usahidsolo.png" onerror="this.style.display='none'" style="width:42px"> USAHID
+  </a>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span id="user-info" style="font-weight:600;color:#333;font-size:13px"></span>
+    <a href="#" onclick="logout()" style="color:#7c2d12;font-size:13px">Logout</a>
+  </div>
+</header>
+
+<div class="wrap" style="max-width:800px;margin:20px auto;padding:0 16px">
+  <a href="/kuliah/" style="color:#7c2d12;text-decoration:none;font-size:13px">← Balik ke Daftar MK</a>
+  <h2 id="judul-mk" style="color:#7c2d12;margin:10px 0">Detail Mata Kuliah</h2>
+  <div id="list-materi">Memuat materi...</div>
+</div>
+
+<!-- FORM KUMPUL TUGAS - PILIHAN B -->
+<div id="form-kumpul" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);padding:20px;z-index:99">
+  <div style="background:white;padding:20px;border-radius:12px;max-width:400px;margin:50px auto">
+    <h3 style="margin:0 0 10px">📤 Kumpul Tugas</h3>
+    <p id="info-tugas" style="font-size:13px;color:#666"></p>
+    <input id="input-nim" placeholder="NIM sampean" style="width:100%;padding:10px;margin:5px 0;box-sizing:border-box"><br>
+    <input id="input-link" placeholder="Paste Link Google Drive Tugas" style="width:100%;padding:10px;margin:5px 0;box-sizing:border-box"><br>
+    <input id="input-ket" placeholder="Keterangan (opsional)" style="width:100%;padding:10px;margin:5px 0;box-sizing:border-box"><br>
+    <button id="btn-kirim" onclick="kirimTugas()" style="width:100%;padding:12px;background:#1a73e8;color:white;border:none;border-radius:8px;font-weight:700">Kumpul</button>
+    <button onclick="document.getElementById('form-kumpul').style.display='none'" style="width:100%;margin-top:5px;padding:10px;border:none;background:#eee;border-radius:8px">Batal</button>
+  </div>
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbxO9b3E0rRs980bTV-1iWFdFawdUnZMWyJ0jYbmtPk5jX5dXnTPSe8CmKkqzDV0KY/exec";
+let user=JSON.parse(localStorage.getItem('kuliah_user')||'null');
+if(!user){ location.href='/kuliah/login.html'; }
+document.getElementById('user-info').innerText=user.nama||'';
+function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
+
 // Ambil kode MK soko URL: detail.html?mk=XXX
 const mk = new URLSearchParams(location.search).get('mk');
+document.getElementById('judul-mk').innerText = 'Mata Kuliah: ' + mk;
 
-fetch(API + "?page=materi&mk=" + mk)
-  .then(r => r.json())
-  .then(data => {
-    document.getElementById('list-materi').innerHTML = data.map(x => `
-      <div class="card">
-        <b>Pertemuan ${x.pertemuan} - ${x.judul_materi}</b><br>
-        <a href="${x.link_drive}" target="_blank">📄 Buka Materi</a>
-        ${x.judul_tugas ? `
-          <div style="background:#fff3cd;padding:10px;margin-top:10px;border-radius:8px;">
-            <b>📝 ${x.judul_tugas}</b><br>Deadline: ${x.deadline_tugas}<br>
-            <a href="${x.link_tugas}" target="_blank">⬇️ Download Soal</a><br><br>
-            <button onclick="bukaForm('${x.kode_mk}','${x.id}')">📤 Kumpul Tugas</button>
-          </div>` : ''}
-      </div>
-    `).join('');
-  });
+fetch(API + "?page=materi&mk=" + mk + "&t=" + Date.now())
+.then(r=>r.json())
+.then(data=>{
+  if(!data.length){ document.getElementById('list-materi').innerHTML='<p>Tidak ada materi untuk MK ini.</p>'; return; }
+  document.getElementById('list-materi').innerHTML=data.map(x=>`
+    <div class="card" style="background:white;padding:16px;border-radius:12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <b>Pertemuan ${x.pertemuan} - ${x.judul_materi}</b><br>
+      <a href="${x.link_drive}" target="_blank">📄 Buka Materi</a>
+      ${x.judul_tugas ? `
+        <div style="background:#fff3cd;padding:10px;margin-top:10px;border-radius:8px">
+          <b>📝 ${x.judul_tugas}</b><br>Deadline: ${x.deadline_tugas}<br>
+          <a href="${x.link_tugas}" target="_blank">⬇️ Download Soal</a><br><br>
+          <button onclick="bukaForm('${x.kode_mk}','${x.id}','${x.judul_tugas}')" style="padding:8px 14px;background:#1a73e8;color:white;border:none;border-radius:8px">📤 Kumpul Tugas</button>
+        </div>` : ''}
+    </div>
+  `).join('');
+});
 
-// Form Kumpul - podo karo kode B wingi, API_URL e nganggo API sing wes ono kui
+// Form Kumpul - Pilihan B
+let tugasAktif={};
+function bukaForm(kode_mk,id_tugas,judul){
+  tugasAktif={kode_mk,id_tugas};
+  document.getElementById('info-tugas').innerText = judul + ' | MK: ' + kode_mk;
+  document.getElementById('input-nim').value = user.nim || user.nama || '';
+  document.getElementById('form-kumpul').style.display='block';
+}
+async function kirimTugas(){
+  const nim=document.getElementById('input-nim').value;
+  const link_gd=document.getElementById('input-link').value;
+  const ket=document.getElementById('input-ket').value;
+  if(!nim||!link_gd) return alert("NIM + Link GD wajib diisi bro!");
+  const btn=document.getElementById('btn-kirim');
+  btn.innerText="Ngirim..."; btn.disabled=true;
+  await fetch(API,{method:'POST',mode:'no-cors',body:JSON.stringify({...tugasAktif,nim,link_gd,ket})});
+  alert("Beres bro! Tugas wes ke-kumpul ✅");
+  document.getElementById('form-kumpul').style.display='none';
+  btn.innerText="Kumpul"; btn.disabled=false;
+}
+</script>
+</body></html>
