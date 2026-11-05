@@ -35,25 +35,69 @@ td{padding:12px 14px;border-bottom:1px solid #eee}
 </div>
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-let user=JSON.parse(localStorage.getItem('kuliah_user')||'null');
-if(!user){ location.href='/kuliah/login.html'; }
+let rawUser = JSON.parse(localStorage.getItem('kuliah_user')||'null');
+if(!rawUser){ location.href='/kuliah/login.html'; }
+// Menyesuaikan dua format penyimpanan: {nim, nama, role} dan {user:{nim, nama, role}}
+let user = rawUser.user || rawUser;
+if(!user.nim){ location.href='/kuliah/login.html'; }
 document.getElementById('user-info').innerText=(user.nama||'')+' ('+(user.role||'')+')';
 function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
 
-fetch(API+"?page=matakuliah&t="+Date.now())
-.then(r=>{ if(!r.ok) throw new Error('Gagal terhubung ke server'); return r.json(); })
-.then(data=>{
-  console.log("DATA MK:", data);
-  // Apps Script kadang mbalekke {data:[...]} kadang langsung [...]
-  const list = Array.isArray(data) ? data : (data.data || data.matakuliah || []);
-  if(!list.length){ document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Tidak ada mata kuliah yang tersedia</td></tr>'; return; }
-  document.getElementById('list-mk').innerHTML=list.map(x=>`<tr><td><b>${x.kode_mk}</b></td><td>${x.nama_mk}</td><td>${x.sks}</td><td>${x.semester}</td><td><a class="btn-buka" href="/kuliah/detail.html?mk=${x.kode_mk}">Buka</a></td></tr>`).join('');
-})
-.catch(err=>{
-  document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Gagal memuat</td></tr>';
-  const eb=document.getElementById('error-box');
-  eb.style.display='block';
-  eb.innerText='Terjadi kesalahan saat memuat. Silakan periksa koneksi dan coba muat ulang halaman. Detail: '+err.message;
-});
+async function loadMatakuliah(){
+  try{
+    const nimLogin = String(user.nim || "").trim();
+    const roleLogin = String(user.role || "").trim().toLowerCase();
+
+    // 1. Ambil seluruh mata kuliah
+    const rMK = await fetch(API+"?page=matakuliah&t="+Date.now());
+    if(!rMK.ok) throw new Error('Gagal terhubung ke server');
+    const dataMK = await rMK.json();
+    let list = Array.isArray(dataMK) ? dataMK : (dataMK.data || dataMK.matakuliah || []);
+    console.log("DATA MK:", list);
+
+    // 2. Apabila mahasiswa, saring berdasarkan PesertaKuliah
+    if(roleLogin === "mahasiswa" && nimLogin){
+      const rPeserta = await fetch(API+"?page=peserta&t="+Date.now());
+      const dataPeserta = await rPeserta.json();
+      const listPeserta = Array.isArray(dataPeserta) ? dataPeserta : (dataPeserta.data || []);
+      console.log("DATA PESERTA:", listPeserta);
+
+      // Ambil kode_mk yang diikuti oleh NIM yang sedang login
+      const kodeDiikuti = listPeserta
+        .filter(function(p){
+          const kunci = {};
+          for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
+          const nimPeserta = String(kunci["nim"] || kunci["nidn"] || "").trim();
+          return nimPeserta === nimLogin;
+        })
+        .map(function(p){
+          const kunci = {};
+          for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
+          return String(kunci["kode_mk"] || kunci["kode_mata_kuliah"] || kunci["kode"] || "").trim();
+        });
+
+      console.log("KODE DIIKUTI:", kodeDiikuti);
+
+      // Saring mata kuliah hanya yang diikuti
+      list = list.filter(function(x){
+        const kodeMK = String(x.kode_mk || x.kode || "").trim();
+        return kodeDiikuti.includes(kodeMK);
+      });
+    }
+
+    // 3. Tampilkan hasil yang sudah disaring
+    if(!list.length){
+      document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Tidak ada mata kuliah yang tersedia untuk Anda</td></tr>';
+      return;
+    }
+    document.getElementById('list-mk').innerHTML=list.map(x=>`<tr><td><b>${x.kode_mk}</b></td><td>${x.nama_mk}</td><td>${x.sks}</td><td>${x.semester}</td><td><a class="btn-buka" href="/kuliah/detail.html?mk=${x.kode_mk}">Buka</a></td></tr>`).join('');
+  }catch(err){
+    document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Gagal memuat</td></tr>';
+    const eb=document.getElementById('error-box');
+    eb.style.display='block';
+    eb.innerText='Terjadi kesalahan saat memuat. Silakan periksa koneksi dan coba muat ulang halaman. Detail: '+err.message;
+  }
+}
+loadMatakuliah();
 </script>
 </body></html>
