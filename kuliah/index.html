@@ -29,7 +29,7 @@ td{padding:12px 14px;border-bottom:1px solid #eee}
   <div class="card">
     <table>
       <thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Semester</th><th>Aksi</th></tr></thead>
-      <tbody id="list-mk"><tr><td colspan="5" style="text-align:center;padding:20px">Memuat data mata kuliah...</td></tr></tbody>
+      <tbody id="list-mk"><tr><td colspan="5" style="text-align:center;padding:20px">Memuat mata kuliah...</td></tr></tbody>
     </table>
   </div>
 </div>
@@ -39,17 +39,21 @@ let user=JSON.parse(localStorage.getItem('kuliah_user')||'null');
 if(!user){ location.href='/kuliah/login.html'; }
 document.getElementById('user-info').innerText=(user.nama||'')+' ('+(user.role||'')+')';
 function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
+
 fetch(API+"?page=matakuliah&t="+Date.now())
 .then(r=>{ if(!r.ok) throw new Error('Gagal terhubung ke server'); return r.json(); })
 .then(data=>{
-  if(!data.length){ document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Tidak ada mata kuliah yang tersedia</td></tr>'; return; }
-  document.getElementById('list-mk').innerHTML=data.map(x=>`<tr><td><b>${x.kode_mk}</b></td><td>${x.nama_mk}</td><td>${x.sks}</td><td>${x.semester}</td><td><a class="btn-buka" href="/kuliah/detail.html?mk=${x.kode_mk}">Buka</a></td></tr>`).join('');
+  console.log("DATA MK:", data);
+  // Apps Script kadang mbalekke {data:[...]} kadang langsung [...]
+  const list = Array.isArray(data) ? data : (data.data || data.matakuliah || []);
+  if(!list.length){ document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Tidak ada mata kuliah yang tersedia</td></tr>'; return; }
+  document.getElementById('list-mk').innerHTML=list.map(x=>`<tr><td><b>${x.kode_mk}</b></td><td>${x.nama_mk}</td><td>${x.sks}</td><td>${x.semester}</td><td><a class="btn-buka" href="/kuliah/detail.html?mk=${x.kode_mk}">Buka</a></td></tr>`).join('');
 })
 .catch(err=>{
-  document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Gagal memuat data</td></tr>';
+  document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Gagal memuat</td></tr>';
   const eb=document.getElementById('error-box');
   eb.style.display='block';
-  eb.innerText='Terjadi kesalahan saat memuat data. Silakan periksa koneksi dan coba muat ulang halaman. Detail: '+err.message;
+  eb.innerText='Terjadi kesalahan saat memuat. Silakan periksa koneksi dan coba muat ulang halaman. Detail: '+err.message;
 });
 </script>
 </body></html>
