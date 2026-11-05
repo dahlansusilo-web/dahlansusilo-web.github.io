@@ -28,14 +28,22 @@ table{width:100%;border-collapse:collapse;font-size:13px} th,td{border-bottom:1p
 </div>
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-let user = JSON.parse(localStorage.getItem('kuliah_user')||'null');
-if(!user){ location.href='/kuliah/login.html'; }
+let rawUser = JSON.parse(localStorage.getItem('kuliah_user')||'null');
+if(!rawUser){ location.href='/kuliah/login.html'; }
+// Menyesuaikan dua format penyimpanan: {nim,nama,role} dan {user:{nim,nama,role}}
+let user = rawUser.user || rawUser;
+if(!user.nim){ location.href='/kuliah/login.html'; }
 document.getElementById('user-info').innerText = (user.nama||'') + ' (' + (user.role||'') + ')';
 function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
 
 const params = new URLSearchParams(location.search);
 const kodeMK = params.get('mk') || '';
 document.getElementById('judul-mk').innerText = 'Mata Kuliah: ' + kodeMK;
+
+const nimLogin = String(user.nim || "").trim();
+const roleLogin = String(user.role || "").trim().toLowerCase();
+const isDosen = (roleLogin === "dosen");
+const isMahasiswa = (roleLogin === "mahasiswa");
 
 function formatTanggal(str){
   if(!str) return '-';
@@ -46,8 +54,6 @@ function formatTanggal(str){
   }catch(e){ return str; }
 }
 
-// Normalisasi id_tugas: 1 -> T1 (IF101), 4 -> P1 (IF102), dst.
-// Agar data lama (angka) tetap dapat dibaca bersama data baru (T1/P1/K1)
 function normalisasiId(id, kode){
   const s = String(id||'').trim().toUpperCase();
   if(s.startsWith('T')||s.startsWith('P')||s.startsWith('K')) return s;
@@ -57,6 +63,30 @@ function normalisasiId(id, kode){
   if(kode==='IF102') return 'P'+(n-3);
   if(kode==='IF103') return 'K'+(n-6);
   return s;
+}
+
+// Penjaga akses: mahasiswa hanya boleh membuka MK yang diikutinya
+async function cekAkses(){
+  if(!isMahasiswa) return true;
+  try{
+    const res = await fetch(API+"?page=peserta&t="+Date.now());
+    const data = await res.json();
+    const listPeserta = Array.isArray(data) ? data : (data.data || []);
+    const diizinkan = listPeserta.some(function(p){
+      const kunci = {};
+      for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
+      return String(kunci["nim"] || "").trim() === nimLogin
+          && String(kunci["kode_mk"] || "").trim() === kodeMK;
+    });
+    if(!diizinkan){
+      alert("Anda tidak terdaftar sebagai peserta pada mata kuliah ini.");
+      location.href='/kuliah/';
+      return false;
+    }
+    return true;
+  }catch(e){
+    return true;
+  }
 }
 
 async function loadDetail(){
@@ -70,6 +100,9 @@ async function loadDetail(){
     }
     document.getElementById('list-materi').innerHTML = materi.map((m,i)=>{
       const idTugas = normalisasiId(m.id_tugas, m.kode_mk);
+      // Mahasiswa: hanya Kumpulkan Tugas. Dosen: hanya Lihat yang Sudah Mengumpulkan.
+      const tombolKumpul = isMahasiswa ? `<a class="btn btn-biru" href="/kuliah/kumpul.html?mk=${m.kode_mk}&id_tugas=${idTugas}">📤 Kumpulkan Tugas</a>` : ``;
+      const tombolLihat = isDosen ? `<button class="btn btn-hijau" onclick="lihatKumpul('${m.kode_mk}','${idTugas}', ${i})">👥 Lihat yang Sudah Mengumpulkan</button>` : ``;
       return `
       <div class="card">
         <b>Pertemuan ${m.pertemuan} - ${m.judul_materi||''}</b><br>
@@ -79,8 +112,8 @@ async function loadDetail(){
           <span>${m.judul_tugas||''}</span><br>
           <span class="muted">Batas Pengumpulan: ${formatTanggal(m.deadline_tugas)}</span><br>
           <a href="${m.link_tugas||'#'}" target="_blank">⬇ Unduh Soal</a><br><br>
-          <a class="btn btn-biru" href="/kuliah/kumpul.html?mk=${m.kode_mk}&id_tugas=${idTugas}">📤 Kumpulkan Tugas</a>
-          <button class="btn btn-hijau" onclick="lihatKumpul('${m.kode_mk}','${idTugas}', ${i})">👥 Lihat yang Sudah Mengumpulkan</button>
+          ${tombolKumpul}
+          ${tombolLihat}
           <div class="list-kumpul" id="kumpul-${i}"><p class="muted">Memuat data...</p></div>
         </div>
       </div>`;
@@ -91,6 +124,11 @@ async function loadDetail(){
 }
 
 async function lihatKumpul(kodeMK, idTugas, idx){
+  // Pengaman tambahan: mahasiswa tidak boleh memanggil fungsi ini melalui console
+  if(!isDosen){
+    alert("Fitur ini hanya untuk dosen.");
+    return;
+  }
   const box = document.getElementById('kumpul-'+idx);
   box.style.display = 'block';
   box.innerHTML = '<p class="muted">Memuat data pengumpulan...</p>';
@@ -98,7 +136,6 @@ async function lihatKumpul(kodeMK, idTugas, idx){
     const res = await fetch(API+"?page=pengumpulan&mk="+encodeURIComponent(kodeMK)+"&id_tugas="+encodeURIComponent(idTugas)+"&t="+Date.now());
     let list = await res.json();
     list = Array.isArray(list) ? list : (list.data||[]);
-    // Jika tidak ditemukan dengan kode T1, coba cari dengan angka lama dan dengan kode_mk saja
     if(!list.length){
       const res2 = await fetch(API+"?page=pengumpulan&mk="+encodeURIComponent(kodeMK)+"&t="+Date.now());
       let semua = await res2.json();
@@ -115,6 +152,7 @@ async function lihatKumpul(kodeMK, idTugas, idx){
     box.innerHTML = '<p>Terjadi kesalahan saat memuat data pengumpulan.</p>';
   }
 }
-loadDetail();
+// Jalankan penjaga akses dahulu, baru muat materi
+cekAkses().then(function(ok){ if(ok) loadDetail(); });
 </script>
 </body></html>
