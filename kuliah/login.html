@@ -11,11 +11,10 @@ button{width:100%;padding:12px;background:#7a1f1f;color:white;border:none;border
 <div class="card">
 <h2 style="color:#7a1f1f;margin:0">USAHID</h2>
 <p style="margin:5px 0 15px">Portal Kuliah</p>
-<input id="nim" placeholder="NIM / NIDN - cth: D01">
-<input id="password" type="password" placeholder="Password - cth: DS123">
+<input id="nim" placeholder="NIM / NIDN" autocomplete="username">
+<input id="password" type="password" placeholder="Password" autocomplete="current-password">
 <button id="btn-login" onclick="login()">LOGIN</button>
 <p id="msg" style="color:red;font-size:13px"></p>
-<p style="font-size:12px;color:#888">Dosen: D01 / DS123<br>Mahasiswa: 2023001 / mhs1</p>
 </div>
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
@@ -25,13 +24,9 @@ async function login(){
   if(!nim || !password){ document.getElementById('msg').innerText="NIM + Password wajib diisi!"; return; }
   const btn = document.getElementById('btn-login');
   btn.innerText="Mlebu..."; btn.disabled=true;
-  document.getElementById('msg').innerText="";
   try{
-    const url = API + "?page=login&nim=" + encodeURIComponent(nim) + "&password=" + encodeURIComponent(password) + "&t=" + Date.now();
-    console.log(url);
-    const res = await fetch(url);
+    const res = await fetch(API + "?page=login&nim=" + encodeURIComponent(nim) + "&password=" + encodeURIComponent(password) + "&t=" + Date.now());
     const data = await res.json();
-    console.log(data);
     if(data.success){
       localStorage.setItem('kuliah_user', JSON.stringify(data));
       location.href='/kuliah/';
@@ -40,7 +35,7 @@ async function login(){
       btn.innerText="LOGIN"; btn.disabled=false;
     }
   }catch(e){
-    document.getElementById('msg').innerText="Error koneksi: "+e;
+    document.getElementById('msg').innerText="Error koneksi";
     btn.innerText="LOGIN"; btn.disabled=false;
   }
 }
