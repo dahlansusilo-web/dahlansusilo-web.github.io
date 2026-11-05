@@ -79,38 +79,39 @@ function tampilPesan(teks, sukses){
   const el=document.getElementById('pesan');
   el.style.display='block';
   el.className = sukses ? 'ok' : 'err';
-  el.id='pesan';
   el.innerText=teks;
-  // Kembalikan class agar warna tetap tampil setelah innerText
-  el.className = sukses ? 'ok' : 'err';
-  el.style.display='block';
 }
 async function kirimTugas(e){
   e.preventDefault();
   const btn=document.getElementById('btn-kirim');
   btn.disabled=true; btn.innerText='Mengirim...';
-  const payload={
-    page:'kumpul',
-    action:'kumpul',
-    nim:document.getElementById('nim').value,
-    nama:document.getElementById('nama').value,
-    kode_mk:kodeMK,
-    mk:kodeMK,
-    id_tugas:idTugas,
-    link_gd:document.getElementById('link_gd').value.trim(),
-    ket:document.getElementById('ket').value.trim(),
-    tanggal_kumpul:new Date().toISOString()
-  };
+  const nim = document.getElementById('nim').value.trim();
+  const nama = document.getElementById('nama').value.trim();
+  const link_gd = document.getElementById('link_gd').value.trim();
+  const ket = document.getElementById('ket').value.trim();
+  // PERBAIKAN UTAMA: gunakan GET agar tidak terkena CORS preflight seperti POST JSON
+  const url = API + "?page=kumpul"
+    + "&nim=" + encodeURIComponent(nim)
+    + "&nama=" + encodeURIComponent(nama)
+    + "&kode_mk=" + encodeURIComponent(kodeMK)
+    + "&mk=" + encodeURIComponent(kodeMK)
+    + "&id_tugas=" + encodeURIComponent(idTugas)
+    + "&link_gd=" + encodeURIComponent(link_gd)
+    + "&ket=" + encodeURIComponent(ket)
+    + "&tanggal_kumpul=" + encodeURIComponent(new Date().toISOString())
+    + "&t=" + Date.now();
   try{
-    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const hasil=await res.json().catch(()=>({}));
+    const res = await fetch(url);
+    const teks = await res.text();
+    let hasil = {};
+    try{ hasil = JSON.parse(teks); }catch(_){ hasil = {}; }
     if(hasil && (hasil.success===false || hasil.error)){
-      throw new Error(hasil.error||hasil.message||'Gagal menyimpan');
+      throw new Error(hasil.error||hasil.message||'Gagal menyimpan di server');
     }
     tampilPesan('Tugas berhasil dikumpulkan. Anda akan kembali ke Detail Mata Kuliah.', true);
     setTimeout(()=>{ location.href='/kuliah/detail.html?mk='+encodeURIComponent(kodeMK); },1500);
   }catch(err){
-    tampilPesan('Gagal mengirim: '+err.message+' - Silakan coba lagi atau hubungi dosen. Pastikan link Drive sudah benar.', false);
+    tampilPesan('Gagal mengirim: '+err.message, false);
     btn.disabled=false; btn.innerText='📤 Kirim Tugas';
   }
   return false;
