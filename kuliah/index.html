@@ -26,6 +26,7 @@ td{padding:12px 14px;border-bottom:1px solid #eee}
   <h2>Daftar Mata Kuliah</h2>
   <p class="sub"><a href="/" style="color:#7c2d12;text-decoration:none">← Beranda</a> • Silakan pilih mata kuliah untuk melihat materi dan tugas</p>
   <div id="error-box"></div>
+  <div id="debug-box" style="display:block;background:#fffbe6;color:#333;padding:12px;border-radius:8px;margin-bottom:12px;font-size:12px;word-break:break-all">Memuat...</div>
   <div class="card">
     <table>
       <thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Semester</th><th>Aksi</th></tr></thead>
@@ -37,7 +38,6 @@ td{padding:12px 14px;border-bottom:1px solid #eee}
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
 let rawUser = JSON.parse(localStorage.getItem('kuliah_user')||'null');
 if(!rawUser){ location.href='/kuliah/login.html'; }
-// Menyesuaikan dua format penyimpanan: {nim, nama, role} dan {user:{nim, nama, role}}
 let user = rawUser.user || rawUser;
 if(!user.nim){ location.href='/kuliah/login.html'; }
 document.getElementById('user-info').innerText=(user.nama||'')+' ('+(user.role||'')+')';
@@ -47,45 +47,32 @@ async function loadMatakuliah(){
   try{
     const nimLogin = String(user.nim || "").trim();
     const roleLogin = String(user.role || "").trim().toLowerCase();
-
-    // 1. Ambil seluruh mata kuliah
     const rMK = await fetch(API+"?page=matakuliah&t="+Date.now());
     if(!rMK.ok) throw new Error('Gagal terhubung ke server');
     const dataMK = await rMK.json();
     let list = Array.isArray(dataMK) ? dataMK : (dataMK.data || dataMK.matakuliah || []);
-    console.log("DATA MK:", list);
 
-    // 2. Apabila mahasiswa, saring berdasarkan PesertaKuliah
     if(roleLogin === "mahasiswa" && nimLogin){
       const rPeserta = await fetch(API+"?page=peserta&t="+Date.now());
       const dataPeserta = await rPeserta.json();
       const listPeserta = Array.isArray(dataPeserta) ? dataPeserta : (dataPeserta.data || []);
-      console.log("DATA PESERTA:", listPeserta);
-
-      // Ambil kode_mk yang diikuti oleh NIM yang sedang login
       const kodeDiikuti = listPeserta
         .filter(function(p){
           const kunci = {};
           for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
-          const nimPeserta = String(kunci["nim"] || kunci["nidn"] || "").trim();
-          return nimPeserta === nimLogin;
+          return String(kunci["nim"] || "").trim() === nimLogin;
         })
         .map(function(p){
           const kunci = {};
           for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
-          return String(kunci["kode_mk"] || kunci["kode_mata_kuliah"] || kunci["kode"] || "").trim();
+          return String(kunci["kode_mk"] || "").trim();
         });
-
-      console.log("KODE DIIKUTI:", kodeDiikuti);
-
-      // Saring mata kuliah hanya yang diikuti
-      list = list.filter(function(x){
-        const kodeMK = String(x.kode_mk || x.kode || "").trim();
-        return kodeDiikuti.includes(kodeMK);
-      });
+      document.getElementById('debug-box').innerText = "Login: " + nimLogin + " | Role: " + roleLogin + " | Kode diikuti: " + JSON.stringify(kodeDiikuti);
+      list = list.filter(function(x){ return kodeDiikuti.includes(String(x.kode_mk || "").trim()); });
+    } else {
+      document.getElementById('debug-box').innerText = "Login: " + nimLogin + " | Role: " + roleLogin + " | Mode dosen: menampilkan semua MK";
     }
 
-    // 3. Tampilkan hasil yang sudah disaring
     if(!list.length){
       document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Tidak ada mata kuliah yang tersedia untuk Anda</td></tr>';
       return;
@@ -95,7 +82,7 @@ async function loadMatakuliah(){
     document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Gagal memuat</td></tr>';
     const eb=document.getElementById('error-box');
     eb.style.display='block';
-    eb.innerText='Terjadi kesalahan saat memuat. Silakan periksa koneksi dan coba muat ulang halaman. Detail: '+err.message;
+    eb.innerText='Terjadi kesalahan saat memuat. Detail: '+err.message;
   }
 }
 loadMatakuliah();
