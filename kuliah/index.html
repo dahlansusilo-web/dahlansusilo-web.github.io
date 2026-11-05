@@ -13,36 +13,43 @@ h2{color:#7c2d12;margin:0 0 4px}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th{background:#7c2d12;color:#fff;text-align:left;padding:12px 14px}
 td{padding:12px 14px;border-bottom:1px solid #eee}
-tr:last-child td{border-bottom:none}
 .btn-buka{background:#7c2d12;color:#fff;padding:7px 16px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block}
-@media(max-width:600px){ .logo{font-size:13px} th,td{padding:10px 8px;font-size:13px} .user span{display:none} }
+#error-box{display:none;background:#fdecea;color:#7c2d12;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px}
+@media(max-width:600px){ .logo{font-size:13px} th,td{padding:10px 8px;font-size:13px} }
 </style></head>
 <body>
 <header>
   <a class="logo" href="/kuliah/"><img src="/logo-usahidsolo.png" onerror="this.style.display='none'"> USAHID SOLO - KULIAH</a>
-  <div class="user"><span id="user-info"></span><a class="btn-logout" href="#" onclick="logout()">Logout</a></div>
+  <div class="user"><span id="user-info"></span><a class="btn-logout" href="#" onclick="logout()">Keluar</a></div>
 </header>
-
 <div class="wrap">
   <h2>Daftar Mata Kuliah</h2>
-  <p class="sub"><a href="/" style="color:#7c2d12;text-decoration:none">← Home</a> • Pilih MK kanggo delok materi & tugas</p>
+  <p class="sub"><a href="/" style="color:#7c2d12;text-decoration:none">← Beranda</a> • Silakan pilih mata kuliah untuk melihat materi dan tugas</p>
+  <div id="error-box"></div>
   <div class="card">
     <table>
-      <thead><tr><th>Kode</th><th>Nama MK</th><th>SKS</th><th>Semester</th><th>Aksi</th></tr></thead>
-      <tbody id="list-mk"><tr><td colspan="5" style="text-align:center;padding:20px">Memuat...</td></tr></tbody>
+      <thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Semester</th><th>Aksi</th></tr></thead>
+      <tbody id="list-mk"><tr><td colspan="5" style="text-align:center;padding:20px">Memuat data mata kuliah...</td></tr></tbody>
     </table>
   </div>
 </div>
-
 <script>
 const API="https://script.google.com/macros/s/AKfycbxO9b3E0rRs980bTV-1iWFdFawdUnZMWyJ0jYbmtPk5jX5dXnTPSe8CmKkqzDV0KY/exec";
 let user=JSON.parse(localStorage.getItem('kuliah_user')||'null');
 if(!user){ location.href='/kuliah/login.html'; }
 document.getElementById('user-info').innerText=(user.nama||'')+' ('+(user.role||'')+')';
 function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
-fetch(API+"?page=matakuliah&t="+Date.now()).then(r=>r.json()).then(data=>{
-  if(!data.length){ document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Tidak ada MK</td></tr>'; return; }
+fetch(API+"?page=matakuliah&t="+Date.now())
+.then(r=>{ if(!r.ok) throw new Error('Gagal terhubung ke server'); return r.json(); })
+.then(data=>{
+  if(!data.length){ document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Tidak ada mata kuliah yang tersedia</td></tr>'; return; }
   document.getElementById('list-mk').innerHTML=data.map(x=>`<tr><td><b>${x.kode_mk}</b></td><td>${x.nama_mk}</td><td>${x.sks}</td><td>${x.semester}</td><td><a class="btn-buka" href="/kuliah/detail.html?mk=${x.kode_mk}">Buka</a></td></tr>`).join('');
+})
+.catch(err=>{
+  document.getElementById('list-mk').innerHTML='<tr><td colspan="5" style="text-align:center">Gagal memuat data</td></tr>';
+  const eb=document.getElementById('error-box');
+  eb.style.display='block';
+  eb.innerText='Terjadi kesalahan saat memuat data. Silakan periksa koneksi dan coba muat ulang halaman. Detail: '+err.message;
 });
 </script>
 </body></html>
