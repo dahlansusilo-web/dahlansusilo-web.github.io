@@ -1,5 +1,4 @@
 <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Karya Dosen - USAHID Solo</title>
-<!-- VERSI-KARYA-DOSEN-2026-11-05 -->
 <style>
 *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f9f5f0;color:#222}
 header{background:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
@@ -29,7 +28,6 @@ tr:nth-child(even) td{background:#fdf8f4}
   <p class="sub">Informasi umum, dapat dibuka tanpa login</p>
   <div id="error-box"></div>
   <div id="list-karya"><p style="text-align:center;padding:20px">Memuat karya dosen...</p></div>
-  <!-- Link Kembali ditempatkan di bawah, sesuai permintaan -->
   <a class="kembali" href="/">← Kembali ke Beranda</a>
 </div>
 <script>
@@ -49,20 +47,18 @@ async function loadKarya(){
     if(!r.ok) throw new Error('Gagal terhubung ke server');
     const data = await r.json();
     let list = Array.isArray(data) ? data : (data.data || data.karya || []);
-    // Informasi umum - tanpa login, tanpa penyaringan NIM
     if(!list.length){
       setHTML('list-karya','<p style="text-align:center">Belum ada karya dosen yang dipublikasikan</p>');
       return;
     }
-    let html = '<table><thead><tr><th>No</th><th>Judul</th><th>Tahun</th><th>Jenis</th><th>Keterangan</th><th>Link</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>No</th><th>Judul</th><th>Tahun</th><th>Jenis</th><th>Keterangan</th></tr></thead><tbody>';
     list.forEach(function(x){
       const nomor = ambil(x, ["nonor","nomor","no","id"]) || "";
       const judul = ambil(x, ["judul","judul_karya","nama_karya","title","nama"]) || "Tanpa Judul";
       const tahun = ambil(x, ["tahun","tahun_terbit"]) || "";
       const jenis = ambil(x, ["jenis","kategori","type"]) || "";
       const ket = ambil(x, ["keterangan","deskripsi","abstrak","ringkasan"]) || "";
-      const link = ambil(x, ["link_gd","link","link_drive","url","file"]) || "";
-      html += '<tr><td>'+nomor+'</td><td><strong>'+judul+'</strong></td><td>'+tahun+'</td><td>'+(jenis ? '<span class="badge">'+jenis+'</span>' : '')+'</td><td>'+ket+'</td><td>'+(link ? '<a class="btn-lihat" href="'+link+'" target="_blank" rel="noopener">Lihat</a>' : '-')+'</td></tr>';
+      html += '<tr><td>'+nomor+'</td><td><strong>'+judul+'</strong></td><td>'+tahun+'</td><td>'+(jenis ? '<span class="badge">'+jenis+'</span>' : '')+'</td><td>'+ket+'</td></tr>';
     });
     html += '</tbody></table>';
     setHTML('list-karya', html);
