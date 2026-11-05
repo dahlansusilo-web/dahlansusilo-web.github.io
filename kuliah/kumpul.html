@@ -1,4 +1,5 @@
 <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Kumpulkan Tugas - USAHID Solo</title>
+<!-- VERSI-KUMPUL-GET-V2 -->
 <style>
 *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f9f5f0;color:#222}
 header{background:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
@@ -28,26 +29,32 @@ input[readonly]{background:#f5f5f5}
   <p><a href="javascript:history.back()" style="color:#7c2d12;text-decoration:none">← Kembali</a></p>
   <h2>Kumpulkan Tugas</h2>
   <p class="muted" id="info-tugas">Memuat info tugas...</p>
+  <p style="font-size:11px;color:#999">Versi: KUMPUL-GET-V2</p>
   <div class="card">
-    <form id="form-kumpul" onsubmit="return kirimTugas(event)">
+    <!-- PERBAIKAN UTAMA: form langsung ke API dengan method GET, tanpa fetch agar tidak kena CORS -->
+    <form id="form-kumpul" method="GET" action="https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec" target="kumpul-iframe" onsubmit="return sebelumKirim()">
+      <input type="hidden" name="page" value="kumpul">
       <label>NIM</label>
-      <input id="nim" readonly>
+      <input id="nim" name="nim" readonly>
       <label>Nama</label>
-      <input id="nama" readonly>
+      <input id="nama" name="nama" readonly>
       <label>Kode Mata Kuliah</label>
-      <input id="mk" readonly>
+      <input id="mk" name="kode_mk" readonly>
+      <input type="hidden" name="mk" id="mk2">
       <label>ID Tugas</label>
-      <input id="id_tugas" readonly>
+      <input id="id_tugas" name="id_tugas" readonly>
       <label>Link Google Drive Berkas Tugas *</label>
-      <input id="link_gd" type="url" placeholder="https://drive.google.com/..." required>
+      <input id="link_gd" name="link_gd" type="url" placeholder="https://drive.google.com/..." required>
       <p class="muted">Unggah berkas ke Google Drive terlebih dahulu, atur ke "Siapa saja yang memiliki link dapat melihat", lalu tempelkan link-nya di sini.</p>
       <label>Keterangan (opsional)</label>
-      <textarea id="ket" rows="3" placeholder="Contoh: Tugas 1 Pertemuan 1 - Sudah sesuai soal"></textarea>
+      <textarea id="ket" name="ket" rows="3" placeholder="Contoh: Tugas 1 Pertemuan 1"></textarea>
+      <input type="hidden" name="tanggal_kumpul" id="tanggal_kumpul">
       <br><br>
       <button class="btn btn-biru" type="submit" id="btn-kirim">📤 Kirim Tugas</button>
       <a class="btn btn-abu" href="/kuliah/">Batal</a>
       <div id="pesan"></div>
     </form>
+    <iframe name="kumpul-iframe" style="display:none"></iframe>
   </div>
 </div>
 <script>
@@ -73,48 +80,21 @@ if(!kodeMK || !idTugas){
 document.getElementById('nim').value=user.nim||'';
 document.getElementById('nama').value=user.nama||'';
 document.getElementById('mk').value=kodeMK;
+document.getElementById('mk2').value=kodeMK;
 document.getElementById('id_tugas').value=idTugas;
 document.getElementById('info-tugas').innerText='Mata Kuliah: '+kodeMK+' | Tugas: '+idTugas;
-function tampilPesan(teks, sukses){
-  const el=document.getElementById('pesan');
-  el.style.display='block';
-  el.className = sukses ? 'ok' : 'err';
-  el.innerText=teks;
-}
-async function kirimTugas(e){
-  e.preventDefault();
+function sebelumKirim(){
+  document.getElementById('tanggal_kumpul').value=new Date().toISOString();
   const btn=document.getElementById('btn-kirim');
   btn.disabled=true; btn.innerText='Mengirim...';
-  const nim = document.getElementById('nim').value.trim();
-  const nama = document.getElementById('nama').value.trim();
-  const link_gd = document.getElementById('link_gd').value.trim();
-  const ket = document.getElementById('ket').value.trim();
-  // PERBAIKAN UTAMA: gunakan GET agar tidak terkena CORS preflight seperti POST JSON
-  const url = API + "?page=kumpul"
-    + "&nim=" + encodeURIComponent(nim)
-    + "&nama=" + encodeURIComponent(nama)
-    + "&kode_mk=" + encodeURIComponent(kodeMK)
-    + "&mk=" + encodeURIComponent(kodeMK)
-    + "&id_tugas=" + encodeURIComponent(idTugas)
-    + "&link_gd=" + encodeURIComponent(link_gd)
-    + "&ket=" + encodeURIComponent(ket)
-    + "&tanggal_kumpul=" + encodeURIComponent(new Date().toISOString())
-    + "&t=" + Date.now();
-  try{
-    const res = await fetch(url);
-    const teks = await res.text();
-    let hasil = {};
-    try{ hasil = JSON.parse(teks); }catch(_){ hasil = {}; }
-    if(hasil && (hasil.success===false || hasil.error)){
-      throw new Error(hasil.error||hasil.message||'Gagal menyimpan di server');
-    }
-    tampilPesan('Tugas berhasil dikumpulkan. Anda akan kembali ke Detail Mata Kuliah.', true);
-    setTimeout(()=>{ location.href='/kuliah/detail.html?mk='+encodeURIComponent(kodeMK); },1500);
-  }catch(err){
-    tampilPesan('Gagal mengirim: '+err.message, false);
-    btn.disabled=false; btn.innerText='📤 Kirim Tugas';
-  }
-  return false;
+  const el=document.getElementById('pesan');
+  el.style.display='block'; el.className='ok';
+  el.innerText='Mengirim tugas... Mohon tunggu, jangan menutup halaman ini.';
+  setTimeout(function(){
+    el.innerText='Tugas terkirim ke server. Anda akan kembali ke Detail Mata Kuliah. Silakan periksa pada daftar pengumpulan dosen.';
+    setTimeout(function(){ location.href='/kuliah/detail.html?mk='+encodeURIComponent(kodeMK); },2000);
+  },2500);
+  return true;
 }
 </script>
 </body></html>
