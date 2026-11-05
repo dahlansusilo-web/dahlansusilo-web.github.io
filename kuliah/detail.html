@@ -28,7 +28,11 @@
     <button onclick="document.getElementById('form-kumpul').style.display='none'" style="width:100%;margin-top:5px;padding:10px;border:none;background:#eee;border-radius:8px">Batal</button>
   </div>
 </div>
+let user = JSON.parse(localStorage.getItem('kuliah_user')||'null');
+if(!user){ location.href='/kuliah/login.html'; }
 
+// CEK PERAN - mung dosen sing iso delok
+const isDosen = (user.role || user.peran || "").toLowerCase() === "dosen";
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
 let user=JSON.parse(localStorage.getItem('kuliah_user')||'null');
