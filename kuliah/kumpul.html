@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Kumpulkan Tugas - USAHID Solo</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f9f5f0;color:#222}
+header{background:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;color:#7c2d12;text-decoration:none;font-size:15px}
+.logo img{width:42px;height:42px;object-fit:contain}
+.wrap{max-width:600px;margin:24px auto;padding:0 16px}
+h2{color:#7c2d12}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+label{display:block;font-weight:700;font-size:13px;margin:14px 0 6px}
+input,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box}
+input[readonly]{background:#f5f5f5}
+.btn{display:inline-block;padding:10px 18px;border-radius:8px;font-weight:700;font-size:14px;border:0;cursor:pointer}
+.btn-biru{background:#2563eb;color:#fff}
+.btn-abu{background:#e5e5e5;color:#222;text-decoration:none}
+.muted{color:#666;font-size:13px}
+#pesan{display:none;padding:12px;border-radius:8px;margin-top:14px;font-size:13px}
+.ok{background:#dcfce7;color:#14532d}
+.err{background:#fdecea;color:#7c2d12}
+.btn-keluar{background:#7c2d12;color:#fff;padding:6px 14px;border-radius:20px;text-decoration:none;font-weight:600;font-size:13px}
+</style></head>
+<body>
+<header>
+  <a class="logo" href="/"><img src="/logo-usahidsolo.png" onerror="this.style.display='none'"> USAHID SOLO - KULIAH</a>
+  <div><span id="user-info" style="font-size:13px;margin-right:10px"></span><a class="btn-keluar" href="#" onclick="logout()">Keluar</a></div>
+</header>
+<div class="wrap">
+  <p><a href="javascript:history.back()" style="color:#7c2d12;text-decoration:none">← Kembali</a></p>
+  <h2>Kumpulkan Tugas</h2>
+  <p class="muted" id="info-tugas">Memuat info tugas...</p>
+  <div class="card">
+    <form id="form-kumpul" onsubmit="return kirimTugas(event)">
+      <label>NIM</label>
+      <input id="nim" readonly>
+      <label>Nama</label>
+      <input id="nama" readonly>
+      <label>Kode Mata Kuliah</label>
+      <input id="mk" readonly>
+      <label>ID Tugas</label>
+      <input id="id_tugas" readonly>
+      <label>Link Google Drive Berkas Tugas *</label>
+      <input id="link_gd" type="url" placeholder="https://drive.google.com/..." required>
+      <p class="muted">Unggah berkas ke Google Drive terlebih dahulu, atur ke "Siapa saja yang memiliki link dapat melihat", lalu tempelkan link-nya di sini.</p>
+      <label>Keterangan (opsional)</label>
+      <textarea id="ket" rows="3" placeholder="Contoh: Tugas 1 Pertemuan 1 - Sudah sesuai soal"></textarea>
+      <br><br>
+      <button class="btn btn-biru" type="submit" id="btn-kirim">📤 Kirim Tugas</button>
+      <a class="btn btn-abu" href="/kuliah/">Batal</a>
+      <div id="pesan"></div>
+    </form>
+  </div>
+</div>
+<script>
+const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
+let rawUser = JSON.parse(localStorage.getItem('kuliah_user')||'null');
+if(!rawUser){ location.href='/kuliah/login.html'; }
+let user = rawUser.user || rawUser;
+if(!user.nim){ location.href='/kuliah/login.html'; }
+let roleLogin = String(user.role||"").trim().toLowerCase();
+if(roleLogin !== "mahasiswa"){
+  alert("Halaman ini hanya untuk mahasiswa.");
+  location.href='/kuliah/';
+}
+document.getElementById('user-info').innerText=(user.nama||'')+' ('+(user.role||'')+')';
+function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
+const params = new URLSearchParams(location.search);
+const kodeMK = params.get('mk')||'';
+const idTugas = params.get('id_tugas')||'';
+if(!kodeMK || !idTugas){
+  document.getElementById('info-tugas').innerText='Parameter tugas tidak lengkap. Silakan kembali ke Detail Mata Kuliah dan klik Kumpulkan Tugas.';
+  document.getElementById('form-kumpul').style.display='none';
+}
+document.getElementById('nim').value=user.nim||'';
+document.getElementById('nama').value=user.nama||'';
+document.getElementById('mk').value=kodeMK;
+document.getElementById('id_tugas').value=idTugas;
+document.getElementById('info-tugas').innerText='Mata Kuliah: '+kodeMK+' | Tugas: '+idTugas;
+function tampilPesan(teks, sukses){
+  const el=document.getElementById('pesan');
+  el.style.display='block';
+  el.className = sukses ? 'ok' : 'err';
+  el.id='pesan';
+  el.innerText=teks;
+  // Kembalikan class agar warna tetap tampil setelah innerText
+  el.className = sukses ? 'ok' : 'err';
+  el.style.display='block';
+}
+async function kirimTugas(e){
+  e.preventDefault();
+  const btn=document.getElementById('btn-kirim');
+  btn.disabled=true; btn.innerText='Mengirim...';
+  const payload={
+    page:'kumpul',
+    action:'kumpul',
+    nim:document.getElementById('nim').value,
+    nama:document.getElementById('nama').value,
+    kode_mk:kodeMK,
+    mk:kodeMK,
+    id_tugas:idTugas,
+    link_gd:document.getElementById('link_gd').value.trim(),
+    ket:document.getElementById('ket').value.trim(),
+    tanggal_kumpul:new Date().toISOString()
+  };
+  try{
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const hasil=await res.json().catch(()=>({}));
+    if(hasil && (hasil.success===false || hasil.error)){
+      throw new Error(hasil.error||hasil.message||'Gagal menyimpan');
+    }
+    tampilPesan('Tugas berhasil dikumpulkan. Anda akan kembali ke Detail Mata Kuliah.', true);
+    setTimeout(()=>{ location.href='/kuliah/detail.html?mk='+encodeURIComponent(kodeMK); },1500);
+  }catch(err){
+    tampilPesan('Gagal mengirim: '+err.message+' - Silakan coba lagi atau hubungi dosen. Pastikan link Drive sudah benar.', false);
+    btn.disabled=false; btn.innerText='📤 Kirim Tugas';
+  }
+  return false;
+}
+</script>
+</body></html>
