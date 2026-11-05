@@ -1,46 +1,21 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Detail Kuliah</title>
-<style>body{background:#f9f5f0;margin:0;font-family:Inter,sans-serif}header{background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}.wrap{max-width:1150px;margin:20px auto;padding:0 16px}.table-wrap{background:white;border-radius:18px;overflow:hidden;border:1px solid #e9ddd0;margin-bottom:20px;overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:700px}th{background:#7c2d12;color:white;padding:12px;text-align:left;font-size:12px}td{padding:12px;border-bottom:1px solid #f0e6d3;font-size:14px}.btn{background:#7c2d12;color:white;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:700}.nilai{background:#f0e6d3;color:#7c2d12;padding:4px 10px;border-radius:8px;font-weight:700;min-width:20px;display:inline-block;text-align:center}</style></head><body>
-<header><div style="display:flex;align-items:center;gap:10px;font-weight:800;color:#7c2d12"><img src="../logo-usahidsolo.png" onerror="this.src='/logo-usahidsolo.png'" style="width:42px"> USAHID SOLO</div><div style="display:flex;align-items:center;gap:8px"><span id="userInfo" style="font-size:12px;background:#f0e6d3;padding:6px 12px;border-radius:20px;color:#7c2d12;font-weight:700"></span><a href="#" onclick="logout()" style="font-size:12px;color:white;background:#7c2d12;padding:6px 14px;border-radius:20px;text-decoration:none;font-weight:800">LOGOUT</a></div></header>
-<div class="wrap">
-<h2 id="title" style="color:#7c2d12">Detail MK</h2>
-<h3 style="color:#7c2d12">📚 Materi / Pertemuan</h3>
-<div class="table-wrap"><table><thead><tr><th>Pert</th><th>Judul Materi</th><th>Tanggal</th><th>Link</th></tr></thead><tbody id="materi"><tr><td colspan="4">⏳ Memuat...</td></tr></tbody></table></div>
-<h3 style="color:#7c2d12">👥 Mahasiswa Peserta & Nilai</h3>
-<div class="table-wrap"><table><thead><tr><th>NIM</th><th>Nama</th><th>N1</th><th>N2</th><th>N3</th><th>N4</th><th>Rata2</th></tr></thead><tbody id="peserta"><tr><td colspan="7">⏳ Memuat...</td></tr></tbody></table></div>
-<h3 style="color:#7c2d12">📝 Tugas & Pengumpulan</h3>
-<div class="table-wrap"><table><thead><tr><th>ID Tugas</th><th>Judul</th><th>Deadline</th><th>Link Kumpul</th><th>Nilai</th><th>Status</th></tr></thead><tbody id="tugas"><tr><td colspan="6">⏳ Memuat tugas...</td></tr></tbody></table></div>
-<div style="text-align:center"><a class="btn" href="/kuliah/">⬅ Kembali ke Daftar MK</a></div>
-</div>
-<script>
-const API="https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-const mk=new URLSearchParams(location.search).get('mk');
-let user = JSON.parse(localStorage.getItem('kuliah_user')||'null');
-if(!user){ location.href='/kuliah/login.html'; }
-function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
-document.getElementById('userInfo').innerText = user.nama + ' ('+user.role+')';
-document.getElementById('title').innerText='Detail Kuliah: '+mk;
-fetch(API+"?page=materikuliah&mk="+mk+"&t="+Date.now()).then(r=>r.json()).then(d=>{
-  document.getElementById('materi').innerHTML = d.length? d.map(x=>`<tr><td>${x.pertemuan||''}</td><td>${x.judul_materi||''}</td><td>${x.tanggal||''}</td><td><a href="${x.link_drive||'#'}" target="_blank">Buka</a></td></tr>`).join('') : '<tr><td colspan=4>Belum ada materi</td></tr>';
-});
-fetch(API+"?page=pesertakuliah&mk="+mk+"&t="+Date.now()).then(r=>r.json()).then(d=>{
-  let list = d; if(user.role=='mahasiswa'){ list = d.filter(x=> x.nim.toString()==user.nim.toString()); }
-  if(!list.length){ document.getElementById('peserta').innerHTML='<tr><td colspan=7>Belum ada data</td></tr>'; return; }
-  document.getElementById('peserta').innerHTML = list.map(x=>{
-    let n1=parseFloat(x.nilai1||0), n2=parseFloat(x.nilai2||0), n3=parseFloat(x.nilai3||0), n4=parseFloat(x.nilai4||0);
-    let avg = n1||n2||n3||n4 ? ((n1+n2+n3+n4)/4).toFixed(1) : '-';
-    return `<tr><td>${x.nim}</td><td>${x.nama||''}</td><td><span class="nilai">${x.nilai1||'-'}</span></td><td><span class="nilai">${x.nilai2||'-'}</span></td><td><span class="nilai">${x.nilai3||'-'}</span></td><td><span class="nilai">${x.nilai4||'-'}</span></td><td style="font-weight:800;color:#7c2d12">${avg}</td></tr>`;
-  }).join('');
-});
-Promise.all([
-  fetch(API+"?page=tugaskuliah&mk="+mk+"&t="+Date.now()).then(r=>r.json()),
-  fetch(API+"?page=kumpultugas&mk="+mk+"&t="+Date.now()).then(r=>r.json())
-]).then(([tugas,kumpul])=>{
-  if(!tugas.length){ document.getElementById('tugas').innerHTML='<tr><td colspan=6>Belum ada tugas</td></tr>'; return; }
-  let html=''; tugas.forEach(t=>{
-    let k = kumpul.filter(x=> x.id_tugas==t.id_tugas && (user.role=='dosen' || x.nim.toString()==user.nim.toString()));
-    if(user.role=='mahasiswa' && k.length==0){ html+=`<tr><td>${t.id_tugas}</td><td>${t.judul_tugas}</td><td>${t.deadline||''}</td><td><span style="color:#999">Belum kumpul</span></td><td>-</td><td>Belum</td></tr>`; }
-    else if(k.length>0){ k.forEach(s=>{ html+=`<tr><td>${t.id_tugas}</td><td>${t.judul_tugas}</td><td>${t.deadline||''}</td><td><a href="${s.link_kumpul}" target="_blank">Lihat</a></td><td>${s.nilai_tugas||'-'}</td><td>${s.status||''}</td></tr>`; }); }
-    else { html+=`<tr><td>${t.id_tugas}</td><td>${t.judul_tugas}</td><td>${t.deadline||''}</td><td colspan=3 style="color:#999">Belum ada pengumpulan</td></tr>`; }
-  }); document.getElementById('tugas').innerHTML = html;
-});
-</script></body></html>
+// Ambil kode MK soko URL: detail.html?mk=XXX
+const mk = new URLSearchParams(location.search).get('mk');
+
+fetch(API + "?page=materi&mk=" + mk)
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('list-materi').innerHTML = data.map(x => `
+      <div class="card">
+        <b>Pertemuan ${x.pertemuan} - ${x.judul_materi}</b><br>
+        <a href="${x.link_drive}" target="_blank">📄 Buka Materi</a>
+        ${x.judul_tugas ? `
+          <div style="background:#fff3cd;padding:10px;margin-top:10px;border-radius:8px;">
+            <b>📝 ${x.judul_tugas}</b><br>Deadline: ${x.deadline_tugas}<br>
+            <a href="${x.link_tugas}" target="_blank">⬇️ Download Soal</a><br><br>
+            <button onclick="bukaForm('${x.kode_mk}','${x.id}')">📤 Kumpul Tugas</button>
+          </div>` : ''}
+      </div>
+    `).join('');
+  });
+
+// Form Kumpul - podo karo kode B wingi, API_URL e nganggo API sing wes ono kui
