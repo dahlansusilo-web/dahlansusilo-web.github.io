@@ -26,7 +26,6 @@ td{padding:12px 14px;border-bottom:1px solid #eee}
   <h2>Daftar Mata Kuliah</h2>
   <p class="sub"><a href="/" style="color:#7c2d12;text-decoration:none">← Beranda</a> • Silakan pilih mata kuliah untuk melihat materi dan tugas</p>
   <div id="error-box"></div>
-
   <div class="card">
     <table>
       <thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Semester</th><th>Aksi</th></tr></thead>
@@ -67,10 +66,7 @@ async function loadMatakuliah(){
           for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
           return String(kunci["kode_mk"] || "").trim();
         });
-      document.getElementById('debug-box').innerText = "Login: " + nimLogin + " | Role: " + roleLogin + " | Kode diikuti: " + JSON.stringify(kodeDiikuti);
       list = list.filter(function(x){ return kodeDiikuti.includes(String(x.kode_mk || "").trim()); });
-    } else {
-      document.getElementById('debug-box').innerText = "Login: " + nimLogin + " | Role: " + roleLogin + " | Mode dosen: menampilkan semua MK";
     }
 
     if(!list.length){
