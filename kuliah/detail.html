@@ -28,18 +28,17 @@
     <button onclick="document.getElementById('form-kumpul').style.display='none'" style="width:100%;margin-top:5px;padding:10px;border:none;background:#eee;border-radius:8px">Batal</button>
   </div>
 </div>
-let user = JSON.parse(localStorage.getItem('kuliah_user')||'null');
-if(!user){ location.href='/kuliah/login.html'; }
-
-// CEK PERAN - mung dosen sing iso delok
-const isDosen = (user.role || user.peran || "").toLowerCase() === "dosen";
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
 let user=JSON.parse(localStorage.getItem('kuliah_user')||'null');
 if(!user){ location.href='/kuliah/login.html'; }
 document.getElementById('user-info').innerText=user.nama||'';
+let user = JSON.parse(localStorage.getItem('kuliah_user')||'null');
+if(!user){ location.href='/kuliah/login.html'; }
+// CEK PERAN - mung dosen sing iso delok
+const isDosen = (user.role || user.peran || "").toLowerCase() === "dosen";
+  
 function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
-
 // Ambil kode MK soko URL: detail.html?mk=XXX
 const mk = new URLSearchParams(location.search).get('mk');
 document.getElementById('judul-mk').innerText = 'Mata Kuliah: ' + mk;
@@ -57,6 +56,11 @@ fetch(API + "?page=materi&mk=" + mk + "&t=" + Date.now())
           <b>📝 ${x.judul_tugas}</b><br>Deadline: ${x.deadline_tugas}<br>
           <a href="${x.link_tugas}" target="_blank">⬇️ Download Soal</a><br><br>
           <button onclick="bukaForm('${x.kode_mk}','${x.id}','${x.judul_tugas}')" style="padding:8px 14px;background:#1a73e8;color:white;border:none;border-radius:8px">📤 Kumpul Tugas</button>
+          ${isDosen ? `
+  <button onclick="lihatKumpul('${x.id_tugas}','${x.judul_tugas}')" style="padding:8px 14px;background:#2e7d32;color:white;border:none;border-radius:8px;margin-top:5px">👀 Lihat Sing Wes Kumpul (${x.id_tugas})</button>
+  <div id="list-${x.id_tugas}" style="margin-top:8px;font-size:13px"></div>
+` : ''}
+          
         </div>` : ''}
     </div>
   `).join('');
@@ -81,6 +85,22 @@ async function kirimTugas(){
   alert("Beres bro! Tugas wes ke-kumpul ✅");
   document.getElementById('form-kumpul').style.display='none';
   btn.innerText="Kumpul"; btn.disabled=false;
+}
+  function lihatKumpul(id_tugas, judul){
+  if(!isDosen){
+    alert("Mung dosen sing iso delok bro!");
+    return;
+  }
+  const box = document.getElementById('list-'+id_tugas);
+  box.innerHTML = "Memuat...";
+  fetch(API + "?page=list_kumpul&mk=" + mk + "&id_tugas=" + id_tugas + "&t=" + Date.now())
+  .then(r=>r.json())
+  .then(data=>{
+    if(!data.length){ box.innerHTML = "Durung ono sing ngumpul bro."; return; }
+    box.innerHTML = "<b>Wes kumpul: "+data.length+" mhs</b><br>" + data.map(d=>`
+      - ${d.nim} - ${d.waktu} - <a href="${d.link_gd}" target="_blank">Buka Tugas</a> ${d.keterangan ? '('+d.keterangan+')' : ''}
+    `).join("<br>");
+  });
 }
 </script>
 </body></html>
