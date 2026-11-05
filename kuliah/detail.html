@@ -1,22 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Detail MK - USAHID</title>
+<style>
+body{font-family:sans-serif;background:#fdf8f0;margin:0}
+.header{background:white;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.header b{color:#7a1f1f}
+.wrap{max-width:800px;margin:20px auto;padding:0 15px}
+.card{background:white;padding:16px;border-radius:12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+</style></head>
+<body>
+<div class="header"><b>USAHID</b><div><span id="user-info"></span> <button onclick="logout()">Logout</button></div></div>
+<div class="wrap">
+<a href="/kuliah/">← Balik ke Daftar MK</a>
+<h2 id="judul-mk">Detail Mata Kuliah</h2>
+<div id="list-materi">Memuat materi...</div>
+<div id="form-kumpul" style="display:none;background:white;padding:16px;border-radius:12px;margin-top:15px">
+<b id="info-tugas"></b><br><br>
+NIM: <input id="input-nim" style="width:100%;padding:8px;margin-bottom:8px"><br>
+Link Google Drive: <input id="input-link" placeholder="https://drive.google.com/..." style="width:100%;padding:8px;margin-bottom:8px"><br>
+Keterangan: <input id="input-ket" style="width:100%;padding:8px;margin-bottom:8px"><br>
+<button id="btn-kirim" onclick="kirimTugas()" style="padding:10px 16px;background:#1a73e8;color:white;border:none;border-radius:8px">Kumpul</button>
+</div>
+</div>
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
 let user=JSON.parse(localStorage.getItem('kuliah_user')||'null');
 if(!user){ location.href='/kuliah/login.html'; }
 document.getElementById('user-info').innerText=user.nama||'';
-
-// CEK PERAN - mung dosen sing iso delok
 const isDosen = (user.role || user.peran || "").toLowerCase() === "dosen";
-
 function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
 const mk = new URLSearchParams(location.search).get('mk');
 document.getElementById('judul-mk').innerText = 'Mata Kuliah: ' + mk;
-
 fetch(API + "?page=materi&mk=" + mk + "&t=" + Date.now())
 .then(r=>r.json())
 .then(data=>{
   if(!data.length){ document.getElementById('list-materi').innerHTML='<p>Tidak ada materi untuk MK ini.</p>'; return; }
   document.getElementById('list-materi').innerHTML=data.map(x=>`
-    <div class="card" style="background:white;padding:16px;border-radius:12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+    <div class="card">
       <b>Pertemuan ${x.pertemuan} - ${x.judul_materi}</b><br>
       <a href="${x.link_drive}" target="_blank">📄 Buka Materi</a>
       ${x.judul_tugas ? `
@@ -24,15 +44,11 @@ fetch(API + "?page=materi&mk=" + mk + "&t=" + Date.now())
           <b>📝 ${x.judul_tugas}</b><br>Deadline: ${x.deadline_tugas}<br>
           <a href="${x.link_tugas}" target="_blank">⬇️ Download Soal</a><br><br>
           <button onclick="bukaForm('${x.kode_mk}','${x.id_tugas}','${x.judul_tugas}')" style="padding:8px 14px;background:#1a73e8;color:white;border:none;border-radius:8px">📤 Kumpul Tugas</button>
-          ${isDosen ? `
-          <button onclick="lihatKumpul('${x.id_tugas}','${x.judul_tugas}')" style="padding:8px 14px;background:#2e7d32;color:white;border:none;border-radius:8px;margin-top:5px">👀 Lihat Sing Wes Kumpul</button>
-          <div id="list-${x.id_tugas}" style="margin-top:8px;font-size:13px"></div>
-          ` : ''}
+          ${isDosen ? `<button onclick="lihatKumpul('${x.id_tugas}')" style="padding:8px 14px;background:#2e7d32;color:white;border:none;border-radius:8px;margin-top:5px">👀 Lihat Sing Wes Kumpul</button><div id="list-${x.id_tugas}" style="margin-top:8px;font-size:13px"></div>` : ''}
         </div>` : ''}
     </div>
   `).join('');
 });
-
 let tugasAktif={};
 function bukaForm(kode_mk,id_tugas,judul){
   tugasAktif={kode_mk,id_tugas};
@@ -52,7 +68,7 @@ async function kirimTugas(){
   document.getElementById('form-kumpul').style.display='none';
   btn.innerText="Kumpul"; btn.disabled=false;
 }
-function lihatKumpul(id_tugas, judul){
+function lihatKumpul(id_tugas){
   if(!isDosen){ alert("Mung dosen sing iso delok bro!"); return; }
   const box = document.getElementById('list-'+id_tugas);
   box.innerHTML = "Memuat...";
@@ -60,9 +76,8 @@ function lihatKumpul(id_tugas, judul){
   .then(r=>r.json())
   .then(data=>{
     if(!data.length){ box.innerHTML = "Durung ono sing ngumpul bro."; return; }
-    box.innerHTML = "<b>Wes kumpul: "+data.length+" mhs</b><br>" + data.map(d=>`
-      - ${d.nim} - ${d.waktu} - <a href="${d.link_gd}" target="_blank">Buka Tugas</a> ${d.keterangan ? '('+d.keterangan+')' : ''}
-    `).join("<br>");
+    box.innerHTML = "<b>Wes kumpul: "+data.length+" mhs</b><br>" + data.map(d=>` - ${d.nim} - ${d.waktu} - <a href="${d.link_gd}" target="_blank">Buka Tugas</a> ${d.keterangan ? '('+d.keterangan+')' : ''}`).join("<br>");
   });
 }
 </script>
+</body></html>
