@@ -10,11 +10,9 @@
   #timer{font-size:28px;font-weight:bold;text-align:center;padding:12px;border-radius:10px;color:#fff}
   .hijau{background:#16a34a}.kuning{background:#eab308;color:#000}.merah{background:#dc2626}
   button{padding:10px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:bold;cursor:pointer;width:100%;margin-top:8px}
-  button:disabled{background:#94a3b8}
   .opt{display:block;width:100%;text-align:left;padding:10px;margin:6px 0;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
   .opt:hover{background:#eff6ff}
   textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid #cbd5e1}
-  .lock{background:#fee2e2;padding:10px;border-radius:8px;text-align:center;font-weight:bold}
 </style>
 </head>
 <body>
@@ -55,7 +53,7 @@ async function mulai(){
     jalanTimer();
     tampilSoal();
   }catch(err){
-    document.getElementById("info").innerHTML = "Gagal menghubungi server: " + err.message + "<br>Coba refresh.";
+    document.getElementById("info").innerHTML = "Gagal menghubungi server: " + err.message;
   }
 }
 function parseJam(val){
@@ -64,9 +62,7 @@ function parseJam(val){
   if(s.includes("T")){
     let d = new Date(s);
     let jamWIB = new Date(d.getTime() + 7*60*60*1000);
-    let hh = String(jamWIB.getUTCHours()).padStart(2,"0");
-    let mm = String(jamWIB.getUTCMinutes()).padStart(2,"0");
-    return hh + ":" + mm;
+    return String(jamWIB.getUTCHours()).padStart(2,"0") + ":" + String(jamWIB.getUTCMinutes()).padStart(2,"0");
   }
   return s.slice(0,5);
 }
@@ -74,30 +70,66 @@ function parseTanggal(val){
   if(!val) return "";
   return String(val).slice(0,10);
 }
-async function update(){
-  try{
-    const srv = await getJSON(API + "?page=servertime");
-    const now = new Date(srv.now);
-
-    // Bandingkan tanggal sebagai TANGGAL, bukan sebagai teks
-    // Ambil YYYY-MM-DD dari tanggal ujian dan dari jam server
-    const tglUjianDate = new Date(tgl + "T00:00:00+07:00");
-    const tglNowDate = new Date(now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0") + "T00:00:00+07:00");
-
-    if(tglNowDate < tglUjianDate){
-      document.getElementById("timer").innerText = "BELUM DIMULAI";
-      info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Tanggal: "+tgl+"<br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai+"<br>Ujian belum dimulai. Jam server: " + now.toLocaleString("id-ID");
-      return;
+function jalanTimer(){
+  const info = document.getElementById("info");
+  const tgl = parseTanggal(ujian.Tanggal);
+  const jamMulai = parseJam(ujian.JamMulai);
+  const jamSelesai = parseJam(ujian.JamSelesai);
+  async function update(){
+    try{
+      const srv = await getJSON(API + "?page=servertime");
+      const now = new Date(srv.now);
+      const tglUjianDate = new Date(tgl + "T00:00:00+07:00");
+      const tglNowStr = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+      const tglNowDate = new Date(tglNowStr + "T00:00:00+07:00");
+      if(tglNowDate < tglUjianDate){
+        document.getElementById("timer").innerText = "BELUM DIMULAI";
+        info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Tanggal: "+tgl+"<br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai+"<br>Ujian belum dimulai.";
+        return;
+      }
+      if(tglNowDate > tglUjianDate){
+        document.getElementById("timer").innerText = "SELESAI";
+        info.innerHTML = "Ujian sudah lewat tanggal.";
+        document.getElementById("soalBox").style.display="none";
+        document.getElementById("navBox").style.display="none";
+        clearInterval(timerInterval);
+        return;
+      }
+      const mulai = new Date(tgl + "T" + jamMulai + ":00+07:00");
+      const selesai = new Date(tgl + "T" + jamSelesai + ":00+07:00");
+      if(now < mulai){
+        document.getElementById("timer").innerText = "BELUM MULAI - " + jamMulai;
+        info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai+"<br>Menunggu jam mulai.";
+        return;
+      }
+      if(now >= selesai){
+        document.getElementById("timer").innerText = "WAKTU HABIS";
+        document.getElementById("timer").className = "merah";
+        info.innerHTML = "Waktu ujian habis. Telat = tidak ada tambahan waktu.";
+        document.getElementById("soalBox").style.display="none";
+        document.getElementById("navBox").style.display="none";
+        clearInterval(timerInterval);
+        return;
+      }
+      const sisaDetik = Math.floor((selesai - now) / 1000);
+      const mm = String(Math.floor(sisaDetik / 60)).padStart(2,"0");
+      const dd = String(sisaDetik % 60).padStart(2,"0");
+      const el = document.getElementById("timer");
+      el.innerText = "Sisa Waktu: " + mm + ":" + dd;
+      if(sisaDetik > 600) el.className = "hijau";
+      else if(sisaDetik > 300) el.className = "kuning";
+      else el.className = "merah";
+      info.innerHTML = "Ujian: <b>" + ujian.Judul + "</b><br>Mulai: " + jamMulai + " - Selesai: " + jamSelesai + "<br>Telat = tidak ada tambahan waktu.";
+      document.getElementById("soalBox").style.display = "block";
+      document.getElementById("navBox").style.display = "block";
+    }catch(e){
+      info.innerHTML = "Gagal ambil jam server: " + e.message;
     }
-    if(tglNowDate > tglUjianDate){
-      document.getElementById("timer").innerText = "SELESAI";
-      info.innerHTML = "Ujian sudah lewat tanggal.";
-      document.getElementById("soalBox").style.display="none";
-      document.getElementById("navBox").style.display="none";
-      clearInterval(timerInterval);
-      return;
-    }
-    // Lanjut ke cek jam seperti sebelumnya...function tampilSoal(){
+  }
+  update();
+  timerInterval = setInterval(update, 5000);
+}
+function tampilSoal(){
   if(sudahJawab.size >= soalList.length){
     document.getElementById("soalBox").innerHTML = "<h3>Semua soal sudah dijawab. Terima kasih.</h3><p>Jawaban terkunci, tidak bisa diubah.</p>";
     document.getElementById("navBox").style.display = "none";
