@@ -11,15 +11,14 @@
   .hijau{background:#16a34a}.kuning{background:#eab308;color:#000}.merah{background:#dc2626}
   button{padding:10px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:bold;cursor:pointer;width:100%;margin-top:8px}
   .opt{display:block;width:100%;text-align:left;padding:10px;margin:6px 0;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
+  .opt:hover{background:#eff6ff}
   textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid #cbd5e1}
-  #debug{background:#fffbe6;border:1px solid #f59e0b;padding:12px;border-radius:8px;font-size:13px;word-break:break-all}
 </style>
 </head>
 <body>
 <h2 id="judul">Memuat Ujian...</h2>
 <div id="timer" class="hijau">--:--</div>
 <div id="info" class="card">Menghubungkan ke server...</div>
-<div id="debug" class="card">Debug: menunggu...</div>
 <div id="soalBox" class="card" style="display:none"></div>
 <div id="navBox" class="card" style="display:none">
   <div id="progress"></div>
@@ -35,10 +34,7 @@ try{
   if(!nim) nim = u.nim || u.NIM || u.nidn || "";
 }catch(e){}
 let ujian = null, soalList = [], sudahJawab = new Set(), idx = 0, timerInterval = null;
-
-async function getJSON(url){
-  const r = await fetch(url); return await r.json();
-}
+async function getJSON(url){ const r = await fetch(url); return await r.json(); }
 async function mulai(){
   if(!kodeUjian){ document.getElementById("info").innerHTML = "Kode ujian tidak ada."; return; }
   if(!nim){ document.getElementById("info").innerHTML = "Silakan login dulu."; return; }
@@ -53,9 +49,7 @@ async function mulai(){
     (jwb||[]).forEach(j => sudahJawab.add(String(j.NoSoal)));
     jalanTimer();
     tampilSoal();
-  }catch(err){
-    document.getElementById("info").innerHTML = "Gagal: " + err.message;
-  }
+  }catch(err){ document.getElementById("info").innerHTML = "Gagal: " + err.message; }
 }
 function parseJam(val){
   if(!val) return "00:00";
@@ -79,7 +73,6 @@ function parseTanggal(val){
 }
 function jalanTimer(){
   const info = document.getElementById("info");
-  const dbg = document.getElementById("debug");
   const tgl = parseTanggal(ujian.Tanggal);
   const jamMulai = parseJam(ujian.JamMulai);
   const jamSelesai = parseJam(ujian.JamSelesai);
@@ -90,17 +83,6 @@ function jalanTimer(){
       const tglNowStr = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
       const tglUjianDate = new Date(tgl + "T00:00:00+07:00");
       const tglNowDate = new Date(tglNowStr + "T00:00:00+07:00");
-      // TAMPILKAN DEBUG BIAR KETAHUAN
-      dbg.innerHTML = "<b>DEBUG:</b><br>"
-        + "Tanggal mentah dari Sheet: " + ujian.Tanggal + "<br>"
-        + "Tanggal hasil parse: " + tgl + "<br>"
-        + "JamMulai mentah: " + ujian.JamMulai + " -> " + jamMulai + "<br>"
-        + "JamSelesai mentah: " + ujian.JamSelesai + " -> " + jamSelesai + "<br>"
-        + "Jam server mentah: " + srv.now + "<br>"
-        + "Jam server (now): " + now.toString() + "<br>"
-        + "Tanggal hari ini (server): " + tglNowStr + "<br>"
-        + "Perbandingan: tglNow (" + tglNowDate.getTime() + ") vs tglUjian (" + tglUjianDate.getTime() + ")<br>"
-        + "Hasil: " + (tglNowDate < tglUjianDate ? "BELUM" : tglNowDate > tglUjianDate ? "LEWAT" : "HARI INI - HARUSNYA JALAN");
       if(tglNowDate < tglUjianDate){
         document.getElementById("timer").innerText = "BELUM DIMULAI";
         info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Tanggal: "+tgl+"<br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai;
