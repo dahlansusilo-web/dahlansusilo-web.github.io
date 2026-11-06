@@ -74,67 +74,30 @@ function parseTanggal(val){
   if(!val) return "";
   return String(val).slice(0,10);
 }
-function jalanTimer(){
-  const info = document.getElementById("info");
-  const tgl = parseTanggal(ujian.Tanggal);
-  const jamMulai = parseJam(ujian.JamMulai);
-  const jamSelesai = parseJam(ujian.JamSelesai);
-  async function update(){
-    try{
-      const srv = await getJSON(API + "?page=servertime");
-      const now = new Date(srv.now);
-      const tglNow = String(srv.now).slice(0,10);
-      // Cek tanggal dulu
-      if(tglNow < tgl){
-        document.getElementById("timer").innerText = "BELUM DIMULAI";
-        info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Tanggal: "+tgl+"<br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai+"<br>Ujian belum dimulai.";
-        return;
-      }
-      if(tglNow > tgl){
-        document.getElementById("timer").innerText = "SELESAI";
-        info.innerHTML = "Ujian sudah lewat tanggal.";
-        document.getElementById("soalBox").style.display="none";
-        document.getElementById("navBox").style.display="none";
-        clearInterval(timerInterval);
-        return;
-      }
-      // Hari ini, cek jam
-      const today = tgl;
-      const mulai = new Date(today + "T" + jamMulai + ":00+07:00");
-      const selesai = new Date(today + "T" + jamSelesai + ":00+07:00");
-      if(now < mulai){
-        document.getElementById("timer").innerText = "BELUM MULAI - " + jamMulai;
-        info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai+"<br>Menunggu jam mulai (jam server).";
-        return;
-      }
-      if(now >= selesai){
-        document.getElementById("timer").innerText = "WAKTU HABIS";
-        document.getElementById("timer").className = "merah";
-        info.innerHTML = "Waktu ujian habis. Telat = tidak ada tambahan waktu.";
-        document.getElementById("soalBox").style.display="none";
-        document.getElementById("navBox").style.display="none";
-        clearInterval(timerInterval);
-        return;
-      }
-      const sisaDetik = Math.floor((selesai - now) / 1000);
-      const mm = String(Math.floor(sisaDetik / 60)).padStart(2,"0");
-      const dd = String(sisaDetik % 60).padStart(2,"0");
-      const el = document.getElementById("timer");
-      el.innerText = "Sisa Waktu: " + mm + ":" + dd;
-      if(sisaDetik > 600) el.className = "hijau";
-      else if(sisaDetik > 300) el.className = "kuning";
-      else el.className = "merah";
-      info.innerHTML = "Ujian: <b>" + ujian.Judul + "</b><br>Mulai: " + jamMulai + " - Selesai: " + jamSelesai + "<br>Telat = tidak ada tambahan waktu.";
-      document.getElementById("soalBox").style.display = "block";
-      document.getElementById("navBox").style.display = "block";
-    }catch(e){
-      info.innerHTML = "Gagal ambil jam server: " + e.message;
+async function update(){
+  try{
+    const srv = await getJSON(API + "?page=servertime");
+    const now = new Date(srv.now);
+
+    // Bandingkan tanggal sebagai TANGGAL, bukan sebagai teks
+    // Ambil YYYY-MM-DD dari tanggal ujian dan dari jam server
+    const tglUjianDate = new Date(tgl + "T00:00:00+07:00");
+    const tglNowDate = new Date(now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0") + "T00:00:00+07:00");
+
+    if(tglNowDate < tglUjianDate){
+      document.getElementById("timer").innerText = "BELUM DIMULAI";
+      info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Tanggal: "+tgl+"<br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai+"<br>Ujian belum dimulai. Jam server: " + now.toLocaleString("id-ID");
+      return;
     }
-  }
-  update();
-  timerInterval = setInterval(update, 5000);
-}
-function tampilSoal(){
+    if(tglNowDate > tglUjianDate){
+      document.getElementById("timer").innerText = "SELESAI";
+      info.innerHTML = "Ujian sudah lewat tanggal.";
+      document.getElementById("soalBox").style.display="none";
+      document.getElementById("navBox").style.display="none";
+      clearInterval(timerInterval);
+      return;
+    }
+    // Lanjut ke cek jam seperti sebelumnya...function tampilSoal(){
   if(sudahJawab.size >= soalList.length){
     document.getElementById("soalBox").innerHTML = "<h3>Semua soal sudah dijawab. Terima kasih.</h3><p>Jawaban terkunci, tidak bisa diubah.</p>";
     document.getElementById("navBox").style.display = "none";
