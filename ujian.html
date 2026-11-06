@@ -26,86 +26,120 @@
   <div id="progress"></div>
   <button id="btnLewat">Lewati Dulu, Kerjakan Lainnya →</button>
 </div>
-
 <script>
-// ===== GANTI URL INI DENGAN URL APPS SCRIPT BAPAK =====
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-// =======================================================
-
 const params = new URLSearchParams(location.search);
 const kodeUjian = params.get("kodeUjian") || params.get("kodeujian") || "";
-const nim = localStorage.getItem("nim") || params.get("nim") || "";
+let nim = params.get("nim") || localStorage.getItem("nim") || localStorage.getItem("NIM") || "";
+try{
+  const u = JSON.parse(localStorage.getItem("user") || localStorage.getItem("mahasiswa") || "{}");
+  if(!nim) nim = u.nim || u.NIM || u.nidn || "";
+}catch(e){}
 let ujian = null, soalList = [], sudahJawab = new Set(), idx = 0, timerInterval = null;
 
 async function getJSON(url){
   const r = await fetch(url); return await r.json();
 }
-
 async function mulai(){
   if(!kodeUjian){ document.getElementById("info").innerHTML = "Kode ujian tidak ada. Buka dari halaman Mata Kuliah."; return; }
   if(!nim){ document.getElementById("info").innerHTML = "Silakan login dulu."; return; }
-  // 1. Ambil info ujian + jam server
-  const listUjian = await getJSON(API + "?page=ujian");
-  ujian = listUjian.find(u => String(u.KodeUjian) === String(kodeUjian));
-  if(!ujian){ document.getElementById("info").innerHTML = "Ujian tidak ditemukan."; return; }
-  document.getElementById("judul").innerText = ujian.Judul + " - " + ujian.KodeUjian;
-
-  // 2. Ambil soal + jawaban yang sudah dijawab
-  soalList = await getJSON(API + "?page=soal&kodeUjian=" + encodeURIComponent(kodeUjian));
-  const jwb = await getJSON(API + "?page=jawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian));
-  jwb.forEach(j => sudahJawab.add(String(j.NoSoal)));
-
-  // 3. Jalan timer serentak - pakai jam server, bukan jam HP
-  jalanTimer();
-  tampilSoal();
+  try{
+    const listUjian = await getJSON(API + "?page=ujian");
+    ujian = listUjian.find(u => String(u.KodeUjian) === String(kodeUjian));
+    if(!ujian){ document.getElementById("info").innerHTML = "Ujian tidak ditemukan."; return; }
+    document.getElementById("judul").innerText = ujian.Judul + " - " + ujian.KodeUjian;
+    soalList = await getJSON(API + "?page=soal&kodeUjian=" + encodeURIComponent(kodeUjian));
+    if(!soalList || soalList.length === 0){ document.getElementById("info").innerHTML = "Soal belum ada untuk kode ini. Cek sheet Soal."; return; }
+    const jwb = await getJSON(API + "?page=jawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian));
+    (jwb||[]).forEach(j => sudahJawab.add(String(j.NoSoal)));
+    jalanTimer();
+    tampilSoal();
+  }catch(err){
+    document.getElementById("info").innerHTML = "Gagal menghubungi server: " + err.message + "<br>Coba refresh.";
+  }
 }
-
 function parseJam(val){
-  // Bisa handle 3 format: "08:17", "1899-12-30T01:17:56.000Z", Date object
   if(!val) return "00:00";
   let s = String(val);
   if(s.includes("T")){
-    // Format Google Sheet: 1899-12-30T01:17:56.000Z = jam UTC, ubah ke WIB (+7)
     let d = new Date(s);
     let jamWIB = new Date(d.getTime() + 7*60*60*1000);
     let hh = String(jamWIB.getUTCHours()).padStart(2,"0");
     let mm = String(jamWIB.getUTCMinutes()).padStart(2,"0");
     return hh + ":" + mm;
   }
-  return s.slice(0,5); // "08:17:00" -> "08:17"
+  return s.slice(0,5);
 }
 function parseTanggal(val){
   if(!val) return "";
-  return String(val).slice(0,10); // "2026-12-14T17:00..." -> "2026-12-14"
+  return String(val).slice(0,10);
 }
-
-    const sisaDetik = Math.floor((selesai - sekarang) / 1000);
-    const mm = String(Math.floor(sisaDetik / 60)).padStart(2, "0");
-    const dd = String(sisaDetik % 60).padStart(2, "0");
-    const el = document.getElementById("timer");
-    el.innerText = "Sisa Waktu: " + mm + ":" + dd;
-    // WARNA: >10 menit hijau, <=10 kuning, <=5 merah
-    if(sisaDetik > 600) el.className = "hijau";
-    else if(sisaDetik > 300) el.className = "kuning";
-    else el.className = "merah";
-    el.id = "timer";
-    info.innerHTML = "Ujian: <b>" + ujian.Judul + "</b><br>Mulai: " + jamMulai + " - Selesai: " + jamSelesai + "<br>Telat = tidak ada tambahan waktu.";
-    document.getElementById("soalBox").style.display = "block";
-    document.getElementById("navBox").style.display = "block";
+function jalanTimer(){
+  const info = document.getElementById("info");
+  const tgl = parseTanggal(ujian.Tanggal);
+  const jamMulai = parseJam(ujian.JamMulai);
+  const jamSelesai = parseJam(ujian.JamSelesai);
+  async function update(){
+    try{
+      const srv = await getJSON(API + "?page=servertime");
+      const now = new Date(srv.now);
+      const tglNow = String(srv.now).slice(0,10);
+      // Cek tanggal dulu
+      if(tglNow < tgl){
+        document.getElementById("timer").innerText = "BELUM DIMULAI";
+        info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Tanggal: "+tgl+"<br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai+"<br>Ujian belum dimulai.";
+        return;
+      }
+      if(tglNow > tgl){
+        document.getElementById("timer").innerText = "SELESAI";
+        info.innerHTML = "Ujian sudah lewat tanggal.";
+        document.getElementById("soalBox").style.display="none";
+        document.getElementById("navBox").style.display="none";
+        clearInterval(timerInterval);
+        return;
+      }
+      // Hari ini, cek jam
+      const today = tgl;
+      const mulai = new Date(today + "T" + jamMulai + ":00+07:00");
+      const selesai = new Date(today + "T" + jamSelesai + ":00+07:00");
+      if(now < mulai){
+        document.getElementById("timer").innerText = "BELUM MULAI - " + jamMulai;
+        info.innerHTML = "Ujian: <b>"+ujian.Judul+"</b><br>Mulai: "+jamMulai+" - Selesai: "+jamSelesai+"<br>Menunggu jam mulai (jam server).";
+        return;
+      }
+      if(now >= selesai){
+        document.getElementById("timer").innerText = "WAKTU HABIS";
+        document.getElementById("timer").className = "merah";
+        info.innerHTML = "Waktu ujian habis. Telat = tidak ada tambahan waktu.";
+        document.getElementById("soalBox").style.display="none";
+        document.getElementById("navBox").style.display="none";
+        clearInterval(timerInterval);
+        return;
+      }
+      const sisaDetik = Math.floor((selesai - now) / 1000);
+      const mm = String(Math.floor(sisaDetik / 60)).padStart(2,"0");
+      const dd = String(sisaDetik % 60).padStart(2,"0");
+      const el = document.getElementById("timer");
+      el.innerText = "Sisa Waktu: " + mm + ":" + dd;
+      if(sisaDetik > 600) el.className = "hijau";
+      else if(sisaDetik > 300) el.className = "kuning";
+      else el.className = "merah";
+      info.innerHTML = "Ujian: <b>" + ujian.Judul + "</b><br>Mulai: " + jamMulai + " - Selesai: " + jamSelesai + "<br>Telat = tidak ada tambahan waktu.";
+      document.getElementById("soalBox").style.display = "block";
+      document.getElementById("navBox").style.display = "block";
+    }catch(e){
+      info.innerHTML = "Gagal ambil jam server: " + e.message;
+    }
   }
   update();
-  timerInterval = setInterval(update, 5000); // cek ke server tiap 5 detik, biar tidak bisa curang ubah jam HP
+  timerInterval = setInterval(update, 5000);
 }
-
 function tampilSoal(){
-  // Cari soal berikutnya yang BELUM dijawab
-  // Kalau semua sudah dijawab, tampil selesai
   if(sudahJawab.size >= soalList.length){
     document.getElementById("soalBox").innerHTML = "<h3>Semua soal sudah dijawab. Terima kasih.</h3><p>Jawaban terkunci, tidak bisa diubah.</p>";
     document.getElementById("navBox").style.display = "none";
     return;
   }
-  // Cari idx yang belum dijawab, mulai dari idx sekarang
   let ketemu = -1;
   for(let k=0;k<soalList.length;k++){
     let i = (idx + k) % soalList.length;
@@ -115,40 +149,30 @@ function tampilSoal(){
   const s = soalList[idx];
   document.getElementById("progress").innerText = "Soal ke-" + s.NoSoal + " | Sudah dijawab: " + sudahJawab.size + " / " + soalList.length + " soal";
   let html = "<b>Soal " + s.NoSoal + "</b><p>" + s.Soal + "</p>";
-  if(String(s.JenisSoal).toLowerCase().includes("esai") || String(s.JenisSoal).toLowerCase() === "esai"){
+  if(String(s.JenisSoal||"").toLowerCase().includes("esai")){
     html += '<textarea id="jawabEsai" placeholder="Tulis jawaban esai di sini..."></textarea>';
     html += '<button onclick="kirimEsai()">Kirim Jawaban Esai (Terkunci Setelah Dikirim)</button>';
   } else {
     ["A","B","C","D"].forEach(h => {
-      const isi = s["Pilihan"+h] || s["pilihan"+h.toLowerCase()] || "";
+      const isi = s["Pilihan"+h] || "";
       if(isi) html += '<button class="opt" onclick="kirimMC(\''+h+'\')"><b>'+h+'.</b> '+isi+'</button>';
     });
   }
   document.getElementById("soalBox").innerHTML = html;
 }
-
 async function kirimMC(jawaban){
   const s = soalList[idx];
   const hasil = await getJSON(API + "?page=submitJawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian) + "&noSoal=" + encodeURIComponent(s.NoSoal) + "&jawaban=" + encodeURIComponent(jawaban));
-  if(hasil.success){
-    sudahJawab.add(String(s.NoSoal));
-    idx++;
-    tampilSoal();
-  } else alert(hasil.message);
+  if(hasil.success){ sudahJawab.add(String(s.NoSoal)); idx++; tampilSoal(); } else alert(hasil.message);
 }
 async function kirimEsai(){
   const v = document.getElementById("jawabEsai").value.trim();
   if(!v) return alert("Jawaban esai masih kosong");
   const s = soalList[idx];
   const hasil = await getJSON(API + "?page=submitJawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian) + "&noSoal=" + encodeURIComponent(s.NoSoal) + "&jawaban=" + encodeURIComponent(v));
-  if(hasil.success){
-    sudahJawab.add(String(s.NoSoal));
-    idx++;
-    tampilSoal();
-  } else alert(hasil.message);
+  if(hasil.success){ sudahJawab.add(String(s.NoSoal)); idx++; tampilSoal(); } else alert(hasil.message);
 }
 document.getElementById("btnLewat").onclick = function(){ idx++; tampilSoal(); };
-
 mulai();
 </script>
 </body>
