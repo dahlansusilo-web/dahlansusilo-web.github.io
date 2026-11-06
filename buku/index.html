@@ -7,23 +7,31 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
-header{background:white;padding:14px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:10}
+header{background:white;padding:10px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:99}
 .wrap{max-width:1150px;margin:30px auto;padding:0 20px}
 .card-table{background:white;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(60,20,10,0.06)}
 table{width:100%;border-collapse:collapse}
-th{background:#0f172a;color:white;padding:12px 10px;font-size:13px;text-align:center}
+th{background:#7c2d12;color:white;padding:12px 10px;font-size:13px;text-align:center}
 td{padding:12px 10px;font-size:13px;border-bottom:1px solid #f0e6d3;text-align:center;vertical-align:top}
 tr:last-child td{border:0}
 .cover{width:50px;height:70px;object-fit:cover;border-radius:4px;background:#eee}
 .judul{font-weight:700;text-align:left}
 .btn-link{background:#7c2d12;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;font-size:12px}
 .loading{padding:40px;text-align:center;color:#7a6e69}
+.btn-kembali{display:inline-block;margin-top:28px;background:#7c2d12;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(124,45,18,0.3)}
+.btn-kembali:hover{background:#5e2210}
+.btn-outline{display:inline-block;margin-top:28px;margin-left:10px;background:white;color:#7c2d12;border:1.5px solid #7c2d12;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}
+footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:40px}
 </style>
 </head>
 <body>
 <header>
-  <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12;font-size:14px">
-    <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain"> USAHID SOLO
+  <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12">
+    <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain">
+    <div style="line-height:1.15">
+      <div style="font-size:16pt;letter-spacing:.3px;">UNIVERSITAS SAHID SURAKARTA</div>
+      <div style="font-size:10px;letter-spacing:2.5px;color:#a08a7a;font-weight:600;">USAHID SOLO</div>
+    </div>
   </div>
   <nav id="autoNav"></nav>
 </header>
@@ -37,7 +45,12 @@ tr:last-child td{border:0}
       <tbody id="tbody"><tr><td colspan="8" class="loading">Memuat buku...</td></tr></tbody>
     </table>
   </div>
+  <div style="text-align:center">
+    <a href="/" class="btn-kembali">⬅ Kembali ke Beranda</a>
+    <a href="/profil.html" class="btn-outline">Profil</a>
+  </div>
 </div>
+<footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta | <a href="/buku/" style="color:#f5e6d3;text-decoration:underline">Buku</a></footer>
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
 
