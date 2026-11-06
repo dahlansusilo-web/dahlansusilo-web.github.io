@@ -5,7 +5,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
-header{background:white;padding:14px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:10}
+header{background:white;padding:10px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:99}
 .wrap{max-width:1100px;margin:30px auto;padding:0 20px}
 .hero-card{background:white;border-radius:32px;overflow:hidden;box-shadow:0 20px 60px rgba(60,20,10,0.07);display:flex;flex-wrap:wrap}
 .left{flex:0 0 340px;background:#7c2d12;color:#f5e6d3;padding:36px 28px;text-align:center}
@@ -22,13 +22,24 @@ td:first-child{width:120px;color:#7a6e69}
 .card{margin-top:20px;background:white;border-radius:24px;box-shadow:0 10px 30px rgba(60,20,10,0.06);padding:26px}
 .btn-kembali{display:inline-block;margin-top:28px;background:#7c2d12;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(124,45,18,0.3)}
 .btn-kembali:hover{background:#5e2210}
+.btn-outline{display:inline-block;margin-top:28px;margin-left:10px;background:white;color:#7c2d12;border:1.5px solid #7c2d12;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}
+footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:40px}
 </style></head><body>
-<header><div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12"><img src="../logo-usahidsolo.png" style="width:42px"> USAHID SOLO</div><nav id="autoNav"></nav></header>
+<header>
+  <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12;font-size:14px">
+    <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain">
+    <div style="line-height:1.15">
+      <div style="font-size:14px;letter-spacing:.3px;">UNIVERSITAS SAHID SURAKARTA</div>
+      <div style="font-size:10px;letter-spacing:2.5px;color:#a08a7a;font-weight:600;">USAHID SOLO</div>
+    </div>
+  </div>
+  <nav id="autoNav" style="display:flex;gap:20px"></nav>
+</header>
 <div id="loading" style="text-align:center;padding:80px;color:#7c2d12">⏳ Memuat profil...</div>
 <div id="content" class="wrap" style="display:none">
   <div class="hero-card">
     <div class="left">
-      <img id="foto" src="../Foto%2011%20KB.jpeg" alt="Foto Profil" onerror="this.src='/Foto%2011%20KB.jpeg'">
+      <img id="foto" src="/Foto%2011%20KB.jpeg" alt="Foto Profil" onerror="this.src='/Foto%2011%20KB.jpeg'">
       <h2 id="namaLengkap"></h2>
       <div class="jabatan" id="jabatan"></div>
       <div id="bidang"></div>
@@ -50,9 +61,10 @@ td:first-child{width:120px;color:#7a6e69}
   </div>
   <div style="text-align:center">
     <a href="/" class="btn-kembali">⬅ Kembali ke Beranda</a>
+    <a href="/buku/" class="btn-outline">Katalog Buku</a>
   </div>
 </div>
-<footer style="background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:40px">© 2026 Dahlan Susilo • USAHID Solo</footer>
+<footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta | <a href="/profil.html" style="color:#f5e6d3;text-decoration:underline">Profil</a></footer>
 <script>
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
 async function load(){
@@ -62,10 +74,8 @@ async function load(){
     const get = k => { let key=Object.keys(p).find(x=>x.toLowerCase().replace(/\s/g,'')===k.toLowerCase().replace(/\s/g,'')); return key ? p[key] : ''; };
     let full = `${get('gelardepan')?get('gelardepan')+' ':''}${get('nama')||'Dahlan Susilo'}${get('gelarbelakang')||get('gelar belakang')? ', '+(get('gelarbelakang')||get('gelar belakang')):''}`;
     document.getElementById('namaLengkap').textContent = full;
-    // FOTO FIX BRO
     let fotoGS = get('foto');
     if(fotoGS && fotoGS.startsWith('http')) document.getElementById('foto').src = fotoGS;
-    // kalau kosong tetap pakai file lokal ../Foto 11 KB.jpeg
     document.getElementById('jabatan').textContent = get('jabatan')||'Lektor';
     document.getElementById('tentang').textContent = get('tentang')||'Dosen Informatika';
     document.getElementById('email').textContent = get('email')||'dahlan.susilo@usahidsolo.ac.id';
