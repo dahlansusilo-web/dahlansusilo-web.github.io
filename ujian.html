@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ujian - USAHID Solo</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:16px;background:#f8fafc}
+  .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:12px}
+  #timer{font-size:28px;font-weight:bold;text-align:center;padding:12px;border-radius:10px;color:#fff}
+  .hijau{background:#16a34a}.kuning{background:#eab308;color:#000}.merah{background:#dc2626}
+  button{padding:10px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:bold;cursor:pointer;width:100%;margin-top:8px}
+  button:disabled{background:#94a3b8}
+  .opt{display:block;width:100%;text-align:left;padding:10px;margin:6px 0;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
+  .opt:hover{background:#eff6ff}
+  textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid #cbd5e1}
+  .lock{background:#fee2e2;padding:10px;border-radius:8px;text-align:center;font-weight:bold}
+</style>
+</head>
+<body>
+<h2 id="judul">Memuat Ujian...</h2>
+<div id="timer" class="hijau">--:--</div>
+<div id="info" class="card">Menghubungkan ke server...</div>
+<div id="soalBox" class="card" style="display:none"></div>
+<div id="navBox" class="card" style="display:none">
+  <div id="progress"></div>
+  <button id="btnLewat">Lewati Dulu, Kerjakan Lainnya →</button>
+</div>
+
+<script>
+// ===== GANTI URL INI DENGAN URL APPS SCRIPT BAPAK =====
+const API = "https://script.google.com/macros/s/XXXXX/exec";
+// =======================================================
+
+const params = new URLSearchParams(location.search);
+const kodeUjian = params.get("kodeUjian") || params.get("kodeujian") || "";
+const nim = localStorage.getItem("nim") || params.get("nim") || "";
+let ujian = null, soalList = [], sudahJawab = new Set(), idx = 0, timerInterval = null;
+
+async function getJSON(url){
+  const r = await fetch(url); return await r.json();
+}
+
+async function mulai(){
+  if(!kodeUjian){ document.getElementById("info").innerHTML = "Kode ujian tidak ada. Buka dari halaman Mata Kuliah."; return; }
+  if(!nim){ document.getElementById("info").innerHTML = "Silakan login dulu."; return; }
+  // 1. Ambil info ujian + jam server
+  const listUjian = await getJSON(API + "?page=ujian");
+  ujian = listUjian.find(u => String(u.KodeUjian) === String(kodeUjian));
+  if(!ujian){ document.getElementById("info").innerHTML = "Ujian tidak ditemukan."; return; }
+  document.getElementById("judul").innerText = ujian.Judul + " - " + ujian.KodeUjian;
+
+  // 2. Ambil soal + jawaban yang sudah dijawab
+  soalList = await getJSON(API + "?page=soal&kodeUjian=" + encodeURIComponent(kodeUjian));
+  const jwb = await getJSON(API + "?page=jawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian));
+  jwb.forEach(j => sudahJawab.add(String(j.NoSoal)));
+
+  // 3. Jalan timer serentak - pakai jam server, bukan jam HP
+  jalanTimer();
+  tampilSoal();
+}
+
+function jalanTimer(){
+  async function update(){
+    const srv = await getJSON(API + "?page=servertime");
+    // Tanggal ujian + JamSelesai dari Sheet
+    const tgl = String(ujian.Tanggal).slice(0,10); // yyyy-MM-dd
+    let jamSelesai = String(ujian.JamSelesai);
+    // Kalau di Sheet jam tersimpan sebagai Date, ambil HH:mm
+    if(jamSelesai.includes("T")) jamSelesai = new Date(jamSelesai).toLocaleTimeString("en-GB",{hour:'2-digit',minute:'2-digit', timeZone:'Asia/Jakarta'});
+    let jamMulai = String(ujian.JamMulai);
+    if(jamMulai.includes("T")) jamMulai = new Date(jamMulai).toLocaleTimeString("en-GB",{hour:'2-digit',minute:'2-digit', timeZone:'Asia/Jakarta'});
+
+    const sekarang = new Date(srv.datetime.replace(" ", "T") + "+07:00");
+    const mulai = new Date(tgl + "T" + jamMulai + ":00+07:00");
+    const selesai = new Date(tgl + "T" + jamSelesai + ":00+07:00");
+
+    const info = document.getElementById("info");
+    if(sekarang < mulai){
+      info.innerHTML = "Ujian belum dimulai. Ujian dimulai pukul <b>" + jamMulai + "</b> tanggal " + tgl + ".<br>Silakan tunggu, halaman akan otomatis terbuka.";
+      document.getElementById("soalBox").style.display = "none";
+      document.getElementById("navBox").style.display = "none";
+      return;
+    }
+    if(sekarang >= selesai){
+      info.innerHTML = "<b>Waktu habis.</b> Ujian otomatis ditutup. Jawaban Anda sudah tersimpan.";
+      document.getElementById("soalBox").style.display = "none";
+      document.getElementById("navBox").style.display = "none";
+      clearInterval(timerInterval);
+      return;
+    }
+
+    const sisaDetik = Math.floor((selesai - sekarang) / 1000);
+    const mm = String(Math.floor(sisaDetik / 60)).padStart(2, "0");
+    const dd = String(sisaDetik % 60).padStart(2, "0");
+    const el = document.getElementById("timer");
+    el.innerText = "Sisa Waktu: " + mm + ":" + dd;
+    // WARNA: >10 menit hijau, <=10 kuning, <=5 merah
+    if(sisaDetik > 600) el.className = "hijau";
+    else if(sisaDetik > 300) el.className = "kuning";
+    else el.className = "merah";
+    el.id = "timer";
+    info.innerHTML = "Ujian: <b>" + ujian.Judul + "</b><br>Mulai: " + jamMulai + " - Selesai: " + jamSelesai + "<br>Telat = tidak ada tambahan waktu.";
+    document.getElementById("soalBox").style.display = "block";
+    document.getElementById("navBox").style.display = "block";
+  }
+  update();
+  timerInterval = setInterval(update, 5000); // cek ke server tiap 5 detik, biar tidak bisa curang ubah jam HP
+}
+
+function tampilSoal(){
+  // Cari soal berikutnya yang BELUM dijawab
+  // Kalau semua sudah dijawab, tampil selesai
+  if(sudahJawab.size >= soalList.length){
+    document.getElementById("soalBox").innerHTML = "<h3>Semua soal sudah dijawab. Terima kasih.</h3><p>Jawaban terkunci, tidak bisa diubah.</p>";
+    document.getElementById("navBox").style.display = "none";
+    return;
+  }
+  // Cari idx yang belum dijawab, mulai dari idx sekarang
+  let ketemu = -1;
+  for(let k=0;k<soalList.length;k++){
+    let i = (idx + k) % soalList.length;
+    if(!sudahJawab.has(String(soalList[i].NoSoal))){ ketemu = i; break; }
+  }
+  idx = ketemu;
+  const s = soalList[idx];
+  document.getElementById("progress").innerText = "Soal ke-" + s.NoSoal + " | Sudah dijawab: " + sudahJawab.size + " / " + soalList.length + " soal";
+  let html = "<b>Soal " + s.NoSoal + "</b><p>" + s.Soal + "</p>";
+  if(String(s.JenisSoal).toLowerCase().includes("esai") || String(s.JenisSoal).toLowerCase() === "esai"){
+    html += '<textarea id="jawabEsai" placeholder="Tulis jawaban esai di sini..."></textarea>';
+    html += '<button onclick="kirimEsai()">Kirim Jawaban Esai (Terkunci Setelah Dikirim)</button>';
+  } else {
+    ["A","B","C","D"].forEach(h => {
+      const isi = s["Pilihan"+h] || s["pilihan"+h.toLowerCase()] || "";
+      if(isi) html += '<button class="opt" onclick="kirimMC(\''+h+'\')"><b>'+h+'.</b> '+isi+'</button>';
+    });
+  }
+  document.getElementById("soalBox").innerHTML = html;
+}
+
+async function kirimMC(jawaban){
+  const s = soalList[idx];
+  const hasil = await getJSON(API + "?page=submitJawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian) + "&noSoal=" + encodeURIComponent(s.NoSoal) + "&jawaban=" + encodeURIComponent(jawaban));
+  if(hasil.success){
+    sudahJawab.add(String(s.NoSoal));
+    idx++;
+    tampilSoal();
+  } else alert(hasil.message);
+}
+async function kirimEsai(){
+  const v = document.getElementById("jawabEsai").value.trim();
+  if(!v) return alert("Jawaban esai masih kosong");
+  const s = soalList[idx];
+  const hasil = await getJSON(API + "?page=submitJawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian) + "&noSoal=" + encodeURIComponent(s.NoSoal) + "&jawaban=" + encodeURIComponent(v));
+  if(hasil.success){
+    sudahJawab.add(String(s.NoSoal));
+    idx++;
+    tampilSoal();
+  } else alert(hasil.message);
+}
+document.getElementById("btnLewat").onclick = function(){ idx++; tampilSoal(); };
+
+mulai();
+</script>
+</body>
+</html>
