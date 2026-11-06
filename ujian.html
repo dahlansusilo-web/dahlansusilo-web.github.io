@@ -13,7 +13,8 @@
   .opt{display:block;width:100%;text-align:left;padding:10px;margin:6px 0;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#111 !important;cursor:pointer}
   .opt b{color:#111 !important}
   .opt:hover{background:#eff6ff}
-  textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid #cbd5e1}
+  textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid #cbd5e1;color:#111}
+  .btnHijau{background:#16a34a}.btnAbu{background:#64748b}
 </style>
 </head>
 <body>
@@ -34,7 +35,7 @@ try{
   const u = JSON.parse(localStorage.getItem("user") || localStorage.getItem("mahasiswa") || "{}");
   if(!nim) nim = u.nim || u.NIM || u.nidn || "";
 }catch(e){}
-let ujian = null, soalList = [], sudahJawab = new Set(), idx = 0, timerInterval = null;
+let ujian = null, soalList = [], sudahJawab = new Set(), idx = 0, timerInterval = null, ujianSelesai = false;
 async function getJSON(url){ const r = await fetch(url); return await r.json(); }
 async function mulai(){
   if(!kodeUjian){ document.getElementById("info").innerHTML = "Kode ujian tidak ada."; return; }
@@ -122,8 +123,11 @@ function jalanTimer(){
       else if(sisaDetik > 300) el.className = "kuning";
       else el.className = "merah";
       info.innerHTML = "Ujian: <b>" + ujian.Judul + "</b><br>Mulai: " + jamMulai + " - Selesai: " + jamSelesai;
-      document.getElementById("soalBox").style.display = "block";
-      document.getElementById("navBox").style.display = "block";
+      // JANGAN PAKSA TAMPIL LAGI KALAU SUDAH SELESAI
+      if(!ujianSelesai){
+        document.getElementById("soalBox").style.display = "block";
+        document.getElementById("navBox").style.display = "block";
+      }
     }catch(e){ info.innerHTML = "Gagal jam server: " + e.message; }
   }
   update();
@@ -131,8 +135,12 @@ function jalanTimer(){
 }
 function tampilSoal(){
   if(sudahJawab.size >= soalList.length){
-    document.getElementById("soalBox").innerHTML = "<h3>Semua soal sudah dijawab.</h3>";
+    ujianSelesai = true;
+    document.getElementById("progress").innerText = "Sudah: " + sudahJawab.size + " / " + soalList.length + " - SELESAI";
+    document.getElementById("soalBox").innerHTML = "<h3>✅ Semua soal sudah dijawab.</h3><p>Jawaban Bapak sudah tersimpan di server. Bapak bisa kembali ke dashboard.</p><button class='btnHijau' onclick='selesaiUjian()'>🏁 Selesai & Kembali ke Dashboard</button><button class='btnAbu' onclick='location.reload()'>🔄 Refresh</button>";
+    document.getElementById("soalBox").style.display = "block";
     document.getElementById("navBox").style.display = "none";
+    document.getElementById("timer").innerText = "SELESAI MENGERJAKAN";
     return;
   }
   let ketemu = -1;
@@ -153,6 +161,11 @@ function tampilSoal(){
     });
   }
   document.getElementById("soalBox").innerHTML = html;
+  document.getElementById("navBox").style.display = "block";
+}
+function selesaiUjian(){
+  // Kembali ke halaman utama / dashboard
+  window.location.href = "index.html?nim=" + encodeURIComponent(nim);
 }
 async function kirimMC(jawaban){
   const s = soalList[idx];
