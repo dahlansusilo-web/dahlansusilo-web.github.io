@@ -60,35 +60,24 @@ async function mulai(){
   tampilSoal();
 }
 
-function jalanTimer(){
-  async function update(){
-    const srv = await getJSON(API + "?page=servertime");
-    // Tanggal ujian + JamSelesai dari Sheet
-    const tgl = String(ujian.Tanggal).slice(0,10); // yyyy-MM-dd
-    let jamSelesai = String(ujian.JamSelesai);
-    // Kalau di Sheet jam tersimpan sebagai Date, ambil HH:mm
-    if(jamSelesai.includes("T")) jamSelesai = new Date(jamSelesai).toLocaleTimeString("en-GB",{hour:'2-digit',minute:'2-digit', timeZone:'Asia/Jakarta'});
-    let jamMulai = String(ujian.JamMulai);
-    if(jamMulai.includes("T")) jamMulai = new Date(jamMulai).toLocaleTimeString("en-GB",{hour:'2-digit',minute:'2-digit', timeZone:'Asia/Jakarta'});
-
-    const sekarang = new Date(srv.datetime.replace(" ", "T") + "+07:00");
-    const mulai = new Date(tgl + "T" + jamMulai + ":00+07:00");
-    const selesai = new Date(tgl + "T" + jamSelesai + ":00+07:00");
-
-    const info = document.getElementById("info");
-    if(sekarang < mulai){
-      info.innerHTML = "Ujian belum dimulai. Ujian dimulai pukul <b>" + jamMulai + "</b> tanggal " + tgl + ".<br>Silakan tunggu, halaman akan otomatis terbuka.";
-      document.getElementById("soalBox").style.display = "none";
-      document.getElementById("navBox").style.display = "none";
-      return;
-    }
-    if(sekarang >= selesai){
-      info.innerHTML = "<b>Waktu habis.</b> Ujian otomatis ditutup. Jawaban Anda sudah tersimpan.";
-      document.getElementById("soalBox").style.display = "none";
-      document.getElementById("navBox").style.display = "none";
-      clearInterval(timerInterval);
-      return;
-    }
+function parseJam(val){
+  // Bisa handle 3 format: "08:17", "1899-12-30T01:17:56.000Z", Date object
+  if(!val) return "00:00";
+  let s = String(val);
+  if(s.includes("T")){
+    // Format Google Sheet: 1899-12-30T01:17:56.000Z = jam UTC, ubah ke WIB (+7)
+    let d = new Date(s);
+    let jamWIB = new Date(d.getTime() + 7*60*60*1000);
+    let hh = String(jamWIB.getUTCHours()).padStart(2,"0");
+    let mm = String(jamWIB.getUTCMinutes()).padStart(2,"0");
+    return hh + ":" + mm;
+  }
+  return s.slice(0,5); // "08:17:00" -> "08:17"
+}
+function parseTanggal(val){
+  if(!val) return "";
+  return String(val).slice(0,10); // "2026-12-14T17:00..." -> "2026-12-14"
+}
 
     const sisaDetik = Math.floor((selesai - sekarang) / 1000);
     const mm = String(Math.floor(sisaDetik / 60)).padStart(2, "0");
