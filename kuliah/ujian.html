@@ -1,166 +1,100 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ujian - USAHID Solo</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dahlan Susilo - Universitas Sahid Surakarta</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:16px;background:#f8fafc}
-  .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:12px}
-  #timer{font-size:28px;font-weight:bold;text-align:center;padding:12px;border-radius:10px;color:#fff}
-  .hijau{background:#16a34a}.kuning{background:#eab308;color:#000}.merah{background:#dc2626}
-  button{padding:10px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:bold;cursor:pointer;width:100%;margin-top:8px}
-  button:disabled{background:#94a3b8}
-  .opt{display:block;width:100%;text-align:left;padding:10px;margin:6px 0;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
-  .opt:hover{background:#eff6ff}
-  textarea{width:100%;min-height:100px;padding:10px;border-radius:8px;border:1px solid #cbd5e1}
-  .lock{background:#fee2e2;padding:10px;border-radius:8px;text-align:center;font-weight:bold}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
+header{background:white;padding:14px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:10}
+.logo{font-weight:700;color:#7c2d12;display:flex;align-items:center;gap:8px;font-size:14px;line-height:1.1}
+nav a{margin-left:20px;text-decoration:none;color:#6b5a52;font-size:14px}
+.main-wrap{max-width:1150px;margin:0 auto;display:flex;gap:24px;align-items:flex-end;padding:40px 20px}
+.hero{flex:2.2;display:flex;justify-content:center}
+.grid-section{flex:0.9;background:white;border-radius:24px;padding:20px;box-shadow:0 10px 30px rgba(60,20,10,0.06);align-self:flex-end;margin-bottom:32px}
+.hero-card{background:white;border-radius:32px;max-width:900px;width:100%;padding:60px 30px 40px;text-align:center;box-shadow:0 20px 60px rgba(60,20,10,0.07);position:relative;margin-top:80px}
+.avatar-wrap{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:160px;height:160px;border-radius:50%;border:8px solid #7c2d12;overflow:hidden;background:white}
+.avatar-wrap img{width:100%;height:100%;object-fit:cover}
+h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:48px;margin-top:20px;letter-spacing:1px}
+.badge{display:inline-block;background:#7c2d12;color:white;padding:8px 22px;border-radius:20px;font-size:14px;margin-top:14px;font-weight:600}
+.sub{margin-top:16px;color:#4a3a32;font-weight:600}
+.desc{margin-top:6px;color:#7a6e69;font-size:14px}
+.stats{display:flex;justify-content:center;gap:40px;margin:36px 0;flex-wrap:wrap;border-top:1px solid #f0e6d3;border-bottom:1px solid #f0e6d3;padding:28px 0}
+.stat{text-align:center;min-width:100px}
+.stat .icon{width:56px;height:56px;background:#7c2d12;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px}
+.stat b{font-size:28px;display:block}
+.stat span{font-size:12px;color:#6b5a52}
+.btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{padding:14px 28px;border-radius:28px;text-decoration:none;font-weight:600;font-size:14px}
+.btn-primary{background:#7c2d12;color:white}
+.btn-outline{border:1.5px solid #7c2d12;color:#7c2d12;background:white}
+.grid-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;color:#7c2d12;margin-bottom:16px;text-align:left}
+.grid{display:flex;flex-direction:column;gap:10px}
+.card{background:#fff;border:1px solid #e9ddd0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;text-decoration:none;color:#4a2c1d;transition:.2s;font-size:14px;font-weight:600}
+.card:hover{transform:translateX(4px);border-color:#7c2d12;background:#fffaf5}
+.profil-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.profil-links a{padding:10px 18px;border-radius:20px;text-decoration:none;font-weight:600;font-size:13px;color:white}
+footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:40px}
+.fab-admin{position:fixed;right:20px;top:50%;transform:translateY(-50%);background:#0f172a;color:#fff;padding:12px 14px;border-radius:50px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.2);font-size:14px;z-index:99;display:flex;align-items:center;gap:6px}
+@media(max-width:900px){
+  .main-wrap{flex-direction:column;align-items:stretch}
+  .grid-section{position:static;width:100%;margin-bottom:0;align-self:stretch}
+  .grid{flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .card{width:130px;flex-direction:column;justify-content:center;height:90px;padding:0}
+  .grid-title{text-align:center}
+}
 </style>
 </head>
 <body>
-<h2 id="judul">Memuat Ujian...</h2>
-<div id="timer" class="hijau">--:--</div>
-<div id="info" class="card">Menghubungkan ke server...</div>
-<div id="soalBox" class="card" style="display:none"></div>
-<div id="navBox" class="card" style="display:none">
-  <div id="progress"></div>
-  <button id="btnLewat">Lewati Dulu, Kerjakan Lainnya →</button>
+<header style="background:white;padding:10px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:99">
+  <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12;font-size:14px">
+    <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain"> USAHID SOLO
+  </div>
+  <div style="display:flex;align-items:center;gap:18px">
+    <nav id="autoNav" style="display:flex;gap:20px"></nav>
+    <img id="fotoTop" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #f5e6d3;display:none">
+  </div>
+</header>
+<script src="/menu.js"></script>
+<div class="main-wrap">
+  <div class="hero">
+    <div class="hero-card">
+      <div class="avatar-wrap"><img src="Foto 11 KB.jpeg" alt="Dahlan Susilo"></div>
+      <h1>DAHLAN SUSILO</h1>
+      <div class="badge">Dosen • Akademik • Peneliti</div>
+      <div class="sub">Universitas Sahid Surakarta</div>
+      <div class="desc">Pengajar & Peneliti — Ilmu Komputer</div>
+      <div class="stats">
+        <div class="stat"><div class="icon">📄</div><b>80+</b><span>Publikasi Ilmiah</span></div>
+        <div class="stat"><div class="icon">🎓</div><b>30+</b><span>Tahun Mengajar</span></div>
+        <div class="stat"><div class="icon">🔬</div><b>10+</b><span>Proyek Riset</span></div>
+      </div>
+      <div class="profil-links">
+        <a href="https://sinta.kemdiktisaintek.go.id/authors/profile/6087970" target="_blank" style="background:#c1272d">📊 SINTA</a>
+        <a href="https://garuda.kemdiktisaintek.go.id/author/view/396457" target="_blank" style="background:#1a73e8">📚 GARUDA</a>
+        <a href="https://pddikti.kemdiktisaintek.go.id/detail-dosen/8JJGH4nUkx77lEu-8eZp4G6if-hBGJ90Ny4Do1gKFwGxXt9QH8oThUA7_aomZD0_LpARoA==" target="_blank" style="background:#f4a300;color:#3a2100">🎓 PDDIKTI</a>
+      </div>
+      <div class="btns" style="margin-top:28px">
+        <a class="btn btn-primary" href="profil.html">Lihat Profil Lengkap</a>
+        <a class="btn btn-outline" href="buku/">Katalog Buku</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-section">
+    <h2 class="grid-title">Akses Cepat</h2>
+    <div class="grid">
+      <a class="card" href="profil.html" style="background:#7c2d12;color:white;border-color:#7c2d12">👤 Profil</a>
+      <a class="card" href="kuliah/">📖 Kuliah</a>
+      <a class="card" href="ujian.html">📋 Ujian</a>
+      <a class="card" href="buku/">📚 Buku</a>
+      <a class="card" href="karya/">💡 Karya</a>
+    </div>
+  </div>
 </div>
 
-<script>
-// ===== GANTI URL INI DENGAN URL APPS SCRIPT BAPAK =====
-const API = "https://script.google.com/macros/s/XXXXX/exec";
-// =======================================================
-
-const params = new URLSearchParams(location.search);
-const kodeUjian = params.get("kodeUjian") || params.get("kodeujian") || "";
-const nim = localStorage.getItem("nim") || params.get("nim") || "";
-let ujian = null, soalList = [], sudahJawab = new Set(), idx = 0, timerInterval = null;
-
-async function getJSON(url){
-  const r = await fetch(url); return await r.json();
-}
-
-async function mulai(){
-  if(!kodeUjian){ document.getElementById("info").innerHTML = "Kode ujian tidak ada. Buka dari halaman Mata Kuliah."; return; }
-  if(!nim){ document.getElementById("info").innerHTML = "Silakan login dulu."; return; }
-  // 1. Ambil info ujian + jam server
-  const listUjian = await getJSON(API + "?page=ujian");
-  ujian = listUjian.find(u => String(u.KodeUjian) === String(kodeUjian));
-  if(!ujian){ document.getElementById("info").innerHTML = "Ujian tidak ditemukan."; return; }
-  document.getElementById("judul").innerText = ujian.Judul + " - " + ujian.KodeUjian;
-
-  // 2. Ambil soal + jawaban yang sudah dijawab
-  soalList = await getJSON(API + "?page=soal&kodeUjian=" + encodeURIComponent(kodeUjian));
-  const jwb = await getJSON(API + "?page=jawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian));
-  jwb.forEach(j => sudahJawab.add(String(j.NoSoal)));
-
-  // 3. Jalan timer serentak - pakai jam server, bukan jam HP
-  jalanTimer();
-  tampilSoal();
-}
-
-function jalanTimer(){
-  async function update(){
-    const srv = await getJSON(API + "?page=servertime");
-    // Tanggal ujian + JamSelesai dari Sheet
-    const tgl = String(ujian.Tanggal).slice(0,10); // yyyy-MM-dd
-    let jamSelesai = String(ujian.JamSelesai);
-    // Kalau di Sheet jam tersimpan sebagai Date, ambil HH:mm
-    if(jamSelesai.includes("T")) jamSelesai = new Date(jamSelesai).toLocaleTimeString("en-GB",{hour:'2-digit',minute:'2-digit', timeZone:'Asia/Jakarta'});
-    let jamMulai = String(ujian.JamMulai);
-    if(jamMulai.includes("T")) jamMulai = new Date(jamMulai).toLocaleTimeString("en-GB",{hour:'2-digit',minute:'2-digit', timeZone:'Asia/Jakarta'});
-
-    const sekarang = new Date(srv.datetime.replace(" ", "T") + "+07:00");
-    const mulai = new Date(tgl + "T" + jamMulai + ":00+07:00");
-    const selesai = new Date(tgl + "T" + jamSelesai + ":00+07:00");
-
-    const info = document.getElementById("info");
-    if(sekarang < mulai){
-      info.innerHTML = "Ujian belum dimulai. Ujian dimulai pukul <b>" + jamMulai + "</b> tanggal " + tgl + ".<br>Silakan tunggu, halaman akan otomatis terbuka.";
-      document.getElementById("soalBox").style.display = "none";
-      document.getElementById("navBox").style.display = "none";
-      return;
-    }
-    if(sekarang >= selesai){
-      info.innerHTML = "<b>Waktu habis.</b> Ujian otomatis ditutup. Jawaban Anda sudah tersimpan.";
-      document.getElementById("soalBox").style.display = "none";
-      document.getElementById("navBox").style.display = "none";
-      clearInterval(timerInterval);
-      return;
-    }
-
-    const sisaDetik = Math.floor((selesai - sekarang) / 1000);
-    const mm = String(Math.floor(sisaDetik / 60)).padStart(2, "0");
-    const dd = String(sisaDetik % 60).padStart(2, "0");
-    const el = document.getElementById("timer");
-    el.innerText = "Sisa Waktu: " + mm + ":" + dd;
-    // WARNA: >10 menit hijau, <=10 kuning, <=5 merah
-    if(sisaDetik > 600) el.className = "hijau";
-    else if(sisaDetik > 300) el.className = "kuning";
-    else el.className = "merah";
-    el.id = "timer";
-    info.innerHTML = "Ujian: <b>" + ujian.Judul + "</b><br>Mulai: " + jamMulai + " - Selesai: " + jamSelesai + "<br>Telat = tidak ada tambahan waktu.";
-    document.getElementById("soalBox").style.display = "block";
-    document.getElementById("navBox").style.display = "block";
-  }
-  update();
-  timerInterval = setInterval(update, 5000); // cek ke server tiap 5 detik, biar tidak bisa curang ubah jam HP
-}
-
-function tampilSoal(){
-  // Cari soal berikutnya yang BELUM dijawab
-  // Kalau semua sudah dijawab, tampil selesai
-  if(sudahJawab.size >= soalList.length){
-    document.getElementById("soalBox").innerHTML = "<h3>Semua soal sudah dijawab. Terima kasih.</h3><p>Jawaban terkunci, tidak bisa diubah.</p>";
-    document.getElementById("navBox").style.display = "none";
-    return;
-  }
-  // Cari idx yang belum dijawab, mulai dari idx sekarang
-  let ketemu = -1;
-  for(let k=0;k<soalList.length;k++){
-    let i = (idx + k) % soalList.length;
-    if(!sudahJawab.has(String(soalList[i].NoSoal))){ ketemu = i; break; }
-  }
-  idx = ketemu;
-  const s = soalList[idx];
-  document.getElementById("progress").innerText = "Soal ke-" + s.NoSoal + " | Sudah dijawab: " + sudahJawab.size + " / " + soalList.length + " soal";
-  let html = "<b>Soal " + s.NoSoal + "</b><p>" + s.Soal + "</p>";
-  if(String(s.JenisSoal).toLowerCase().includes("esai") || String(s.JenisSoal).toLowerCase() === "esai"){
-    html += '<textarea id="jawabEsai" placeholder="Tulis jawaban esai di sini..."></textarea>';
-    html += '<button onclick="kirimEsai()">Kirim Jawaban Esai (Terkunci Setelah Dikirim)</button>';
-  } else {
-    ["A","B","C","D"].forEach(h => {
-      const isi = s["Pilihan"+h] || s["pilihan"+h.toLowerCase()] || "";
-      if(isi) html += '<button class="opt" onclick="kirimMC(\''+h+'\')"><b>'+h+'.</b> '+isi+'</button>';
-    });
-  }
-  document.getElementById("soalBox").innerHTML = html;
-}
-
-async function kirimMC(jawaban){
-  const s = soalList[idx];
-  const hasil = await getJSON(API + "?page=submitJawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian) + "&noSoal=" + encodeURIComponent(s.NoSoal) + "&jawaban=" + encodeURIComponent(jawaban));
-  if(hasil.success){
-    sudahJawab.add(String(s.NoSoal));
-    idx++;
-    tampilSoal();
-  } else alert(hasil.message);
-}
-async function kirimEsai(){
-  const v = document.getElementById("jawabEsai").value.trim();
-  if(!v) return alert("Jawaban esai masih kosong");
-  const s = soalList[idx];
-  const hasil = await getJSON(API + "?page=submitJawaban&nim=" + encodeURIComponent(nim) + "&kodeUjian=" + encodeURIComponent(kodeUjian) + "&noSoal=" + encodeURIComponent(s.NoSoal) + "&jawaban=" + encodeURIComponent(v));
-  if(hasil.success){
-    sudahJawab.add(String(s.NoSoal));
-    idx++;
-    tampilSoal();
-  } else alert(hasil.message);
-}
-document.getElementById("btnLewat").onclick = function(){ idx++; tampilSoal(); };
-
-mulai();
-</script>
+<a href="buku/admin.html" class="fab-admin">⚙️ <span>Admin</span></a>
+<footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta | <a href="profil.html" style="color:#f5e6d3;text-decoration:underline">Profil</a></footer>
 </body>
 </html>
