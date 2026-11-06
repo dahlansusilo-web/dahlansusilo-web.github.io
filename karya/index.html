@@ -1,73 +1,83 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Karya Dosen - USAHID Solo</title>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karya Dosen - Dahlan Susilo</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f9f5f0;color:#222}
-header{background:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;color:#7c2d12;text-decoration:none;font-size:15px}
-.logo img{width:42px;height:42px;object-fit:contain}
-.btn{padding:6px 14px;border-radius:20px;text-decoration:none;font-weight:600;font-size:13px}
-.btn-coklat{background:#7c2d12;color:#fff}
-.wrap{max-width:900px;margin:24px auto;padding:0 16px}
-h2{color:#7c2d12;margin:0 0 4px}
-.sub{color:#666;font-size:13px;margin-bottom:16px}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.07)}
-th{background:#7c2d12;color:#fff;text-align:left;padding:12px;font-size:13px}
-td{padding:12px;border-top:1px solid #eee;font-size:14px;vertical-align:top}
-tr:nth-child(even) td{background:#fdf8f4}
-.badge{display:inline-block;background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
-.btn-lihat{background:#7c2d12;color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block}
-.kembali{display:inline-block;margin-top:20px;color:#7c2d12;text-decoration:none;font-weight:700;font-size:14px}
-#error-box{display:none;background:#fdecea;color:#7c2d12;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px}
-</style></head>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
+header{background:white;padding:10px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:99}
+.wrap{max-width:1150px;margin:30px auto;padding:0 20px}
+.card-table{background:white;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(60,20,10,0.06)}
+table{width:100%;border-collapse:collapse}
+th{background:#7c2d12;color:white;padding:12px 10px;font-size:13px;text-align:center}
+td{padding:12px 10px;font-size:13px;border-bottom:1px solid #f0e6d3;text-align:center;vertical-align:top}
+tr:last-child td{border:0}
+.loading{padding:40px;text-align:center;color:#7a6e69}
+.btn-kembali{display:inline-block;margin-top:28px;background:#7c2d12;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(124,45,18,0.3)}
+.btn-kembali:hover{background:#5e2210}
+.btn-outline{display:inline-block;margin-top:28px;margin-left:10px;background:white;color:#7c2d12;border:1.5px solid #7c2d12;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}
+footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:40px}
+</style>
+</head>
 <body>
 <header>
-  <a class="logo" href="/"><img src="/logo-usahidsolo.png" onerror="this.style.display='none'"> USAHID SOLO - KARYA DOSEN</a>
-  <div><a class="btn btn-coklat" href="/kuliah/login.html">Login Kuliah</a></div>
+  <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12">
+    <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain">
+    <div style="line-height:1.15">
+      <div style="font-size:16pt;letter-spacing:.3px;">UNIVERSITAS SAHID SURAKARTA</div>
+      <div style="font-size:10px;letter-spacing:2.5px;color:#a08a7a;font-weight:600;">USAHID SOLO</div>
+    </div>
+  </div>
+  <nav id="autoNav"></nav>
 </header>
+
 <div class="wrap">
-  <h2>Karya Dosen</h2>
-  <p class="sub">Informasi umum, dapat dibuka tanpa login</p>
-  <div id="error-box"></div>
-  <div id="list-karya"><p style="text-align:center;padding:20px">Memuat karya dosen...</p></div>
-  <a class="kembali" href="/">← Kembali ke Beranda</a>
+  <h2 style="font-family:'Plus Jakarta Sans';color:#7c2d12;margin-bottom:6px">Karya Dosen</h2>
+  <p style="color:#666;font-size:13px;margin-bottom:16px">Informasi umum, dapat dibuka tanpa login</p>
+  <div class="card-table">
+    <table>
+      <thead>
+        <tr><th>No</th><th>Judul</th><th>Tahun</th><th>Jenis</th><th>Keterangan</th></tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="5" class="loading">Memuat karya...</td></tr></tbody>
+    </table>
+  </div>
+  <div style="text-align:center">
+    <a href="/" class="btn-kembali">⬅ Kembali ke Beranda</a>
+    <a href="/profil.html" class="btn-outline">Profil</a>
+  </div>
 </div>
+
+<footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta | <a href="/karya/" style="color:#f5e6d3;text-decoration:underline">Karya</a></footer>
+
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-function setHTML(id, html){ var el=document.getElementById(id); if(el) el.innerHTML=html; }
-function ambil(obj, daftar){
-  for(let i=0;i<daftar.length;i++){
-    for(let k in obj){
-      if(String(k).trim().toLowerCase()===daftar[i]) return obj[k];
-    }
-  }
-  return "";
-}
 async function loadKarya(){
   try{
-    const r = await fetch(API+"?page=karya&t="+Date.now());
-    if(!r.ok) throw new Error('Gagal terhubung ke server');
-    const data = await r.json();
-    let list = Array.isArray(data) ? data : (data.data || data.karya || []);
-    if(!list.length){
-      setHTML('list-karya','<p style="text-align:center">Belum ada karya dosen yang dipublikasikan</p>');
+    const res = await fetch(API + "?page=karya&t=" + Date.now());
+    const data = await res.json();
+    const tbody = document.getElementById('tbody');
+    if(!data || data.length==0 || data.error){
+      tbody.innerHTML = '<tr><td colspan="5">Belum ada karya - '+(data.error||'kosong')+'</td></tr>';
       return;
     }
-    let html = '<table><thead><tr><th>No</th><th>Judul</th><th>Tahun</th><th>Jenis</th><th>Keterangan</th></tr></thead><tbody>';
-    list.forEach(function(x){
-      const nomor = ambil(x, ["nonor","nomor","no","id"]) || "";
-      const judul = ambil(x, ["judul","judul_karya","nama_karya","title","nama"]) || "Tanpa Judul";
-      const tahun = ambil(x, ["tahun","tahun_terbit"]) || "";
-      const jenis = ambil(x, ["jenis","kategori","type"]) || "";
-      const ket = ambil(x, ["keterangan","deskripsi","abstrak","ringkasan"]) || "";
-      html += '<tr><td>'+nomor+'</td><td><strong>'+judul+'</strong></td><td>'+tahun+'</td><td>'+(jenis ? '<span class="badge">'+jenis+'</span>' : '')+'</td><td>'+ket+'</td></tr>';
-    });
-    html += '</tbody></table>';
-    setHTML('list-karya', html);
-  }catch(err){
-    setHTML('list-karya','<p style="text-align:center">Gagal memuat karya dosen</p>');
-    var eb=document.getElementById('error-box');
-    if(eb){ eb.style.display='block'; eb.innerText='Terjadi kesalahan saat memuat. Detail: '+err.message; }
+    tbody.innerHTML = data.map((k,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td style="text-align:left;font-weight:700">${k.judul || k.Judul || '-'}</td>
+        <td>${k.tahun || k.Tahun || '-'}</td>
+        <td><span style="background:#fef3c7;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600">${k.jenis || k.Jenis || '-'}</span></td>
+        <td style="text-align:left">${k.keterangan || k.Keterangan || '-'}</td>
+      </tr>
+    `).join('');
+  }catch(e){
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="5">Gagal load: '+e+'</td></tr>';
   }
 }
 loadKarya();
 </script>
-</body></html>
+<script src="/menu.js"></script>
+</body>
+</html>
