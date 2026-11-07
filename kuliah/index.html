@@ -42,7 +42,6 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px
 <p id="loginMsg" style="color:red"></p>
 <button class="btn ghost small" onclick="muatUlangGS()">🔄 Muat Ulang Data dari GS</button>
 </div>
-
 <div id="pageApp" class="hidden">
 <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 id="hello" style="margin:0"></h2><p id="helloSub" class="muted"></p><p><span id="statusGS2" class="sync ok">✅ Terhubung ke GS</span> <button class="btn ghost small" onclick="muatUlangGS()">🔄 Sync GS</button></p></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" onclick="toggleFormGantiPassword()">🔑 Ganti Password</button><button class="btn-logout" onclick="logout()"><span>🚪</span><span style="text-align:left">Keluar<small>Klik untuk logout</small></span></button></div></div>
@@ -58,42 +57,29 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px
 </div>
 </div>
 <script>
-// ===== KONEKSI KE GS BAPAK =====
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-
-// DB awal kosong, diisi dari GS. Kalau GS belum kebaca, pakai cache terakhir.
 let DB = JSON.parse(localStorage.getItem('elearning_db_final_gs')||'null') || {mahasiswa:[],mataKuliah:[],peserta:[],materi:[],pengumpulan:[],ujian:[],soal:[],jawaban:[],resetRequests:[]};
 if(!DB.resetRequests) DB.resetRequests=[];
-
 function setStatus(txt,cls){ const a=document.getElementById('statusGS'); const b=document.getElementById('statusGS2'); if(a){a.innerText=txt; a.className='sync '+cls;} if(b){b.innerText=txt; b.className='sync '+cls;} }
-
-// Normalisasi: API Bapak bisa kirim format beda-beda, kita terima semua
-function normalisasiData(raw){
-  // raw bisa: {mahasiswa:[...], ...} atau {data:{...}} atau array langsung
-  let d = raw.data || raw.result || raw;
-  if(Array.isArray(d)) d = {mahasiswa:d};
-  const get = (keys) => { for(let k of keys){ if(d[k]) return d[k]; } return []; };
-  // Cari sheet dengan nama mirip, tidak harus persis huruf besar/kecil
-  const keys = Object.keys(d||{});
-  const findSheet = (nama) => { const k = keys.find(x => x.toLowerCase().replace(/[^a-z]/g,'') === nama.toLowerCase().replace(/[^a-z]/g,'')); return k ? d[k] : []; };
-  const norm = (arr, map) => (arr||[]).map(r => { let o={}; for(let k in map){ const col = Object.keys(r).find(c => c.toLowerCase().replace(/[^a-z0-9]/g,'') === map[k].toLowerCase().replace(/[^a-z0-9]/g,'')); o[k] = col ? r[col] : (r[map[k]] ?? ''); } return o; });
-  return {
-    mahasiswa: norm(findSheet('mahasiswa'), {nim:'NIM',nama:'Nama',password:'Password',role:'Role',angkatan:'Angkatan'}),
-    mataKuliah: norm(findSheet('matakuliah'), {kode_mk:'Kode_MK',nama_mk:'Nama_MK',sks:'SKS',dosen:'Dosen'}).map(x=>({...x,sks:+x.sks||3})),
-    peserta: norm(findSheet('peserta'), {nim:'NIM',kode_mk:'Kode_MK',nilai1:'Nilai1',nilai2:'Nilai2',nilai3:'Nilai3',nilai4:'Nilai4'}).map(x=>({...x,nilai1:+x.nilai1||0,nilai2:+x.nilai2||0,nilai3:+x.nilai3||0,nilai4:+x.nilai4||0})),
-    materi: norm(findSheet('materi'), {kode_mk:'Kode_MK',id_tugas:'ID_Tugas',judul:'Judul',deskripsi:'Deskripsi',deadline:'Deadline',link_materi:'Link_Materi',link_tugas:'Link_Tugas'}),
-    pengumpulan: norm(findSheet('pengumpulan'), {kode_mk:'Kode_MK',nim:'NIM',id_tugas:'ID_Tugas',link:'Link',tanggal:'Tanggal',ket:'Ket',nilai:'Nilai'}),
-    ujian: norm(findSheet('ujian'), {KodeUjian:'KodeUjian',KodeMK:'KodeMK',Judul:'Judul',Tanggal:'Tanggal',JamMulai:'JamMulai',JamSelesai:'JamSelesai',Status:'Status',DurasiMenit:'DurasiMenit'}).map(x=>({...x,DurasiMenit:+x.DurasiMenit||60})),
-    soal: norm(findSheet('soal'), {KodeUjian:'KodeUjian',NoSoal:'NoSoal',JenisSoal:'JenisSoal',Soal:'Soal',PilihanA:'PilihanA',PilihanB:'PilihanB',PilihanC:'PilihanC',PilihanD:'PilihanD',Kunci:'Kunci'}).map(x=>({...x,NoSoal:+x.NoSoal||0})),
-    jawaban: norm(findSheet('jawaban'), {NIM:'NIM',KodeUjian:'KodeUjian',NoSoal:'NoSoal',Jawaban:'Jawaban',Status:'Status',WaktuJawab:'WaktuJawab',nilai:'Nilai',koreksi_dosen:'Koreksi_Dosen'}).map(x=>({...x,NoSoal:+x.NoSoal||0})),
-    resetRequests: norm(findSheet('resetrequests')||findSheet('reset')||[], {nim:'NIM',nama:'Nama',tanggal:'Tanggal',status:'Status'})
-  };
-}
-
 async function muatDariGS(){
   setStatus('⏳ Memuat dari GS...','load');
   const btnLogin = document.getElementById('btnLogin');
-  if(btnLogin){ btnLogin.disabled = true; btnLogin.innerText = '⏳ Menghubungkan ke GS...'; }  function pick(o, names){
+  if(btnLogin){ btnLogin.disabled = true; btnLogin.innerText = '⏳ Menghubungkan ke GS...'; }
+  clearTimeout(window._tLogin);
+  window._tLogin = setTimeout(()=>{
+    if(btnLogin){ btnLogin.disabled = false; btnLogin.innerText = 'Masuk (Pakai Data Terakhir)'; }
+    setStatus('⚠️ GS lambat, pakai data terakhir yang tersimpan','warn');
+  }, 8000);
+  async function getPage(page){
+    try{
+      const r = await fetch(API + '?page=' + page + '&t=' + Date.now(), { signal: AbortSignal.timeout(8000) });
+      const j = await r.json();
+      if(Array.isArray(j)) return j;
+      if(j && Array.isArray(j.data)) return j.data;
+      return [];
+    }catch(e){ return []; }
+  }
+  function pick(o, names){
     for(let n of names){
       let k = Object.keys(o).find(x => x.toLowerCase().replace(/[^a-z0-9]/g,'') === n.toLowerCase().replace(/[^a-z0-9]/g,''));
       if(k) return o[k];
@@ -114,84 +100,79 @@ async function muatDariGS(){
   for(let u of DB.ujian){
     let s = await getPage('Soal&kodeUjian=' + encodeURIComponent(u.KodeUjian));
     if(Array.isArray(s)) so = so.concat(s);
-  };
+  }
   DB.soal = so.map(o => ({KodeUjian: pick(o,['KodeUjian']), NoSoal:+pick(o,['NoSoal'])||0, JenisSoal: pick(o,['JenisSoal']), Soal: pick(o,['Soal']), PilihanA: pick(o,['PilihanA']), PilihanB: pick(o,['PilihanB']), PilihanC: pick(o,['PilihanC']), PilihanD: pick(o,['PilihanD']), Kunci: pick(o,['Kunci'])}));
   let jw = await getPage('Jawaban');
   DB.jawaban = jw.map(o => ({NIM: pick(o,['NIM']), KodeUjian: pick(o,['KodeUjian']), NoSoal:+pick(o,['NoSoal'])||0, Jawaban: pick(o,['Jawaban']), Status: pick(o,['Status']), WaktuJawab: pick(o,['WaktuJawab']), nilai: pick(o,['Nilai']), koreksi_dosen: pick(o,['Koreksi_Dosen','KoreksiDosen'])}));
   saveLocal();
   setStatus(`✅ ${DB.mahasiswa.length} mhs, ${DB.mataKuliah.length} MK, ${DB.materi.length} materi, ${DB.soal.length} soal`,'ok');
+  clearTimeout(window._tLogin);
   if(btnLogin){ btnLogin.disabled = false; btnLogin.innerText = 'Masuk'; }
   if(user) render();
 }
 function muatUlangGS(){ muatDariGS(false); }
 function saveLocal(){ localStorage.setItem('elearning_db_final_gs', JSON.stringify(DB)); }
-
-// Simpan balik ke GS: kirim 1 perubahan ke API, sekaligus simpan lokal
 async function simpanKeGS(sheet, payload){
   saveLocal();
   try{
     await fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'save', sheet: sheet, data: payload, all: DB})});
-  }catch(e){ console.log('Simpan GS (no-cors) - cek di GS apakah masuk', e); }
-  // Kalau API Bapak hanya terima action=add / update, payload di atas tetap bisa dibaca di doPost karena kita kirim sheet + data + all
+  }catch(e){ console.log('Simpan GS (no-cors)', e); }
 }
 function save(sheet, payload){ simpanKeGS(sheet||'', payload||{}); }
-
 let user=null,tab='dashboard',selectedMK=null,subTab='materi',subTabDosen='link';
 let timerInterval=null,sisaDetik=0,ujianAktifKode=null,jawabanTerkunci={};
 let formMateriIdx=-1,showFormMateri=false,showFormMK=false,editMKCode=null,showFormSoal=false,showFormPeserta=false,showFormUjian=false,showFormMhs=false,editMhsNim=null;
-
-// Load GS saat pertama buka
 muatDariGS(false);
-
 function doLogin(){
   if(!DB.mahasiswa || DB.mahasiswa.length===0){ document.getElementById('loginMsg').innerText='Masih menghubungkan ke GS, tunggu sebentar sampai tombol Masuk aktif...'; return; }
-  const nim=document.getElementById('inNim').value.trim()function logout(){if(timerInterval)clearInterval(timerInterval);if(confirm('Yakin mau keluar, '+user.nama+'?'))location.reload();}
+  const nim=document.getElementById('inNim').value.trim(),pw=document.getElementById('inPass').value.trim();
+  const u=DB.mahasiswa.find(x=>String(x.nim).trim()===nim&&String(x.password).trim()===pw);
+  if(!u){document.getElementById('loginMsg').innerText='NIM / Password salah. Cek di Sheet Mahasiswa di GS.';return}
+  user=u;selectedMK=null;tab='dashboard';
+  document.getElementById('pageLogin').classList.add('hidden');
+  document.getElementById('pageApp').classList.remove('hidden');
+  document.getElementById('topUser').innerText=u.nama+' ('+u.role+')';
+  document.getElementById('hello').innerText='Halo, '+u.nama+' 👋';
+  document.getElementById('helloSub').innerText='NIM: '+u.nim+' • Role: '+u.role+' • Angkatan: '+u.angkatan;
+  renderTabs();render();
+}
+function logout(){if(timerInterval)clearInterval(timerInterval);if(confirm('Yakin mau keluar, '+user.nama+'?'))location.reload();}
 function renderTabs(){const t=user.role==='dosen'?['dashboard','nilai','mahasiswa']:['dashboard','nilai'];const labels={dashboard:'🏠 Dashboard',nilai:user.role==='dosen'?'📊 Nilai Mahasiswa':'📊 Nilai Saya',mahasiswa:'👥 Mahasiswa'};document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';selectedMK=null;render()">${labels[x]}</button>`).join('');}
 function mkNama(k){const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(k));return m?m.nama_mk:k}
 function openMK(k){selectedMK=k;subTab='materi';subTabDosen='link';showFormMateri=false;showFormSoal=false;showFormPeserta=false;showFormUjian=false;render();}
 function backToDashboard(){selectedMK=null;tab='dashboard';if(timerInterval)clearInterval(timerInterval);render();}
 function sudahUjian(kode){return DB.jawaban.some(j=>String(j.NIM)===String(user.nim)&&String(j.KodeUjian)===String(kode));}
-
 function toggleFormGantiPassword(){const el=document.getElementById('formGantiPass');el.classList.toggle('hidden');document.getElementById('gpNama').innerText=user.nama+' ('+user.nim+')';document.getElementById('gp_lama').value='';document.getElementById('gp_baru').value='';document.getElementById('gp_baru2').value='';document.getElementById('gpMsg').innerText='';if(!el.classList.contains('hidden'))el.scrollIntoView({behavior:'smooth'});}
 function simpanPasswordBaru(){const lama=document.getElementById('gp_lama').value,baru=document.getElementById('gp_baru').value,baru2=document.getElementById('gp_baru2').value,msg=document.getElementById('gpMsg');if(lama!==String(user.password)){msg.innerText='Password Lama salah!';return}if(baru.length<4){msg.innerText='Password Baru minimal 4 karakter!';return}if(baru!==baru2){msg.innerText='Password Baru tidak sama dengan ketik ulang!';return}if(baru===lama){msg.innerText='Password Baru tidak boleh sama dengan Password Lama!';return}if(!confirm('Yakin ganti password? Setelah ini kamu akan logout dan harus login pakai password baru.'))return;const idx=DB.mahasiswa.findIndex(m=>String(m.nim)===String(user.nim));DB.mahasiswa[idx].password=baru;user.password=baru;save('Mahasiswa',{nim:user.nim,password:baru,action:'updatePassword'});alert('Password berhasil diganti & tersimpan ke GS! Silakan login lagi pakai password baru.');location.reload();}
-
 function toggleLupaPassword(){document.getElementById('boxLupa').classList.toggle('hidden');}
 function kirimPermintaanReset(){const nim=document.getElementById('lupa_nim').value.trim(),msg=document.getElementById('lupaMsg');const m=DB.mahasiswa.find(x=>String(x.nim)===nim);if(!m){msg.style.color='red';msg.innerText='NIM tidak ditemukan di GS!';return}if(m.role==='dosen'){msg.style.color='red';msg.innerText='Akun dosen tidak bisa request reset di sini.';return}const sudah=DB.resetRequests.find(r=>String(r.nim)===nim&&r.status==='Menunggu');if(sudah){msg.style.color='#854d0e';msg.innerText='Permintaan kamu sudah dikirim dan masih menunggu Dosen.';return}DB.resetRequests.push({nim,nama:m.nama,tanggal:new Date().toLocaleString('id-ID'),status:'Menunggu'});save('ResetRequests',{nim,nama:m.nama,tanggal:new Date().toLocaleString('id-ID'),status:'Menunggu'});msg.style.color='green';msg.innerText='✅ Permintaan terkirim ke Dosen! Hubungi Dosen agar cepat direset.';alert('Permintaan reset password terkirim ke Dosen!');}
 function resetPasswordDosen(nim){const m=DB.mahasiswa.find(x=>String(x.nim)===String(nim));const passBaru=prompt(`Reset password untuk ${m.nama} (${nim})\n\nMasukkan password baru:`,'mhs'+String(nim).slice(-1));if(passBaru===null)return;if(passBaru.length<4){alert('Password minimal 4 karakter!');return}if(!confirm(`Yakin ganti password ${m.nama} (${nim}) menjadi:\n\n"${passBaru}"\n\nKasih tahu mahasiswa password barunya ya!`))return;m.password=passBaru;DB.resetRequests=DB.resetRequests.filter(r=>!(String(r.nim)===String(nim)&&r.status==='Menunggu'));save('Mahasiswa',{nim,password:passBaru,action:'updatePassword'});alert(`Berhasil! Password baru ${m.nama} (${nim}) adalah:\n\n${passBaru}\n\nJangan lupa kasih tahu mahasiswanya!`);render();}
 function setujuiReset(nim){const r=DB.resetRequests.find(x=>String(x.nim)===String(nim)&&x.status==='Menunggu');if(!r)return;const passBaru=prompt(`Setujui reset untuk ${r.nama} (${nim})?\n\nMasukkan password baru:`, 'mhs123');if(passBaru===null)return;if(passBaru.length<4){alert('Password minimal 4 karakter!');return}const m=DB.mahasiswa.find(x=>String(x.nim)===String(nim));m.password=passBaru;r.status='Disetujui';r.passwordBaru=passBaru;r.tanggalSetuju=new Date().toLocaleString('id-ID');save('Mahasiswa',{nim,password:passBaru,action:'updatePassword'});alert(`Disetujui! Password baru ${r.nama} adalah: ${passBaru}\nKasih tahu mahasiswanya.`);render();}
 function tolakReset(nim){if(!confirm('Tolak permintaan reset dari '+nim+'?'))return;const r=DB.resetRequests.find(x=>String(x.nim)===String(nim)&&x.status==='Menunggu');if(r)r.status='Ditolak';save('ResetRequests',{nim,status:'Ditolak'});render();}
 function renderListReset(){const el=document.getElementById('listReset'),elJml=document.getElementById('jmlReset');if(!el)return;const menunggu=DB.resetRequests.filter(r=>r.status==='Menunggu');if(elJml)elJml.innerText=menunggu.length+' menunggu';if(menunggu.length===0){el.innerHTML='<p class="muted">Tidak ada permintaan reset. Aman.</p>';return}el.innerHTML=menunggu.map(r=>`<div style="border:1px solid #fed7aa;padding:10px;border-radius:10px;margin-bottom:8px;background:#fff7ed"><b>${r.nama} (${r.nim})</b> - minta reset password<br><span class="muted">Tanggal: ${r.tanggal}</span><br><button class="btn green small" onclick="setujuiReset('${r.nim}')">✅ Setujui & Buat Password Baru</button> <button class="btn red small" onclick="tolakReset('${r.nim}')">❌ Tolak</button></div>`).join('');}
-
 function exportExcelMK(kodeMK){const list=kodeMK?DB.peserta.filter(p=>String(p.kode_mk)===String(kodeMK)):DB.peserta;const judul=kodeMK?`Nilai_${kodeMK}`:`Nilai_Semua_MK`;let csv="NIM,Nama,Kode MK,Nama MK,Kehadiran,Tugas,UTS,UAS,Rata-rata\n";list.forEach(p=>{const nama=DB.mahasiswa.find(m=>String(m.nim)===String(p.nim))?.nama||'';const avg=((+p.nilai1||0)+(+p.nilai2||0)+(+p.nilai3||0)+(+p.nilai4||0))/4;csv+=`${p.nim},"${nama}",${p.kode_mk},"${mkNama(p.kode_mk)}",${p.nilai1},${p.nilai2},${p.nilai3},${p.nilai4},${avg.toFixed(1)}\n`;});csv+="\n\nDetail Jawaban Ujian\nNIM,Kode Ujian,No Soal,Jawaban,Nilai,Koreksi Dosen\n";const kodeUjianList=kodeMK?DB.ujian.filter(u=>String(u.KodeMK)===String(kodeMK)).map(u=>u.KodeUjian):DB.ujian.map(u=>u.KodeUjian);DB.jawaban.filter(j=>kodeUjianList.includes(j.KodeUjian)).forEach(j=>{csv+=`${j.NIM},${j.KodeUjian},${j.NoSoal},"${(j.Jawaban||'').replace(/"/g,'""')}",${j.nilai},"${(j.koreksi_dosen||'').replace(/"/g,'""')}"\n`;});const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=judul+".csv";a.click();alert('File Excel (CSV) '+judul+'.csv berhasil diunduh!');}
 function exportPDFMK(kodeMK){const list=kodeMK?DB.peserta.filter(p=>String(p.kode_mk)===String(kodeMK)):DB.peserta;const w=window.open('','_blank');let html=`<h2>Rekap Nilai ${kodeMK?kodeMK+' - '+mkNama(kodeMK):'Semua MK'}</h2><p>Dosen: ${user.nama} | Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}</p><table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%"><tr><th>NIM</th><th>Nama</th><th>MK</th><th>Kehadiran</th><th>Tugas</th><th>UTS</th><th>UAS</th><th>Rata-rata</th></tr>`;list.forEach(p=>{const nama=DB.mahasiswa.find(m=>String(m.nim)===String(p.nim))?.nama||'';const avg=((+p.nilai1||0)+(+p.nilai2||0)+(+p.nilai3||0)+(+p.nilai4||0))/4;html+=`<tr><td>${p.nim}</td><td>${nama}</td><td>${p.kode_mk}</td><td>${p.nilai1}</td><td>${p.nilai2}</td><td>${p.nilai3}</td><td>${p.nilai4}</td><td><b>${avg.toFixed(1)}</b></td></tr>`;});html+=`</table><p style="margin-top:20px">Tanda tangan Dosen<br><br><br>____________________<br>${user.nama}</p><script>window.print()<\/script>`;w.document.write(html);w.document.close();}
-
 function bukaFormMhs(nim){if(nim){editMhsNim=nim;showFormMhs=true;}else{editMhsNim=null;showFormMhs=!showFormMhs;}render();setTimeout(()=>{if(nim){const m=DB.mahasiswa.find(x=>String(x.nim)===String(nim));if(m){document.getElementById('f_mhs_nim').value=m.nim;document.getElementById('f_mhs_nama').value=m.nama;document.getElementById('f_mhs_pass').value=m.password;document.getElementById('f_mhs_angk').value=m.angkatan;document.getElementById('f_mhs_role').value=m.role;}}},0);}
 function simpanMhsForm(){const nim=document.getElementById('f_mhs_nim').value.trim(),nama=document.getElementById('f_mhs_nama').value.trim(),pass=document.getElementById('f_mhs_pass').value.trim(),angk=document.getElementById('f_mhs_angk').value.trim(),role=document.getElementById('f_mhs_role').value;if(!nim||!nama||!pass){alert('NIM, Nama, dan Password wajib diisi!');return}if(editMhsNim){const m=DB.mahasiswa.find(x=>String(x.nim)===String(editMhsNim));m.nim=nim;m.nama=nama;m.password=pass;m.angkatan=angk;m.role=role;save('Mahasiswa',{nim,nama,password:pass,angkatan:angk,role,action:'update'});}else{if(DB.mahasiswa.find(x=>String(x.nim)===nim)){alert('NIM '+nim+' sudah ada di GS!');return}DB.mahasiswa.push({nim,nama,password:pass,angkatan:angk||'2026',role});save('Mahasiswa',{nim,nama,password:pass,angkatan:angk||'2026',role,action:'add'});}showFormMhs=false;editMhsNim=null;alert('Mahasiswa berhasil disimpan ke GS! Bisa langsung login.');render();}
 function hapusMhs(nim){const m=DB.mahasiswa.find(x=>String(x.nim)===String(nim));if(m.role==='dosen'){alert('Tidak bisa hapus akun dosen!');return}if(!confirm(`Yakin hapus mahasiswa ${m.nama} (${nim}) dari GS?\n\nAkan menghapus juga peserta, pengumpulan tugas, dan jawaban ujiannya.\nTidak bisa dibatalkan!`))return;DB.mahasiswa=DB.mahasiswa.filter(x=>String(x.nim)!==String(nim));DB.peserta=DB.peserta.filter(p=>String(p.nim)!==String(nim));DB.pengumpulan=DB.pengumpulan.filter(p=>String(p.nim)!==String(nim));DB.jawaban=DB.jawaban.filter(j=>String(j.NIM)!==String(nim));save('Mahasiswa',{nim,action:'delete'});alert('Mahasiswa berhasil dihapus dari GS!');render();}
-
 function toggleFormMK(editKode){if(editKode){editMKCode=editKode;showFormMK=true;}else{editMKCode=null;showFormMK=!showFormMK;}render();}
 function simpanMK(){const kode=document.getElementById('f_mk_kode').value.trim(),nama=document.getElementById('f_mk_nama').value.trim(),sks=parseInt(document.getElementById('f_mk_sks').value)||3;if(!kode||!nama){alert('Kode MK dan Nama MK wajib diisi!');return}if(editMKCode){const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(editMKCode));m.kode_mk=kode;m.nama_mk=nama;m.sks=sks;save('MataKuliah',{kode_mk:kode,nama_mk:nama,sks,dosen:user.nim,action:'update',kodeLama:editMKCode});}else{if(DB.mataKuliah.find(m=>String(m.kode_mk)===kode)){alert('Kode MK sudah ada di GS!');return}DB.mataKuliah.push({kode_mk:kode,nama_mk:nama,sks,dosen:user.nim});save('MataKuliah',{kode_mk:kode,nama_mk:nama,sks,dosen:user.nim,action:'add'});}showFormMK=false;editMKCode=null;alert('MK berhasil disimpan ke GS!');render();}
 function hapusMK(kode){const jmlPeserta=DB.peserta.filter(p=>String(p.kode_mk)===String(kode)).length,jmlMateri=DB.materi.filter(p=>String(p.kode_mk)===String(kode)).length;if(!confirm(`YAKIN hapus MK ${kode} - ${mkNama(kode)} dari GS?\n\nAkan menghapus juga:\n- ${jmlPeserta} peserta\n- ${jmlMateri} materi/tugas\n- Pengumpulan & ujian MK ini\n\nTidak bisa dibatalkan!`))return;DB.mataKuliah=DB.mataKuliah.filter(m=>String(m.kode_mk)!==String(kode));DB.peserta=DB.peserta.filter(p=>String(p.kode_mk)!==String(kode));DB.materi=DB.materi.filter(p=>String(p.kode_mk)!==String(kode));DB.pengumpulan=DB.pengumpulan.filter(p=>String(p.kode_mk)!==String(kode));const ku=DB.ujian.filter(u=>String(u.KodeMK)===String(kode)).map(u=>u.KodeUjian);DB.ujian=DB.ujian.filter(u=>String(u.KodeMK)!==String(kode));DB.jawaban=DB.jawaban.filter(j=>!ku.includes(j.KodeUjian));save('MataKuliah',{kode_mk:kode,action:'delete'});alert('MK '+kode+' berhasil dihapus dari GS!');render();}
-
 function bukaFormMateri(idx){formMateriIdx=idx;showFormMateri=true;render();setTimeout(()=>{if(idx>=0){const m=DB.materi[idx];document.getElementById('f_m_id').value=m.id_tugas;document.getElementById('f_m_judul').value=m.judul;document.getElementById('f_m_desk').value=m.deskripsi;document.getElementById('f_m_deadline').value=m.deadline;document.getElementById('f_m_linkM').value=m.link_materi;document.getElementById('f_m_linkT').value=m.link_tugas||'';}},0);}
 function simpanMateriForm(){const id=document.getElementById('f_m_id').value.trim(),judul=document.getElementById('f_m_judul').value.trim(),desk=document.getElementById('f_m_desk').value.trim(),deadline=document.getElementById('f_m_deadline').value,linkM=document.getElementById('f_m_linkM').value.trim(),linkT=document.getElementById('f_m_linkT').value.trim();if(!id||!judul){alert('ID Tugas dan Judul wajib diisi!');return}const payload={kode_mk:selectedMK,id_tugas:id,judul,deskripsi:desk,deadline,link_materi:linkM,link_tugas:linkT};if(formMateriIdx>=0){const m=DB.materi[formMateriIdx];Object.assign(m,payload);save('Materi',{...payload,action:'update'});}else{DB.materi.push(payload);save('Materi',{...payload,action:'add'});}showFormMateri=false;formMateriIdx=-1;alert('Materi / Tugas berhasil disimpan ke GS!');render();}
 function hapusMateri(idx){if(!confirm('Yakin hapus "'+DB.materi[idx].judul+'" dari GS?'))return;const m=DB.materi[idx];DB.materi.splice(idx,1);save('Materi',{kode_mk:m.kode_mk,id_tugas:m.id_tugas,action:'delete'});render();}
-
 function toggleFormSoal(){showFormSoal=!showFormSoal;render();}
 function onJenisSoalChange(){const jenis=document.getElementById('f_s_jenis').value;document.getElementById('boxPilihan').style.display=jenis==='MC'?'block':'none';}
 function simpanSoalForm(){const kodeUjian=document.getElementById('f_s_ujian').value,no=parseInt(document.getElementById('f_s_no').value),jenis=document.getElementById('f_s_jenis').value,soalTxt=document.getElementById('f_s_soal').value.trim();const pa=document.getElementById('f_s_a').value.trim(),pb=document.getElementById('f_s_b').value.trim(),pc=document.getElementById('f_s_c').value.trim(),pd=document.getElementById('f_s_d').value.trim(),kunci=document.getElementById('f_s_kunci').value.trim();if(!kodeUjian||!no||!soalTxt){alert('Ujian, No Soal, dan Soal wajib diisi!');return}if(jenis==='MC'&&(!pa||!pb||!pc||!pd||!['A','B','C','D'].includes(kunci.toUpperCase()))){alert('Untuk MC, Pilihan A-D dan Kunci wajib diisi!');return}if(DB.soal.find(s=>String(s.KodeUjian)===String(kodeUjian)&&+s.NoSoal===no)){alert('No Soal '+no+' sudah ada!');return}const payload={KodeUjian:kodeUjian,NoSoal:no,JenisSoal:jenis,Soal:soalTxt,PilihanA:pa,PilihanB:pb,PilihanC:pc,PilihanD:pd,Kunci:jenis==='MC'?kunci.toUpperCase():''};DB.soal.push(payload);save('Soal',{...payload,action:'add'});showFormSoal=false;alert('Soal berhasil ditambah ke GS!');render();}
 function hapusSoal(kode,no){if(!confirm('Yakin hapus Soal No '+no+' di '+kode+' dari GS?'))return;DB.soal=DB.soal.filter(s=>!(String(s.KodeUjian)===String(kode)&&+s.NoSoal===+no));save('Soal',{KodeUjian:kode,NoSoal:no,action:'delete'});render();}
 function toggleFormUjian(){showFormUjian=!showFormUjian;render();}
 function simpanUjianForm(){const kode=document.getElementById('f_u_kode').value.trim(),judul=document.getElementById('f_u_judul').value.trim(),tgl=document.getElementById('f_u_tgl').value,mulai=document.getElementById('f_u_mulai').value,selesai=document.getElementById('f_u_selesai').value,durasi=parseInt(document.getElementById('f_u_durasi').value)||60;if(!kode||!judul){alert('Kode Ujian dan Judul wajib diisi!');return}if(DB.ujian.find(u=>String(u.KodeUjian)===String(kode))){alert('Kode Ujian sudah ada!');return}const payload={KodeUjian:kode,KodeMK:selectedMK,Judul:judul,Jenis:'UTS',Tanggal:tgl,JamMulai:mulai,JamSelesai:selesai,Status:'Aktif',DurasiMenit:durasi};DB.ujian.push(payload);save('Ujian',{...payload,action:'add'});showFormUjian=false;alert('Ujian berhasil dibuat di GS! Sekarang tambah soalnya.');render();}
-
 function toggleFormPeserta(){showFormPeserta=!showFormPeserta;render();}
 function simpanPesertaForm(){const nim=document.getElementById('f_p_nim').value;if(!nim){alert('Pilih mahasiswa dulu!');return}if(DB.peserta.find(p=>String(p.nim)===String(nim)&&String(p.kode_mk)===String(selectedMK))){alert('Mahasiswa ini sudah jadi peserta MK ini!');return}const payload={nim,kode_mk:selectedMK,nilai1:0,nilai2:0,nilai3:0,nilai4:0};DB.peserta.push(payload);save('Peserta',{...payload,action:'add'});showFormPeserta=false;alert('Peserta berhasil ditambah ke GS!');render();}
 function hapusPeserta(nim){const nama=DB.mahasiswa.find(m=>String(m.nim)===String(nim))?.nama||nim;if(!confirm(`Yakin keluarkan ${nama} (${nim}) dari MK ${selectedMK} di GS?`))return;DB.peserta=DB.peserta.filter(p=>!(String(p.nim)===String(nim)&&String(p.kode_mk)===String(selectedMK)));save('Peserta',{nim,kode_mk:selectedMK,action:'delete'});render();}
-
 function render(){
 renderTabs();const c=document.getElementById('content');let h='';
 const myPeserta=DB.peserta.filter(p=>String(p.nim)===String(user.nim));
-//const myMK=user.role==='dosen'?DB.mataKuliah.filter(m=>String(m.dosen)===String(user.nim)):DB.mataKuliah.filter(m=>myPeserta.some(p=>String(p.kode_mk)===String(m.kode_mk)));
 const myMK=user.role==='dosen'?DB.mataKuliah.filter(m=>String(m.dosen)===String(user.nim)||String(m.dosen)===String(user.nama)):DB.mataKuliah.filter(m=>myPeserta.some(p=>String(p.kode_mk)===String(m.kode_mk)));
 if(user.role==='dosen' && tab==='mahasiswa' && !selectedMK){
   h+=`<div class="card" style="border:2px solid #ea580c"><h3 style="margin-top:0">🔔 Permintaan Reset Password (<span id="jmlReset">0 menunggu</span>)</h3><div id="listReset"></div></div>`;
@@ -302,12 +283,11 @@ function kerjakan(kode){
   const el=document.getElementById('ujian-'+kode);
   const soals=DB.soal.filter(s=>String(s.KodeUjian)===String(kode));
   el.innerHTML=`<div class="timer" id="timerBox">⏱️ SISA WAKTU: <b>${Math.floor(sisaDetik/60)}:${sisaDetik%60}</b></div>`+soals.map((s,idx)=>{
-    const tampil = idx+1; // nomor yang tampil, urut 1,2,3 sesuai acak di layar
+    const tampil = idx+1;
     if(s.JenisSoal==='MC')return `<div class="soal-box" id="box-${s.NoSoal}"><b>${tampil}. ${s.Soal}</b><p class="muted">⚠️ Sekali klik, langsung terkunci!</p><label><input type="radio" name="q${s.NoSoal}" value="A" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value,${tampil})"> A. ${s.PilihanA}</label><br><label><input type="radio" name="q${s.NoSoal}" value="B" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value,${tampil})"> B. ${s.PilihanB}</label><br><label><input type="radio" name="q${s.NoSoal}" value="C" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value,${tampil})"> C. ${s.PilihanC}</label><br><label><input type="radio" name="q${s.NoSoal}" value="D" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value,${tampil})"> D. ${s.PilihanD}</label><br><span id="status-${s.NoSoal}"><span class="badge warn">Belum dijawab</span></span></div>`;
     return `<div class="soal-box" id="box-${s.NoSoal}"><b>${tampil}. ${s.Soal} (Esai)</b><textarea id="esai${s.NoSoal}" placeholder="Ketik jawaban..."></textarea><button class="btn lock" onclick="kunciEsai(${s.NoSoal},${tampil})">🔒 Kunci Jawaban Ini</button><br><span id="status-${s.NoSoal}"><span class="badge warn">Belum dijawab</span></span></div>`;
   }).join('')+`<button class="btn green" onclick="submitUjian('${kode}',false)">✅ Kirim Semua Jawaban</button><p id="msgKirim" class="muted"></p>`;
 }
-
 function kunciMC(no,val,tampil){
   if(jawabanTerkunci[no]!==undefined)return;
   if(!confirm('Kunci jawaban No '+tampil+' = '+val+' ? Setelah dikunci TIDAK BISA DIUBAH.')){
@@ -318,7 +298,6 @@ function kunciMC(no,val,tampil){
   document.getElementById('box-'+no).classList.add('locked');
   document.getElementById('status-'+no).innerHTML=`<span class="badge redbg">🔒 Terkunci: ${val}</span>`;
 }
-
 function kunciEsai(no,tampil){
   if(jawabanTerkunci[no]!==undefined)return;
   const txt=document.getElementById('esai'+no).value.trim();
@@ -329,7 +308,6 @@ function kunciEsai(no,tampil){
   document.getElementById('box-'+no).classList.add('locked');
   document.getElementById('status-'+no).innerHTML=`<span class="badge redbg">🔒 Terkunci</span>`;
 }
-
 function submitUjian(kode,otomatis){
   if(timerInterval)clearInterval(timerInterval);
   const soals=DB.soal.filter(s=>String(s.KodeUjian)===String(kode));
@@ -347,8 +325,8 @@ function submitUjian(kode,otomatis){
     const p=DB.peserta.find(x=>String(x.nim)===String(user.nim)&&String(x.kode_mk)===String(DB.ujian.find(u=>String(u.KodeUjian)===String(kode)).KodeMK));
     if(p){p.nilai3=Math.round(totalMC/cntMC);save('Peserta',{...p,action:'update'});}
   }
-  // alert dihapus, ganti tulisan di bawah tombol saja biar tidak muncul popup tiap jawab
   const msgEl=document.getElementById('msgKirim');
   if(msgEl) msgEl.innerHTML = otomatis ? '⏰ Waktu habis - jawaban terkirim otomatis ke GS.' : '✅ Jawaban terkirim ke GS!';
   setTimeout(()=>{ render(); }, 800);
-}</script></body></html>
+}
+</script></body></html>
