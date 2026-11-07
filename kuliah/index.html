@@ -152,7 +152,7 @@ function kembaliKeHalamanUtama(){
  // }
   // Kalau belum login, balik ke halaman utama web Bapak
   // GANTI link ini dengan link halaman utama Bapak yang asli:
-  window.location.href = 'index.html';
+  window.location.href = '../index.html';
 }  
 function renderTabs(){const t=user.role==='dosen'?['dashboard','nilai','mahasiswa']:['dashboard','nilai'];const labels={dashboard:'🏠 Dashboard',nilai:user.role==='dosen'?'📊 Nilai Mahasiswa':'📊 Nilai Saya',mahasiswa:'👥 Mahasiswa'};document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';selectedMK=null;render()">${labels[x]}</button>`).join('');}
 function mkNama(k){const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(k));return m?m.nama_mk:k}
