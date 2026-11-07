@@ -118,7 +118,11 @@ async function muatDariGS(){
   DB.pengumpulan = await getPage('pengumpulan');
   let uj = await getPage('Ujian');
   DB.ujian = uj.map(o => ({KodeUjian: pick(o,['KodeUjian']), KodeMK: pick(o,['KodeMK','Kode_MK']), Judul: pick(o,['Judul']), Tanggal: pick(o,['Tanggal']), JamMulai: pick(o,['JamMulai']), JamSelesai: pick(o,['JamSelesai']), Status: pick(o,['Status']), DurasiMenit: +pick(o,['DurasiMenit','Durasi'])||60}));
-  let so = await getPage('Soal').then(r => r || []);
+  let so = [];
+  for(let u of DB.ujian){
+    let s = await getPage('Soal&kodeUjian=' + encodeURIComponent(u.KodeUjian));
+    if(Array.isArray(s)) so = so.concat(s);
+  };
   DB.soal = so.map(o => ({KodeUjian: pick(o,['KodeUjian']), NoSoal:+pick(o,['NoSoal'])||0, JenisSoal: pick(o,['JenisSoal']), Soal: pick(o,['Soal']), PilihanA: pick(o,['PilihanA']), PilihanB: pick(o,['PilihanB']), PilihanC: pick(o,['PilihanC']), PilihanD: pick(o,['PilihanD']), Kunci: pick(o,['Kunci'])}));
   let jw = await getPage('Jawaban');
   DB.jawaban = jw.map(o => ({NIM: pick(o,['NIM']), KodeUjian: pick(o,['KodeUjian']), NoSoal:+pick(o,['NoSoal'])||0, Jawaban: pick(o,['Jawaban']), Status: pick(o,['Status']), WaktuJawab: pick(o,['WaktuJawab']), nilai: pick(o,['Nilai']), koreksi_dosen: pick(o,['Koreksi_Dosen','KoreksiDosen'])}));
