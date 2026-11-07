@@ -193,7 +193,8 @@ function hapusPeserta(nim){const nama=DB.mahasiswa.find(m=>String(m.nim)===Strin
 function render(){
 renderTabs();const c=document.getElementById('content');let h='';
 const myPeserta=DB.peserta.filter(p=>String(p.nim)===String(user.nim));
-const myMK=user.role==='dosen'?DB.mataKuliah.filter(m=>String(m.dosen)===String(user.nim)):DB.mataKuliah.filter(m=>myPeserta.some(p=>String(p.kode_mk)===String(m.kode_mk)));
+//const myMK=user.role==='dosen'?DB.mataKuliah.filter(m=>String(m.dosen)===String(user.nim)):DB.mataKuliah.filter(m=>myPeserta.some(p=>String(p.kode_mk)===String(m.kode_mk)));
+const myMK=user.role==='dosen'?DB.mataKuliah.filter(m=>String(m.dosen)===String(user.nim)||String(m.dosen)===String(user.nama)):DB.mataKuliah.filter(m=>myPeserta.some(p=>String(p.kode_mk)===String(m.kode_mk)));
 if(user.role==='dosen' && tab==='mahasiswa' && !selectedMK){
   h+=`<div class="card" style="border:2px solid #ea580c"><h3 style="margin-top:0">🔔 Permintaan Reset Password (<span id="jmlReset">0 menunggu</span>)</h3><div id="listReset"></div></div>`;
   if(showFormMhs){
