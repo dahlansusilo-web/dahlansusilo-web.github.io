@@ -31,7 +31,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px
 <div id="pageLogin" class="card" style="max-width:440px;margin:30px auto">
 <h2>Login</h2><p class="muted">Data dari Google Sheet Bapak</p><p><span id="statusGS" class="sync load">⏳ Menghubungkan ke Google Sheet...</span></p>
 <label>NIM / Kode Dosen</label><input id="inNim" placeholder="Contoh: D01 / 2023001"><label>Password</label><input id="inPass" type="password" placeholder="Password dari GS">
-<button class="btn" style="width:100%" onclick="doLogin()">Masuk</button>
+<button id="btnLogin" class="btn" style="width:100%" onclick="doLogin()" disabled>⏳ Menghubungkan ke GS...</button>
 <button class="btn ghost" style="width:100%;margin-top:8px" onclick="toggleLupaPassword()">❓ Lupa Password?</button>
 <div id="boxLupa" class="hidden" style="background:#fef9c3;padding:12px;border-radius:10px;margin-top:10px">
 <b>Lupa Password?</b><p class="muted">Masukkan NIM, permintaan akan dikirim ke Dosen.</p>
@@ -92,16 +92,8 @@ function normalisasiData(raw){
 
 async function muatDariGS(){
   setStatus('⏳ Memuat dari GS...','load');
-  async function getPage(page){
-    try{
-      const r = await fetch(API + '?page=' + page + '&t=' + Date.now());
-      const j = await r.json();
-      if(Array.isArray(j)) return j;
-      if(j && Array.isArray(j.data)) return j.data;
-      return [];
-    }catch(e){ return []; }
-  }
-  function pick(o, names){
+  const btnLogin = document.getElementById('btnLogin');
+  if(btnLogin){ btnLogin.disabled = true; btnLogin.innerText = '⏳ Menghubungkan ke GS...'; }  function pick(o, names){
     for(let n of names){
       let k = Object.keys(o).find(x => x.toLowerCase().replace(/[^a-z0-9]/g,'') === n.toLowerCase().replace(/[^a-z0-9]/g,''));
       if(k) return o[k];
@@ -128,6 +120,7 @@ async function muatDariGS(){
   DB.jawaban = jw.map(o => ({NIM: pick(o,['NIM']), KodeUjian: pick(o,['KodeUjian']), NoSoal:+pick(o,['NoSoal'])||0, Jawaban: pick(o,['Jawaban']), Status: pick(o,['Status']), WaktuJawab: pick(o,['WaktuJawab']), nilai: pick(o,['Nilai']), koreksi_dosen: pick(o,['Koreksi_Dosen','KoreksiDosen'])}));
   saveLocal();
   setStatus(`✅ ${DB.mahasiswa.length} mhs, ${DB.mataKuliah.length} MK, ${DB.materi.length} materi, ${DB.soal.length} soal`,'ok');
+  if(btnLogin){ btnLogin.disabled = false; btnLogin.innerText = 'Masuk'; }
   if(user) render();
 }
 function muatUlangGS(){ muatDariGS(false); }
@@ -150,8 +143,9 @@ let formMateriIdx=-1,showFormMateri=false,showFormMK=false,editMKCode=null,showF
 // Load GS saat pertama buka
 muatDariGS(false);
 
-function doLogin(){const nim=document.getElementById('inNim').value.trim(),pw=document.getElementById('inPass').value.trim();const u=DB.mahasiswa.find(x=>String(x.nim).trim()===nim&&String(x.password).trim()===pw);if(!u){document.getElementById('loginMsg').innerText='NIM / Password salah. Cek di Sheet Mahasiswa di GS.';return}user=u;selectedMK=null;tab='dashboard';document.getElementById('pageLogin').classList.add('hidden');document.getElementById('pageApp').classList.remove('hidden');document.getElementById('topUser').innerText=u.nama+' ('+u.role+')';document.getElementById('hello').innerText='Halo, '+u.nama+' 👋';document.getElementById('helloSub').innerText='NIM: '+u.nim+' • Role: '+u.role+' • Angkatan: '+u.angkatan;renderTabs();render();}
-function logout(){if(timerInterval)clearInterval(timerInterval);if(confirm('Yakin mau keluar, '+user.nama+'?'))location.reload();}
+function doLogin(){
+  if(!DB.mahasiswa || DB.mahasiswa.length===0){ document.getElementById('loginMsg').innerText='Masih menghubungkan ke GS, tunggu sebentar sampai tombol Masuk aktif...'; return; }
+  const nim=document.getElementById('inNim').value.trim()function logout(){if(timerInterval)clearInterval(timerInterval);if(confirm('Yakin mau keluar, '+user.nama+'?'))location.reload();}
 function renderTabs(){const t=user.role==='dosen'?['dashboard','nilai','mahasiswa']:['dashboard','nilai'];const labels={dashboard:'🏠 Dashboard',nilai:user.role==='dosen'?'📊 Nilai Mahasiswa':'📊 Nilai Saya',mahasiswa:'👥 Mahasiswa'};document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';selectedMK=null;render()">${labels[x]}</button>`).join('');}
 function mkNama(k){const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(k));return m?m.nama_mk:k}
 function openMK(k){selectedMK=k;subTab='materi';subTabDosen='link';showFormMateri=false;showFormSoal=false;showFormPeserta=false;showFormUjian=false;render();}
