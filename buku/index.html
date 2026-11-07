@@ -14,13 +14,11 @@ table{width:100%;border-collapse:collapse}
 th{background:#7c2d12;color:white;padding:12px 10px;font-size:13px;text-align:center}
 td{padding:12px 10px;font-size:13px;border-bottom:1px solid #f0e6d3;text-align:center;vertical-align:top}
 tr:last-child td{border:0}
-.cover{width:50px;height:70px;object-fit:cover;border-radius:4px;background:#eee}
 .judul{font-weight:700;text-align:left}
-.btn-link{background:#7c2d12;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;font-size:12px}
+.btn-link{background:#7c2d12;color:white;padding:6px 12px;border-radius:20px;text-decoration:none;font-size:12px;white-space:nowrap}
 .loading{padding:40px;text-align:center;color:#7a6e69}
 .btn-kembali{display:inline-block;margin-top:28px;background:#7c2d12;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(124,45,18,0.3)}
 .btn-kembali:hover{background:#5e2210}
-.btn-outline{display:inline-block;margin-top:28px;margin-left:10px;background:white;color:#7c2d12;border:1.5px solid #7c2d12;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}
 footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:40px}
 </style>
 </head>
@@ -40,14 +38,13 @@ footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size
   <div class="card-table">
     <table>
       <thead>
-        <tr><th>No</th><th>Cover</th><th>Judul</th><th>Penulis</th><th>Tahun</th><th>Penerbit</th><th>ISBN / Jenis / Hal</th><th>Aksi</th></tr>
+        <tr><th>No</th><th>Judul</th><th>Tahun</th><th>Penerbit</th><th>ISBN / Jenis / Hal</th><th>Link Buku</th></tr>
       </thead>
-      <tbody id="tbody"><tr><td colspan="8" class="loading">Memuat buku...</td></tr></tbody>
+      <tbody id="tbody"><tr><td colspan="6" class="loading">Memuat buku...</td></tr></tbody>
     </table>
   </div>
   <div style="text-align:center">
     <a href="/" class="btn-kembali">⬅ Kembali ke Beranda</a>
-    <a href="/profil.html" class="btn-outline">Profil</a>
   </div>
 </div>
 <footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta | <a href="/buku/" style="color:#f5e6d3;text-decoration:underline">Buku</a></footer>
@@ -58,26 +55,23 @@ async function loadBuku(){
   try{
     const res = await fetch(API + "?page=buku");
     const data = await res.json();
-    console.log(data);
     const tbody = document.getElementById('tbody');
     if(!data || data.length==0 || data.error){
-      tbody.innerHTML = '<tr><td colspan="8">Belum ada buku - '+(data.error||'kosong')+'</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6">Belum ada buku - '+(data.error||'kosong')+'</td></tr>';
       return;
     }
     tbody.innerHTML = data.map((b,i)=>`
       <tr>
         <td>${i+1}</td>
-        <td>${b.cover ? `<img src="${b.cover}" class="cover">` : '-'}</td>
         <td class="judul">${b.judul||'-'}<br><small style="color:#7a6e69">${(b.deskripsi||'').substring(0,80)}</small></td>
-        <td style="text-align:left;font-size:12px">${b.penulis||'-'}</td>
         <td>${b.tahun||'-'}</td>
         <td style="text-align:left">${b.penerbit||'-'}</td>
         <td style="text-align:left;font-size:11px">${b.isbn||'-'}<br>${b.jenis||''}<br>${b.halaman||''} Hal</td>
-        <td>${b.link ? `<a href="${b.link}" target="_blank" class="btn-link">Lihat</a>` : '-'}</td>
+        <td>${b.link ? `<a href="${b.link}" target="_blank" class="btn-link">Lihat Buku</a>` : '-'}</td>
       </tr>
     `).join('');
   }catch(e){
-    document.getElementById('tbody').innerHTML = '<tr><td colspan="8">Gagal load: '+e+'</td></tr>';
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="6">Gagal load: '+e+'</td></tr>';
   }
 }
 loadBuku();
