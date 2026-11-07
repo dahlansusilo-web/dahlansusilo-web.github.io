@@ -2,11 +2,11 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>E-Learning IF - Anti Contek</title>
+<title>E-Learning IF</title>
 <style>
 *{box-sizing:border-box;font-family:system-ui,Arial}body{margin:0;background:#f1f5f9;color:#0f172a}
 header{background:#0f172a;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-.btn{cursor:pointer;border:0;border-radius:10px;padding:10px 16px;background:#2563eb;color:#fff;font-weight:600}.btn.ghost{background:#e2e8f0;color:#0f172a}.btn.green{background:#16a34a}.btn.disabled{background:#94a3b8;cursor:not-allowed}.btn.lock{background:#dc2626}
+.btn{cursor:pointer;border:0;border-radius:10px;padding:10px 16px;background:#2563eb;color:#fff;font-weight:600}.btn.ghost{background:#e2e8f0;color:#0f172a}.btn.green{background:#16a34a}.btn.orange{background:#ea580c}.btn.red{background:#dc2626}.btn.disabled{background:#94a3b8;cursor:not-allowed}.btn.lock{background:#dc2626}
 .btn-logout{display:flex;align-items:center;gap:8px;background:#fff;color:#dc2626;border:1px solid #fecaca;padding:8px 14px;border-radius:999px;font-weight:700}.btn-logout small{display:block;font-weight:400;color:#64748b;font-size:11px}
 .wrap{max-width:1000px;margin:0 auto;padding:16px}.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;margin:6px 0}label{font-size:13px;font-weight:600}
@@ -14,10 +14,11 @@ input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-ra
 table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}
 .badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:12px;font-weight:700}.ok{background:#dcfce7;color:#166534}.warn{background:#fef9c3;color:#854d0e}.blue{background:#dbeafe;color:#1e40af}.redbg{background:#fee2e2;color:#991b1b}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tabs button{background:#e2e8f0;color:#0f172a;border:0;padding:9px 14px;border-radius:8px;font-weight:600;cursor:pointer}.tabs button.active{background:#0f172a;color:#fff}
-.hidden{display:none}.muted{color:#64748b;font-size:13px}.mk-card{cursor:pointer;border:2px solid transparent}.mk-card:hover{border-color:#2563eb}
+.hidden{display:none}.muted{color:#64748b;font-size:13px}.mk-card{cursor:pointer;border:2px solid transparent}.mk-card:hover{border-color:#2563eb;transform:translateY(-2px)}.mk-card .go{margin-top:10px;color:#2563eb;font-weight:700;font-size:13px}
 .subtabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.subtabs button{border:1px solid #cbd5e1;background:#fff;padding:9px 14px;border-radius:999px;cursor:pointer;font-weight:600}.subtabs button.active{background:#2563eb;color:#fff;border-color:#2563eb}
 .timer{position:sticky;top:70px;background:#fef2f2;border:2px solid #fecaca;padding:12px;border-radius:12px;font-weight:800;font-size:18px;text-align:center;z-index:5}.timer b{color:#dc2626}
-.soal-box{border:2px solid #e2e8f0;padding:14px;border-radius:12px;margin-bottom:12px}.soal-box.locked{border-color:#fecaca;background:#fff7f7}.soal-box.locked textarea,.soal-box.locked input{ background:#f1f5f9}
+.soal-box{border:2px solid #e2e8f0;padding:14px;border-radius:12px;margin-bottom:12px}.soal-box.locked{border-color:#fecaca;background:#fff7f7}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.row-actions button{padding:7px 10px;font-size:13px}
 </style>
 </head>
 <body>
@@ -25,8 +26,8 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px
 <div class="wrap">
 <div id="pageLogin" class="card" style="max-width:420px;margin:40px auto">
 <h2>Login</h2><p class="muted">Pakai NIM + Password dari sheet Mahasiswa</p>
-<label>NIM</label><input id="inNim" value="2023001"><label>Password</label><input id="inPass" type="password" value="mhs1">
-<button class="btn" style="width:100%" onclick="doLogin()">Masuk</button><p class="muted">D01 / DS123 (Dosen) • 2023001 / mhs1 (Eko)</p><p id="loginMsg" style="color:red"></p></div>
+<label>NIM / Kode Dosen</label><input id="inNim" value="D01"><label>Password</label><input id="inPass" type="password" value="DS123">
+<button class="btn" style="width:100%" onclick="doLogin()">Masuk</button><p class="muted">D01 / DS123 (Dosen) • 2023001 / mhs1 (Eko) • 2023002 / mhs2 (Budi)</p><p id="loginMsg" style="color:red"></p></div>
 <div id="pageApp" class="hidden">
 <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 id="hello" style="margin:0"></h2><p id="helloSub" class="muted"></p></div>
 <button class="btn-logout" onclick="logout()"><span>🚪</span><span style="text-align:left">Keluar<small>Klik untuk logout</small></span></button></div>
@@ -39,126 +40,157 @@ peserta:[{nim:"2023001",kode_mk:"IF101",nilai1:90,nilai2:85,nilai3:0,nilai4:0},{
 materi:[
 {kode_mk:"IF101",id_tugas:"T1",judul:"Tugas 1 Algoritma",deskripsi:"Buat flowchart",deadline:"2026-11-10",link_materi:"https://drive.google.com/file/d/MATERI-IF101-T1/view",link_tugas:"https://drive.google.com/file/d/TUGAS-IF101-T1/view"},
 {kode_mk:"IF101",id_tugas:"K1",judul:"Materi 1 - Pengenalan Algoritma",deskripsi:"Slide pengenalan algoritma",deadline:"-",link_materi:"https://drive.google.com/file/d/MATERI-IF101-K1/view",link_tugas:""},
+{kode_mk:"IF102",id_tugas:"P1",judul:"Praktikum 1 Basis Data",deskripsi:"Buat ERD",deadline:"2026-11-11",link_materi:"https://drive.google.com/file/d/MATERI-IF102-P1/view",link_tugas:""},
 ],
-pengumpulan:[{kode_mk:"IF101",nim:"2023001",id_tugas:"T1",link:"https://drive.google.com/file/d/13PJJS106Y2NWmOhfJz3KK0AsK6LPPnZp/view",tanggal:"11/5/2026 16:04:58",ket:"Sudah dikumpulkan",nilai:""}],
+pengumpulan:[
+{kode_mk:"IF102",nim:"2023002",id_tugas:"P1",link:"https://drive.google.com/file/d/13PJJS106Y2NWmOhfJz3KK0AsK6LPPnZp/view",tanggal:"11/5/2026 15:52:38",ket:"Sudah dikumpulkan",nilai:""},
+{kode_mk:"IF101",nim:"2023001",id_tugas:"T1",link:"https://drive.google.com/file/d/13PJJS106Y2NWmOhfJz3KK0AsK6LPPnZp/view",tanggal:"11/5/2026 16:04:58",ket:"Sudah dikumpulkan",nilai:""},
+],
 ujian:[{KodeUjian:"UTS-IF101-2026",KodeMK:"IF101",Judul:"UTS Algoritma",Tanggal:"2026-11-06",JamMulai:"10:00",JamSelesai:"20:00",Status:"Aktif",DurasiMenit:60},{KodeUjian:"UTS-IF102-2026",KodeMK:"IF102",Judul:"UTS Basisdata",Tanggal:"2026-11-06",JamMulai:"13:00",JamSelesai:"20:00",Status:"Aktif",DurasiMenit:60}],
 soal:[{KodeUjian:"UTS-IF101-2026",NoSoal:1,JenisSoal:"MC",Soal:"Apa itu algoritma?",PilihanA:"Langkah acak",PilihanB:"Langkah sistematis",PilihanC:"Tebakan",PilihanD:"Doa",Kunci:"B"},{KodeUjian:"UTS-IF101-2026",NoSoal:2,JenisSoal:"Esai",Soal:"Jelaskan perbedaan algoritma dan program!",Kunci:""}],
-jawaban:[{NIM:"2023001",KodeUjian:"UTS-IF101-2026",NoSoal:2,Jawaban:"Algoritma untuk membuat urutan perintah secara logis dan sistematis, sedangkan program adalah hasil penulisan kode sesuai algoritma",Status:"Dijawab",WaktuJawab:"2026-11-06 13:38:34",nilai:"",koreksi_dosen:""},{NIM:"2023001",KodeUjian:"UTS-IF101-2026",NoSoal:1,Jawaban:"B",Status:"Dijawab",WaktuJawab:"2026-11-06 13:42:06",nilai:100,koreksi_dosen:"Benar"}]
+jawaban:[{NIM:"2023001",KodeUjian:"UTS-IF101-2026",NoSoal:2,Jawaban:"Algoritma untuk membuat urutan perintah secara logis dan sistematis, sedangkan program adalah hasil penulisan kode sesuai algoritma",Status:"Dijawab",WaktuJawab:"2026-11-06 13:38:34",nilai:90,koreksi_dosen:"tambah gambar"},{NIM:"2023001",KodeUjian:"UTS-IF101-2026",NoSoal:1,Jawaban:"B",Status:"Dijawab",WaktuJawab:"2026-11-06 13:42:06",nilai:100,koreksi_dosen:"Benar"}]
 };
-let DB=JSON.parse(localStorage.getItem('elearning_db_v4')||'null')||structuredClone(DEFAULT_DB);
-let user=null,tab='dashboard',selectedMK=null,subTab='materi';
-let timerInterval=null,sisaDetik=0,ujianAktifKode=null;
-// PENYIMPAN JAWABAN TERKUNCI PER SOAL - selama ujian berjalan
-let jawabanTerkunci={}; // contoh: {1:"B", 2:"teks esai"}
-function save(){localStorage.setItem('elearning_db_v4',JSON.stringify(DB))}
+let DB=JSON.parse(localStorage.getItem('elearning_db_v5')||'null')||structuredClone(DEFAULT_DB);
+let user=null,tab='dashboard',selectedMK=null,subTab='materi',subTabDosen='link';
+let timerInterval=null,sisaDetik=0,ujianAktifKode=null, jawabanTerkunci={};
+function save(){localStorage.setItem('elearning_db_v5',JSON.stringify(DB))}
 function doLogin(){const nim=document.getElementById('inNim').value.trim(),pw=document.getElementById('inPass').value.trim();const u=DB.mahasiswa.find(x=>x.nim===nim&&x.password===pw);if(!u){document.getElementById('loginMsg').innerText='NIM / Password salah';return}user=u;selectedMK=null;tab='dashboard';document.getElementById('pageLogin').classList.add('hidden');document.getElementById('pageApp').classList.remove('hidden');document.getElementById('topUser').innerText=u.nama+' ('+u.role+')';document.getElementById('hello').innerText='Halo, '+u.nama+' 👋';document.getElementById('helloSub').innerText='NIM: '+u.nim+' • Role: '+u.role+' • Angkatan: '+u.angkatan;renderTabs();render();}
 function logout(){if(timerInterval)clearInterval(timerInterval);if(confirm('Yakin mau keluar, '+user.nama+'?'))location.reload();}
-function renderTabs(){const t=user.role==='dosen'?['dashboard','mk','materi','pengumpulan','ujian','jawaban','nilai']:['dashboard','nilai'];const labels={dashboard:'🏠 Dashboard',nilai:'📊 Nilai Saya',mk:'MK',materi:'Materi',pengumpulan:'Pengumpulan',ujian:'Ujian',jawaban:'Jawaban'};document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';selectedMK=null;render()">${labels[x]||x}</button>`).join('');}
+function renderTabs(){
+  // DOSEN & MAHASISWA sekarang sama polanya: Dashboard + Nilai. Kerja di dalam MK.
+  const t=['dashboard','nilai'];
+  const labels={dashboard:'🏠 Dashboard',nilai: user.role==='dosen'?'📊 Nilai Mahasiswa':'📊 Nilai Saya'};
+  document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';selectedMK=null;render()">${labels[x]}</button>`).join('');
+}
 function mkNama(k){const m=DB.mataKuliah.find(x=>x.kode_mk===k);return m?m.nama_mk:k}
-function openMK(k){selectedMK=k;subTab='materi';render();}
+function openMK(k){selectedMK=k;subTab='materi';subTabDosen='link';render();}
 function backToDashboard(){selectedMK=null;tab='dashboard';if(timerInterval)clearInterval(timerInterval);render();}
 function sudahUjian(kode){return DB.jawaban.some(j=>j.NIM===user.nim&&j.KodeUjian===kode);}
+
+// ============ DOSEN: TAMBAH / EDIT / HAPUS MK ============
+function tambahMK(){
+  const kode=prompt('Kode MK baru (contoh: IF104):'); if(!kode) return;
+  if(DB.mataKuliah.find(m=>m.kode_mk===kode.trim())){alert('Kode MK sudah ada!');return;}
+  const nama=prompt('Nama MK:'); if(!nama) return;
+  const sks=prompt('SKS (contoh: 3):','3');
+  DB.mataKuliah.push({kode_mk:kode.trim(),nama_mk:nama.trim(),sks:parseInt(sks)||3,dosen:user.nim}); save(); alert('MK '+kode+' berhasil ditambah!'); render();
+}
+function editMK(kode){
+  const m=DB.mataKuliah.find(x=>x.kode_mk===kode); if(!m) return;
+  const nama=prompt('Edit Nama MK:',m.nama_mk); if(nama===null) return;
+  const sks=prompt('Edit SKS:',m.sks); if(sks===null) return;
+  m.nama_mk=nama.trim()||m.nama_mk; m.sks=parseInt(sks)||m.sks; save(); alert('MK berhasil diedit!'); render();
+}
+function hapusMK(kode){
+  const jmlPeserta=DB.peserta.filter(p=>p.kode_mk===kode).length;
+  const jmlMateri=DB.materi.filter(p=>p.kode_mk===kode).length;
+  if(!confirm(`YAKIN hapus MK ${kode} - ${mkNama(kode)} ?\n\nIni akan menghapus juga:\n- ${jmlPeserta} peserta\n- ${jmlMateri} materi/tugas\n- Semua pengumpulan & ujian MK ini\n\nTindakan ini tidak bisa dibatalkan!`)) return;
+  DB.mataKuliah=DB.mataKuliah.filter(m=>m.kode_mk!==kode);
+  DB.peserta=DB.peserta.filter(p=>p.kode_mk!==kode);
+  DB.materi=DB.materi.filter(p=>p.kode_mk!==kode);
+  DB.pengumpulan=DB.pengumpulan.filter(p=>p.kode_mk!==kode);
+  const kodeUjianHapus=DB.ujian.filter(u=>u.KodeMK===kode).map(u=>u.KodeUjian);
+  DB.ujian=DB.ujian.filter(u=>u.KodeMK!==kode);
+  DB.jawaban=DB.jawaban.filter(j=>!kodeUjianHapus.includes(j.KodeUjian));
+  save(); alert('MK '+kode+' berhasil dihapus!'); render();
+}
+// DOSEN: Simpan / Edit Link Materi & Tugas
+function tambahMateri(){
+  const judul=prompt('Judul Materi / Tugas (contoh: Tugas 1 Algoritma):'); if(!judul) return;
+  const id=prompt('ID Tugas (contoh: T3):'); if(!id) return;
+  const desk=prompt('Deskripsi:',''); const deadline=prompt('Deadline (contoh: 2026-11-15):','');
+  const linkM=prompt('Link Materi (Google Drive):',''); const linkT=prompt('Link Soal Tugas (Google Drive):','');
+  DB.materi.push({kode_mk:selectedMK,id_tugas:id, judul, deskripsi:desk||'', deadline:deadline||'', link_materi:linkM||'', link_tugas:linkT||''});
+  save(); alert('Materi/Tugas berhasil ditambah!'); render();
+}
+function editLinkMateri(idx){
+  const m=DB.materi[idx];
+  const linkM=prompt('Edit Link Materi untuk '+m.judul+':',m.link_materi); if(linkM===null) return;
+  const linkT=prompt('Edit Link Soal Tugas untuk '+m.judul+':',m.link_tugas||''); if(linkT===null) return;
+  m.link_materi=linkM; m.link_tugas=linkT; save(); alert('Link berhasil disimpan! Mahasiswa sekarang bisa lihat link baru.'); render();
+}
+function hapusMateri(idx){
+  if(!confirm('Yakin hapus materi/tugas "'+DB.materi[idx].judul+'"?')) return;
+  DB.materi.splice(idx,1); save(); render();
+}
+
 function render(){
 renderTabs();const c=document.getElementById('content');let h='';
 const myPeserta=DB.peserta.filter(p=>p.nim===user.nim);
-const myMK=user.role==='dosen'?DB.mataKuliah:DB.mataKuliah.filter(m=>myPeserta.some(p=>p.kode_mk===m.kode_mk));
-if(user.role!=='dosen'&&selectedMK){
-const mk=DB.mataKuliah.find(m=>m.kode_mk===selectedMK);
-h+=`<button class="btn ghost" onclick="backToDashboard()">← Kembali ke Dashboard</button><br><br>`;
-h+=`<div class="card"><h2 style="margin:0">${mk.kode_mk} - ${mk.nama_mk}</h2><p class="muted">${mk.sks} SKS • Dosen ${mk.dosen}</p><div class="subtabs"><button class="${subTab==='materi'?'active':''}" onclick="subTab='materi';render()">📖 Lihat Materi</button><button class="${subTab==='tugas'?'active':''}" onclick="subTab='tugas';render()">📝 Kerjakan Tugas</button><button class="${subTab==='ujian'?'active':''}" onclick="subTab='ujian';render()">📝 Ujian</button></div></div>`;
-if(subTab==='materi'){const list=DB.materi.filter(m=>m.kode_mk===selectedMK);h+=`<div class="card"><h3>📖 Materi - ${mk.nama_mk}</h3>${list.map(m=>`<div style="border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:10px"><b>${m.id_tugas} - ${m.judul}</b><p>${m.deskripsi}</p><p class="muted">Deadline: ${m.deadline}</p><a href="${m.link_materi}" target="_blank"><button class="btn">📥 Lihat / Download Materi</button></a></div>`).join('')||'<p>Belum ada materi.</p>'}</div>`;}
-if(subTab==='tugas'){const listMateri=DB.materi.filter(m=>m.kode_mk===selectedMK);const listKumpul=DB.pengumpulan.filter(p=>p.nim===user.nim&&p.kode_mk===selectedMK);h+=`<div class="card"><h3>📝 Kerjakan Tugas - ${mk.nama_mk}</h3>${listMateri.map(m=>{const sudah=listKumpul.find(k=>k.id_tugas===m.id_tugas);return `<div style="border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:10px"><b>${m.id_tugas} - ${m.judul}</b><p>${m.deskripsi} • Deadline ${m.deadline}</p>${sudah?`<span class="badge ok">✅ Sudah dikumpulkan</span> Nilai: <b>${sudah.nilai||'-'}</b>`:`<span class="badge warn">Belum dikumpulkan</span>`}</div>`}).join('')}</div>`;h+=`<div class="card"><h3>Kumpulkan Tugas Baru</h3><label>Pilih Tugas</label><select id="kTugas">${listMateri.map(m=>`<option value="${m.kode_mk}|${m.id_tugas}">${m.kode_mk} - ${m.id_tugas} ${m.judul}</option>`).join('')}</select><label>Link Google Drive</label><input id="kLink" placeholder="https://drive.google.com/..."><button class="btn green" onclick="kumpul()">Kumpulkan Tugas</button></div>`;}
-if(subTab==='ujian'){const listU=DB.ujian.filter(u=>u.KodeMK===selectedMK);h+=`<div class="card"><h3>📝 Ujian - ${mk.nama_mk}</h3><p class="muted" style="background:#fef9c3;padding:10px;border-radius:8px">⚠️ <b>Aturan Anti Contek:</b> Jawaban yang sudah dipilih / dikunci <b>TIDAK BISA DIUBAH</b>. Soal yang belum dijawab masih bisa dijawab selama waktu masih tersedia.</p>${listU.map(u=>{const soals=DB.soal.filter(s=>s.KodeUjian===u.KodeUjian);const sudah=sudahUjian(u.KodeUjian);return `<div style="border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:10px"><b>${u.Judul} (${u.KodeUjian})</b><p class="muted">${u.Tanggal} ${u.JamMulai}-${u.JamSelesai} • ${soals.length} soal • ⏱️ ${u.DurasiMenit} menit (keseluruhan) ${sudah?'• <span class="badge redbg">🔒 Sudah Dikerjakan</span>':''}</p>${sudah?`<button class="btn disabled" disabled>🔒 Sudah Dikerjakan</button> <button class="btn ghost" onclick="lihatHasil('${u.KodeUjian}')">Lihat Hasil Saya</button>`:`<button class="btn" onclick="mulaiUjian('${u.KodeUjian}')">▶️ Mulai Ujian (${u.DurasiMenit} Menit)</button>`}<div id="ujian-${u.KodeUjian}"></div><div id="hasil-${u.KodeUjian}"></div></div>`}).join('')||'<p>Tidak ada ujian.</p>'}</div>`;}
-c.innerHTML=h;return;
-}
-if(tab==='dashboard'){if(user.role==='dosen'){h+=`<div class="card"><h3>Dashboard Dosen</h3></div>`;}else{h+=`<div class="card"><h3>Dashboard</h3><p>Anda mengambil <b>${myMK.length} MK</b>. Klik MK untuk lihat Materi, Kerjakan Tugas, dan Ujian.</p></div><div class="grid">${myMK.map(m=>`<div class="card mk-card" onclick="openMK('${m.kode_mk}')"><b>${m.kode_mk} - ${m.nama_mk}</b><p class="muted">${m.sks} SKS</p><div class="go">Masuk →</div></div>`).join('')}</div>`;}}
-if(tab==='nilai'){const listN=user.role==='dosen'?DB.peserta:myPeserta;h+=`<div class="card"><h3>${user.role==='dosen'?'Nilai Semua':'📊 Nilai Saya'} - Kehadiran / Tugas / UTS / UAS</h3><table><tr><th>NIM</th><th>MK</th><th>Kehadiran</th><th>Tugas</th><th>UTS</th><th>UAS</th><th>Rata-rata</th></tr>${listN.map(p=>{const avg=((+p.nilai1||0)+(+p.nilai2||0)+(+p.nilai3||0)+(+p.nilai4||0))/4;return `<tr><td>${p.nim}</td><td>${p.kode_mk}</td><td>${p.nilai1}</td><td>${p.nilai2}</td><td>${p.nilai3}</td><td>${p.nilai4}</td><td><b>${avg.toFixed(1)}</b></td></tr>`}).join('')}</table></div>`;}
-if(user.role==='dosen'&&['mk','materi','pengumpulan','ujian','jawaban'].includes(tab)){if(tab==='jawaban')h+=`<div class="card"><h3>Koreksi Esai</h3><table><tr><th>NIM</th><th>Ujian</th><th>No</th><th>Jawaban</th><th>Nilai</th><th>Koreksi</th><th>Simpan</th></tr>${DB.jawaban.map((j,i)=>`<tr><td>${j.NIM}</td><td>${j.KodeUjian}</td><td>${j.NoSoal}</td><td>${j.Jawaban}</td><td><input style="width:60px" value="${j.nilai}" id="jn${i}"></td><td><input value="${j.koreksi_dosen}" id="jk${i}"></td><td><button class="btn" onclick="saveKoreksi(${i})">Simpan</button></td></tr>`).join('')}</table></div>`;else h+=`<div class="card"><h3>${tab}</h3><p>Gunakan tab lain untuk dosen (sama seperti versi sebelumnya).</p></div>`;}
-c.innerHTML=h;
-}
-// TUGAS: BOLEH GANTI LELUASA SAMPAI DEADLINE
-function kumpul(){
-  const v = document.getElementById('kTugas').value.split('|');
-  const link = document.getElementById('kLink').value || 'https://drive.google.com/file/d/contoh';
-  const kode_mk = v[0], id_tugas = v[1];
+const myMK=user.role==='dosen'?DB.mataKuliah.filter(m=>m.dosen===user.nim):DB.mataKuliah.filter(m=>myPeserta.some(p=>p.kode_mk===m.kode_mk));
 
-  // Cek apakah sudah pernah kumpul tugas yang sama
-  const idx = DB.pengumpulan.findIndex(p => p.nim === user.nim && p.kode_mk === kode_mk && p.id_tugas === id_tugas);
+// ============ DETAIL MK DOSEN ============
+if(user.role==='dosen' && selectedMK){
+  const mk=DB.mataKuliah.find(m=>m.kode_mk===selectedMK);
+  h+=`<button class="btn ghost" onclick="backToDashboard()">← Kembali ke Daftar MK</button><br><br>`;
+  h+=`<div class="card"><h2 style="margin:0">${mk.kode_mk} - ${mk.nama_mk}</h2><p class="muted">${mk.sks} SKS • Dosen ${mk.dosen} • ${DB.peserta.filter(p=>p.kode_mk===selectedMK).length} peserta</p>
+  <div class="subtabs">
+    <button class="${subTabDosen==='link'?'active':''}" onclick="subTabDosen='link';render()">🔗 Simpan Link Materi / Tugas</button>
+    <button class="${subTabDosen==='koreksiTugas'?'active':''}" onclick="subTabDosen='koreksiTugas';render()">📝 Koreksi / Nilai Tugas</button>
+    <button class="${subTabDosen==='koreksiUjian'?'active':''}" onclick="subTabDosen='koreksiUjian';render()">📝 Koreksi Jawaban Ujian</button>
+    <button class="${subTabDosen==='nilai'?'active':''}" onclick="subTabDosen='nilai';render()">📊 Nilai Mahasiswa</button>
+  </div></div>`;
 
-  if(idx !== -1){
-    // SUDAH PERNAH KUMPUL -> GANTI LINK-NYA SAJA, BUKAN TAMBAH BARU
-    if(confirm('Tugas ini sudah dikumpulkan. Ganti dengan link baru?\nLink lama: ' + DB.pengumpulan[idx].link)){
-      DB.pengumpulan[idx].link = link;
-      DB.pengumpulan[idx].tanggal = new Date().toLocaleString('id-ID');
-      DB.pengumpulan[idx].ket = 'Sudah dikumpulkan (Diperbarui)';
-      DB.pengumpulan[idx].nilai = ''; // nilai lama dihapus, dosen nilai ulang
-      save(); alert('Link tugas berhasil diganti! Nilai lama dihapus, menunggu dinilai ulang dosen.');
-      render();
-    }
+  if(subTabDosen==='link'){
+    const list=DB.materi.filter(m=>m.kode_mk===selectedMK);
+    h+=`<div class="card"><h3>🔗 Simpan Link Materi / Tugas - ${mk.nama_mk}</h3><button class="btn green" onclick="tambahMateri()">+ Tambah Materi / Tugas Baru</button><p class="muted">Dosen simpan link Drive di sini, mahasiswa langsung bisa klik Lihat / Download.</p>
+    ${list.map(m=>{const idx=DB.materi.indexOf(m);return `<div style="border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:10px"><b>${m.id_tugas} - ${m.judul}</b><p>${m.deskripsi} • Deadline: ${m.deadline}</p><p>📖 Link Materi: ${m.link_materi?`<a href="${m.link_materi}" target="_blank">Buka Link</a> - ${m.link_materi}`:'<span style="color:red">Belum ada link</span>'}</p><p>📄 Link Tugas: ${m.link_tugas?`<a href="${m.link_tugas}" target="_blank">Buka Link</a>`:'-'}</p><div class="row-actions"><button class="btn orange" onclick="editLinkMateri(${idx})">✏️ Edit / Simpan Link</button><button class="btn red" onclick="hapusMateri(${idx})">🗑️ Hapus</button></div></div>`}).join('')||'<p>Belum ada materi.</p>'}</div>`;
+  }
+  if(subTabDosen==='koreksiTugas'){
+    const list=DB.pengumpulan.filter(p=>p.kode_mk===selectedMK);
+    h+=`<div class="card"><h3>📝 Koreksi / Penilaian Tugas - ${mk.nama_mk}</h3><table><tr><th>NIM</th><th>Tugas</th><th>Tanggal</th><th>Link Mahasiswa</th><th>Nilai Tugas</th><th>Simpan</th></tr>${list.map((p,i)=>{const idx=DB.pengumpulan.indexOf(p);return `<tr><td>${p.nim}</td><td>${p.id_tugas}</td><td>${p.tanggal}</td><td><a href="${p.link}" target="_blank">Buka File</a></td><td><input style="width:70px" value="${p.nilai}" id="nt${idx}" placeholder="0-100"></td><td><button class="btn" onclick="saveNilaiTugas(${idx})">Simpan</button></td></tr>`}).join('')||'<tr><td colspan="6">Belum ada yang kumpul.</td></tr>'}</table><p class="muted">Nilai tugas di sini akan dipakai dosen untuk rekap, dan mahasiswa bisa lihat di halaman Kerjakan Tugas.</p></div>`;
+  }
+  if(subTabDosen==='koreksiUjian'){
+    // Hanya ujian untuk MK ini
+    const kodeUjianList=DB.ujian.filter(u=>u.KodeMK===selectedMK).map(u=>u.KodeUjian);
+    const list=DB.jawaban.filter(j=>kodeUjianList.includes(j.KodeUjian));
+    h+=`<div class="card"><h3>📝 Koreksi Jawaban Ujian - ${mk.nama_mk}</h3><p class="muted">Sama seperti di screenshot Bapak: Eko - Esai No 2 nilai 90, koreksi "tambah gambar". MC auto-nilai, Esai dosen yang koreksi.</p><table><tr><th>NIM</th><th>Ujian</th><th>No</th><th>Jawaban</th><th>Nilai</th><th>Koreksi Dosen</th><th>Simpan</th></tr>${list.map((j,i)=>{const idx=DB.jawaban.indexOf(j);return `<tr><td>${j.NIM}</td><td>${j.KodeUjian}</td><td>${j.NoSoal}</td><td>${j.Jawaban}</td><td><input style="width:60px" value="${j.nilai}" id="jn${idx}"></td><td><input value="${j.koreksi_dosen}" id="jk${idx}" placeholder="Contoh: tambah gambar"></td><td><button class="btn" onclick="saveKoreksi(${idx})">Simpan</button></td></tr>`}).join('')||'<tr><td colspan="7">Belum ada jawaban ujian.</td></tr>'}</table></div>`;
+    h+=`<div class="card"><h3>Daftar Ujian MK Ini</h3>${DB.ujian.filter(u=>u.KodeMK===selectedMK).map(u=>`<p><b>${u.Judul}</b> - ${u.Tanggal} ${u.JamMulai}-${u.JamSelesai} • Durasi ${u.DurasiMenit} menit • ${u.Status}</p>`).join('')||'<p>Belum ada ujian.</p>'}</div>`;
+  }
+  if(subTabDosen==='nilai'){
+    const list=DB.peserta.filter(p=>p.kode_mk===selectedMK);
+    h+=`<div class="card"><h3>📊 Nilai Mahasiswa - ${mk.nama_mk} (Kehadiran / Tugas / UTS / UAS)</h3><table><tr><th>NIM</th><th>Kehadiran</th><th>Tugas</th><th>UTS</th><th>UAS</th><th>Rata-rata</th><th>Simpan</th></tr>${list.map(p=>{const idx=DB.peserta.indexOf(p);const avg=((+p.nilai1||0)+(+p.nilai2||0)+(+p.nilai3||0)+(+p.nilai4||0))/4;return `<tr><td>${p.nim}</td><td><input style="width:60px" value="${p.nilai1}" id="n1${idx}"></td><td><input style="width:60px" value="${p.nilai2}" id="n2${idx}"></td><td><input style="width:60px" value="${p.nilai3}" id="n3${idx}"></td><td><input style="width:60px" value="${p.nilai4}" id="n4${idx}"></td><td><b>${avg.toFixed(1)}</b></td><td><button class="btn" onclick="saveNilai(${idx})">Simpan</button></td></tr>`}).join('')||'<tr><td colspan="7">Belum ada peserta.</td></tr>'}</table></div>`;
+  }
+  c.innerHTML=h; return;
+}
+
+// ============ DETAIL MK MAHASISWA (TETAP SAMA, SUDAH OK) ============
+if(user.role!=='dosen' && selectedMK){
+  const mk=DB.mataKuliah.find(m=>m.kode_mk===selectedMK);
+  h+=`<button class="btn ghost" onclick="backToDashboard()">← Kembali ke Dashboard</button><br><br>`;
+  h+=`<div class="card"><h2 style="margin:0">${mk.kode_mk} - ${mk.nama_mk}</h2><p class="muted">${mk.sks} SKS • Dosen ${mk.dosen}</p><div class="subtabs"><button class="${subTab==='materi'?'active':''}" onclick="subTab='materi';render()">📖 Lihat Materi</button><button class="${subTab==='tugas'?'active':''}" onclick="subTab='tugas';render()">📝 Kerjakan Tugas</button><button class="${subTab==='ujian'?'active':''}" onclick="subTab='ujian';render()">📝 Ujian</button></div></div>`;
+  if(subTab==='materi'){const list=DB.materi.filter(m=>m.kode_mk===selectedMK);h+=`<div class="card"><h3>📖 Materi - ${mk.nama_mk}</h3>${list.map(m=>`<div style="border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:10px"><b>${m.id_tugas} - ${m.judul}</b><p>${m.deskripsi}</p><p class="muted">Deadline: ${m.deadline}</p>${m.link_materi?`<a href="${m.link_materi}" target="_blank"><button class="btn">📥 Lihat / Download Materi</button></a>`:''} ${m.link_tugas?`<a href="${m.link_tugas}" target="_blank"><button class="btn ghost">📄 Soal Tugas</button></a>`:''}</div>`).join('')||'<p>Belum ada materi.</p>'}</div>`;}
+  if(subTab==='tugas'){const listMateri=DB.materi.filter(m=>m.kode_mk===selectedMK);const listKumpul=DB.pengumpulan.filter(p=>p.nim===user.nim&&p.kode_mk===selectedMK);h+=`<div class="card"><h3>📝 Kerjakan Tugas - ${mk.nama_mk}</h3><p class="muted">Tugas boleh ganti leluasa sampai deadline.</p>${listMateri.map(m=>{const sudah=listKumpul.find(k=>k.id_tugas===m.id_tugas);return `<div style="border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:10px"><b>${m.id_tugas} - ${m.judul}</b><p>${m.deskripsi} • Deadline ${m.deadline}</p>${sudah?`<span class="badge ok">✅ Sudah dikumpulkan</span> Nilai: <b>${sudah.nilai||'-'}</b> • <a href="${sudah.link}" target="_blank">Lihat File</a> <button class="btn ghost" style="padding:6px 10px" onclick="hapusTugas('${m.kode_mk}','${m.id_tugas}')">🗑️ Hapus & Kumpul Ulang</button>`:`<span class="badge warn">Belum dikumpulkan</span>`}</div>`}).join('')}</div>`;h+=`<div class="card"><h3>Kumpulkan / Ganti Tugas</h3><label>Pilih Tugas</label><select id="kTugas">${listMateri.map(m=>`<option value="${m.kode_mk}|${m.id_tugas}">${m.kode_mk} - ${m.id_tugas} ${m.judul}</option>`).join('')}</select><label>Link Google Drive</label><input id="kLink" placeholder="https://drive.google.com/..."><button class="btn green" onclick="kumpul()">Kumpulkan / Ganti Tugas</button></div>`;}
+  if(subTab==='ujian'){const listU=DB.ujian.filter(u=>u.KodeMK===selectedMK);h+=`<div class="card"><h3>📝 Ujian - ${mk.nama_mk}</h3><p class="muted" style="background:#fef9c3;padding:10px;border-radius:8px">⚠️ <b>Anti Contek:</b> Jawaban yang sudah dipilih / dikunci <b>TIDAK BISA DIUBAH</b>.</p>${listU.map(u=>{const soals=DB.soal.filter(s=>s.KodeUjian===u.KodeUjian);const sudah=sudahUjian(u.KodeUjian);return `<div style="border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:10px"><b>${u.Judul} (${u.KodeUjian})</b><p class="muted">${u.Tanggal} ${u.JamMulai}-${u.JamSelesai} • ${soals.length} soal • ⏱️ ${u.DurasiMenit} menit ${sudah?'• <span class="badge redbg">🔒 Sudah Dikerjakan</span>':''}</p>${sudah?`<button class="btn disabled" disabled>🔒 Sudah Dikerjakan</button> <button class="btn ghost" onclick="lihatHasil('${u.KodeUjian}')">Lihat Hasil Saya</button>`:`<button class="btn" onclick="mulaiUjian('${u.KodeUjian}')">▶️ Mulai Ujian (${u.DurasiMenit} Menit)</button>`}<div id="ujian-${u.KodeUjian}"></div><div id="hasil-${u.KodeUjian}"></div></div>`}).join('')||'<p>Tidak ada ujian.</p>'}</div>`;}
+  c.innerHTML=h;return;
+}
+
+// ============ DASHBOARD ============
+if(tab==='dashboard'){
+  if(user.role==='dosen'){
+    h+=`<div class="card"><h3>📚 Mata Kuliah Aktif Saya</h3><p>Klik salah satu MK untuk: Simpan Link, Koreksi Tugas, Koreksi Ujian, dan Nilai.</p><button class="btn green" onclick="tambahMK()">+ Tambah MK Baru</button></div>`;
+    h+=`<div class="grid">${myMK.map(m=>{const jml=DB.peserta.filter(p=>p.kode_mk===m.kode_mk).length;return `<div class="card mk-card"><div onclick="openMK('${m.kode_mk}')"><b>${m.kode_mk} - ${m.nama_mk}</b><p class="muted">${m.sks} SKS • ${jml} peserta</p><div class="go">Masuk ke Mata Kuliah →</div></div><div class="row-actions"><button class="btn orange" onclick="editMK('${m.kode_mk}')">✏️ Edit MK</button><button class="btn red" onclick="hapusMK('${m.kode_mk}')">🗑️ Hapus MK</button></div></div>`}).join('')||'<p>Belum ada MK. Klik + Tambah MK Baru.</p>'}</div>`;
   } else {
-    // BELUM PERNAH -> TAMBAH BARU
-    DB.pengumpulan.push({kode_mk, nim:user.nim, id_tugas, link, tanggal:new Date().toLocaleString('id-ID'), ket:'Sudah dikumpulkan', nilai:''});
-    save(); alert('Berhasil dikumpulkan!');
-    render();
+    h+=`<div class="card"><h3>Dashboard</h3><p>Anda mengambil <b>${myMK.length} MK</b>. Klik MK untuk lihat Materi, Kerjakan Tugas, dan Ujian.</p></div><div class="grid">${myMK.map(m=>`<div class="card mk-card" onclick="openMK('${m.kode_mk}')"><b>${m.kode_mk} - ${m.nama_mk}</b><p class="muted">${m.sks} SKS • Dosen ${m.dosen}</p><div class="go">Masuk →</div></div>`).join('')}</div>`;
   }
 }
-
-// Tombol hapus / ganti tugas yang sudah dikumpulkan
-function hapusTugas(kode_mk, id_tugas){
-  if(!confirm('Hapus pengumpulan tugas '+id_tugas+'? Kamu bisa kumpul ulang lagi.')) return;
-  DB.pengumpulan = DB.pengumpulan.filter(p => !(p.nim===user.nim && p.kode_mk===kode_mk && p.id_tugas===id_tugas));
-  save(); alert('Dihapus, silakan kumpul ulang.');
-  render();
-}function saveKoreksi(i){DB.jawaban[i].nilai=document.getElementById('jn'+i).value;DB.jawaban[i].koreksi_dosen=document.getElementById('jk'+i).value;save();alert('Koreksi tersimpan');render();}
-function lihatHasil(kode){const el=document.getElementById('hasil-'+kode);const list=DB.jawaban.filter(j=>j.NIM===user.nim&&j.KodeUjian===kode);el.innerHTML=`<div style="background:#f8fafc;padding:12px;border-radius:10px;margin-top:10px"><b>Hasil Saya (Terkunci):</b>${list.map(j=>`<p>No ${j.NoSoal}: ${j.Jawaban} - Nilai: <b>${j.nilai||'Menunggu koreksi'}</b></p>`).join('')}</div>`;}
-
-// === UJIAN ANTI CONTEK ===
-function mulaiUjian(kode){
-if(sudahUjian(kode)){alert('Sudah dikerjakan. Tidak bisa diulang.');return;}
-if(!confirm('Mulai ujian? ATURAN: Jawaban yang sudah dipilih langsung TERKUNCI dan tidak bisa diubah. Yang belum dijawab masih bisa dijawab selama waktu jalan.'))return;
-jawabanTerkunci={}; ujianAktifKode=kode; const dur=DB.ujian.find(u=>u.KodeUjian===kode).DurasiMenit||60; sisaDetik=dur*60;
-kerjakan(kode); startTimer();
+if(tab==='nilai'){
+  const listN=user.role==='dosen'?DB.peserta:myPeserta;
+  h+=`<div class="card"><h3>${user.role==='dosen'?'📊 Nilai Semua Mahasiswa':'📊 Nilai Saya'} - Kehadiran / Tugas / UTS / UAS</h3><table><tr><th>NIM</th><th>MK</th><th>Kehadiran</th><th>Tugas</th><th>UTS</th><th>UAS</th><th>Rata-rata</th><th>${user.role==='dosen'?'Edit':''}</th></tr>${listN.map(p=>{const idx=DB.peserta.indexOf(p);const avg=((+p.nilai1||0)+(+p.nilai2||0)+(+p.nilai3||0)+(+p.nilai4||0))/4;return `<tr><td>${p.nim}</td><td>${p.kode_mk} - ${mkNama(p.kode_mk)}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai1}" id="n1${idx}">`:p.nilai1}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai2}" id="n2${idx}">`:p.nilai2}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai3}" id="n3${idx}">`:p.nilai3}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai4}" id="n4${idx}">`:p.nilai4}</td><td><b>${avg.toFixed(1)}</b></td><td>${user.role==='dosen'?`<button class="btn" onclick="saveNilai(${idx})">Simpan</button>`:''}</td></tr>`}).join('')}</table></div>`;
+  if(user.role!=='dosen'){const myJaw=DB.jawaban.filter(j=>j.NIM===user.nim);h+=`<div class="card"><h3>Nilai Esai Saya + Koreksi Dosen</h3>${myJaw.map(j=>`<p><b>${j.KodeUjian} No ${j.NoSoal}</b> - ${j.Jawaban}<br>Nilai: <b>${j.nilai||'Belum dinilai'}</b> • Koreksi: ${j.koreksi_dosen||'-'}</p>`).join('')||'<p>Belum ada jawaban.</p>'}</div>`;}
 }
-function startTimer(){if(timerInterval)clearInterval(timerInterval); timerInterval=setInterval(()=>{sisaDetik--; const el=document.getElementById('timerBox'); if(el){const m=Math.floor(sisaDetik/60),s=sisaDetik%60; el.innerHTML=`⏱️ SISA WAKTU KESELURUHAN: <b>${m}:${s<10?'0':''}${s}</b> - Soal yang belum dijawab masih bisa dijawab, yang sudah terkunci tidak bisa diubah`;} if(sisaDetik<=0){clearInterval(timerInterval); alert('Waktu habis! Jawaban terkirim otomatis.'); submitUjian(ujianAktifKode,true);} },1000);}
-function kerjakan(kode){
-const el=document.getElementById('ujian-'+kode); const soals=DB.soal.filter(s=>s.KodeUjian===kode);
-el.innerHTML=`<div class="timer" id="timerBox">⏱️ SISA WAKTU KESELURUHAN: <b>${Math.floor(sisaDetik/60)}:${sisaDetik%60}</b></div>`+soals.map(s=>{
-if(s.JenisSoal==='MC') return `<div class="soal-box" id="box-${s.NoSoal}"><b>${s.NoSoal}. ${s.Soal}</b><p class="muted">⚠️ Sekali klik, langsung terkunci! Pikirkan dulu sebelum klik.</p><label><input type="radio" name="q${s.NoSoal}" value="A" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value)"> A. ${s.PilihanA}</label><br><label><input type="radio" name="q${s.NoSoal}" value="B" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value)"> B. ${s.PilihanB}</label><br><label><input type="radio" name="q${s.NoSoal}" value="C" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value)"> C. ${s.PilihanC}</label><br><label><input type="radio" name="q${s.NoSoal}" value="D" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value)"> D. ${s.PilihanD}</label><br><span id="status-${s.NoSoal}"><span class="badge warn">Belum dijawab - masih bisa dijawab</span></span></div>`;
-return `<div class="soal-box" id="box-${s.NoSoal}"><b>${s.NoSoal}. ${s.Soal} (Esai)</b><textarea id="esai${s.NoSoal}" placeholder="Ketik jawaban... Setelah klik Kunci, tidak bisa diubah!"></textarea><button class="btn lock" onclick="kunciEsai(${s.NoSoal})">🔒 Kunci Jawaban Ini</button><br><span id="status-${s.NoSoal}"><span class="badge warn">Belum dijawab - masih bisa dijawab</span></span></div>`;
-}).join('')+`<button class="btn green" onclick="submitUjian('${kode}',false)">✅ Kirim Semua Jawaban</button><p class="muted">Tombol Kirim hanya mengirim semua jawaban yang sudah terkunci + yang belum dijawab akan dianggap kosong. Yang sudah terkunci tidak bisa diubah lagi.</p>`;
+c.innerHTML=h;
 }
-// MC: langsung kunci saat klik
-function kunciMC(no,val){
-if(jawabanTerkunci[no]!==undefined) return;
-if(!confirm('Kunci jawaban No '+no+' = '+val+' ? Setelah dikunci TIDAK BISA DIUBAH lagi.')){ document.querySelector(`input[name="q${no}"][value="${val}"]`).checked=false; return; }
-jawabanTerkunci[no]=val;
-document.querySelectorAll(`input[name="q${no}"]`).forEach(r=>r.disabled=true);
-document.getElementById('box-'+no).classList.add('locked');
-document.getElementById('status-'+no).innerHTML=`<span class="badge redbg">🔒 Terkunci: ${val} - Tidak bisa diubah</span>`;
-}
-// Esai: kunci saat klik tombol
-function kunciEsai(no){
-if(jawabanTerkunci[no]!==undefined) return;
-const txt=document.getElementById('esai'+no).value.trim();
-if(!txt){alert('Isi dulu jawabannya baru dikunci.'); return;}
-if(!confirm('Kunci jawaban esai No '+no+' ? Setelah dikunci TIDAK BISA DIUBAH lagi.')) return;
-jawabanTerkunci[no]=txt;
-document.getElementById('esai'+no).disabled=true;
-document.getElementById('box-'+no).classList.add('locked');
-document.getElementById('status-'+no).innerHTML=`<span class="badge redbg">🔒 Terkunci - Tidak bisa diubah</span>`;
-}
-function submitUjian(kode,otomatis){
-if(timerInterval)clearInterval(timerInterval);
-const soals=DB.soal.filter(s=>s.KodeUjian===kode); let totalMC=0,cntMC=0;
-soals.forEach(s=>{
-let ans = jawabanTerkunci[s.NoSoal]!==undefined ? jawabanTerkunci[s.NoSoal] : '';
-// Kalau belum dikunci tapi sempat ketik esai, ambil apa adanya (dianggap belum terkunci tapi tetap dikirim saat waktu habis)
-if(ans==='' && s.JenisSoal==='Esai'){ const e=document.getElementById('esai'+s.NoSoal); if(e) ans=e.value; }
-if(s.JenisSoal==='MC'){cntMC++; if(ans===s.Kunci) totalMC+=100;}
-DB.jawaban=DB.jawaban.filter(j=>!(j.NIM===user.nim&&j.KodeUjian===kode&&j.NoSoal===s.NoSoal));
-DB.jawaban.push({NIM:user.nim,KodeUjian:kode,NoSoal:s.NoSoal,Jawaban:ans,Status:'Dijawab',WaktuJawab:new Date().toLocaleString('id-ID'),nilai:s.JenisSoal==='MC'?(ans===s.Kunci?100:0):'',koreksi_dosen:s.JenisSoal==='MC'?(ans===s.Kunci?'Benar':'Salah'):''});
-});
-if(cntMC>0){const p=DB.peserta.find(x=>x.nim===user.nim&&x.kode_mk===DB.ujian.find(u=>u.KodeUjian===kode).KodeMK); if(p) p.nilai3=Math.round(totalMC/cntMC);}
-save(); alert(otomatis?'Waktu habis - jawaban terkirim otomatis dan terkunci.':'Jawaban terkirim! Yang sudah terkunci tidak bisa diubah lagi.'); render();
-}
+function kumpul(){const v=document.getElementById('kTugas').value.split('|');const link=document.getElementById('kLink').value||'https://drive.google.com/file/d/contoh';const idx=DB.pengumpulan.findIndex(p=>p.nim===user.nim&&p.kode_mk===v[0]&&p.id_tugas===v[1]);if(idx!==-1){if(!confirm('Tugas ini sudah dikumpulkan. Ganti dengan link baru?'))return;DB.pengumpulan[idx].link=link;DB.pengumpulan[idx].tanggal=new Date().toLocaleString('id-ID');DB.pengumpulan[idx].ket='Sudah dikumpulkan (Diperbarui)';DB.pengumpulan[idx].nilai='';}else{DB.pengumpulan.push({kode_mk:v[0],nim:user.nim,id_tugas:v[1],link,tanggal:new Date().toLocaleString('id-ID'),ket:'Sudah dikumpulkan',nilai:''});}save();alert('Tugas berhasil dikumpulkan / diganti!');render();}
+function hapusTugas(kode_mk,id_tugas){if(!confirm('Hapus pengumpulan tugas '+id_tugas+'? Kamu bisa kumpul ulang lagi.'))return;DB.pengumpulan=DB.pengumpulan.filter(p=>!(p.nim===user.nim&&p.kode_mk===kode_mk&&p.id_tugas===id_tugas));save();render();}
+function saveNilaiTugas(idx){DB.pengumpulan[idx].nilai=document.getElementById('nt'+idx).value;save();alert('Nilai tugas tersimpan!');render();}
+function saveNilai(i){DB.peserta[i].nilai1=document.getElementById('n1'+i).value;DB.peserta[i].nilai2=document.getElementById('n2'+i).value;DB.peserta[i].nilai3=document.getElementById('n3'+i).value;DB.peserta[i].nilai4=document.getElementById('n4'+i).value;save();alert('Nilai tersimpan');render();}
+function saveKoreksi(i){DB.jawaban[i].nilai=document.getElementById('jn'+i).value;DB.jawaban[i].koreksi_dosen=document.getElementById('jk'+i).value;save();alert('Koreksi tersimpan! Mahasiswa langsung bisa lihat di Nilai Saya.');render();}
+function lihatHasil(kode){const el=document.getElementById('hasil-'+kode);const list=DB.jawaban.filter(j=>j.NIM===user.nim&&j.KodeUjian===kode);el.innerHTML=`<div style="background:#f8fafc;padding:12px;border-radius:10px;margin-top:10px"><b>Hasil Saya (Terkunci):</b>${list.map(j=>`<p>No ${j.NoSoal}: ${j.Jawaban} - Nilai: <b>${j.nilai||'Menunggu koreksi'}</b> • Koreksi: ${j.koreksi_dosen||'-'}</p>`).join('')}</div>`;}
+function mulaiUjian(kode){if(sudahUjian(kode)){alert('Sudah dikerjakan. Tidak bisa diulang.');return;}if(!confirm('Mulai ujian? ATURAN: Jawaban yang sudah dipilih langsung TERKUNCI dan tidak bisa diubah.'))return;jawabanTerkunci={};ujianAktifKode=kode;const dur=DB.ujian.find(u=>u.KodeUjian===kode).DurasiMenit||60;sisaDetik=dur*60;kerjakan(kode);startTimer();}
+function startTimer(){if(timerInterval)clearInterval(timerInterval);timerInterval=setInterval(()=>{sisaDetik--;const el=document.getElementById('timerBox');if(el){const m=Math.floor(sisaDetik/60),s=sisaDetik%60;el.innerHTML=`⏱️ SISA WAKTU KESELURUHAN: <b>${m}:${s<10?'0':''}${s}</b>`;}if(sisaDetik<=0){clearInterval(timerInterval);alert('Waktu habis! Jawaban terkirim otomatis.');submitUjian(ujianAktifKode,true);}},1000);}
+function kerjakan(kode){const el=document.getElementById('ujian-'+kode);const soals=DB.soal.filter(s=>s.KodeUjian===kode);el.innerHTML=`<div class="timer" id="timerBox">⏱️ SISA WAKTU: <b>${Math.floor(sisaDetik/60)}:${sisaDetik%60}</b></div>`+soals.map(s=>{if(s.JenisSoal==='MC')return `<div class="soal-box" id="box-${s.NoSoal}"><b>${s.NoSoal}. ${s.Soal}</b><p class="muted">⚠️ Sekali klik, langsung terkunci!</p><label><input type="radio" name="q${s.NoSoal}" value="A" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value)"> A. ${s.PilihanA}</label><br><label><input type="radio" name="q${s.NoSoal}" value="B" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value)"> B. ${s.PilihanB}</label><br><label><input type="radio" name="q${s.NoSoal}" value="C" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value)"> C. ${s.PilihanC}</label><br><label><input type="radio" name="q${s.NoSoal}" value="D" style="width:auto" onchange="kunciMC(${s.NoSoal},this.value)"> D. ${s.PilihanD}</label><br><span id="status-${s.NoSoal}"><span class="badge warn">Belum dijawab</span></span></div>`;return `<div class="soal-box" id="box-${s.NoSoal}"><b>${s.NoSoal}. ${s.Soal} (Esai)</b><textarea id="esai${s.NoSoal}" placeholder="Ketik jawaban..."></textarea><button class="btn lock" onclick="kunciEsai(${s.NoSoal})">🔒 Kunci Jawaban Ini</button><br><span id="status-${s.NoSoal}"><span class="badge warn">Belum dijawab</span></span></div>`;}).join('')+`<button class="btn green" onclick="submitUjian('${kode}',false)">✅ Kirim Semua Jawaban</button>`;}
+function kunciMC(no,val){if(jawabanTerkunci[no]!==undefined)return;if(!confirm('Kunci jawaban No '+no+' = '+val+' ? Setelah dikunci TIDAK BISA DIUBAH.')){document.querySelector(`input[name="q${no}"][value="${val}"]`).checked=false;return;}jawabanTerkunci[no]=val;document.querySelectorAll(`input[name="q${no}"]`).forEach(r=>r.disabled=true);document.getElementById('box-'+no).classList.add('locked');document.getElementById('status-'+no).innerHTML=`<span class="badge redbg">🔒 Terkunci: ${val}</span>`;}
+function kunciEsai(no){if(jawabanTerkunci[no]!==undefined)return;const txt=document.getElementById('esai'+no).value.trim();if(!txt){alert('Isi dulu jawabannya baru dikunci.');return;}if(!confirm('Kunci jawaban esai No '+no+' ? Setelah dikunci TIDAK BISA DIUBAH.'))return;jawabanTerkunci[no]=txt;document.getElementById('esai'+no).disabled=true;document.getElementById('box-'+no).classList.add('locked');document.getElementById('status-'+no).innerHTML=`<span class="badge redbg">🔒 Terkunci</span>`;}
+function submitUjian(kode,otomatis){if(timerInterval)clearInterval(timerInterval);const soals=DB.soal.filter(s=>s.KodeUjian===kode);let totalMC=0,cntMC=0;soals.forEach(s=>{let ans=jawabanTerkunci[s.NoSoal]!==undefined?jawabanTerkunci[s.NoSoal]:'';if(ans===''&&s.JenisSoal==='Esai'){const e=document.getElementById('esai'+s.NoSoal);if(e)ans=e.value;}if(s.JenisSoal==='MC'){cntMC++;if(ans===s.Kunci)totalMC+=100;}DB.jawaban=DB.jawaban.filter(j=>!(j.NIM===user.nim&&j.KodeUjian===kode&&j.NoSoal===s.NoSoal));DB.jawaban.push({NIM:user.nim,KodeUjian:kode,NoSoal:s.NoSoal,Jawaban:ans,Status:'Dijawab',WaktuJawab:new Date().toLocaleString('id-ID'),nilai:s.JenisSoal==='MC'?(ans===s.Kunci?100:0):'',koreksi_dosen:s.JenisSoal==='MC'?(ans===s.Kunci?'Benar':'Salah'):''});});if(cntMC>0){const p=DB.peserta.find(x=>x.nim===user.nim&&x.kode_mk===DB.ujian.find(u=>u.KodeUjian===kode).KodeMK);if(p)p.nilai3=Math.round(totalMC/cntMC);}save();alert(otomatis?'Waktu habis - jawaban terkirim otomatis.':'Jawaban terkirim!');render();}
 </script></body></html>
