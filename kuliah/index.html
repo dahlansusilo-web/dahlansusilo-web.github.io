@@ -1,101 +1,183 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Kuliah USAHID</title>
-<!-- VERSI-DIAG-NIM-2026-11-05 -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-Learning IF - UTS</title>
 <style>
-*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f9f5f0;color:#222}
-header{background:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;color:#7c2d12;text-decoration:none;font-size:15px}
-.logo img{width:42px;height:42px;object-fit:contain}
-.user{display:flex;gap:10px;align-items:center;font-size:13px}
-.btn-logout{background:#7c2d12;color:#fff;padding:6px 14px;border-radius:20px;text-decoration:none;font-weight:600}
-.wrap{max-width:900px;margin:24px auto;padding:0 16px}
-h2{color:#7c2d12;margin:0 0 4px}
-.sub{color:#666;font-size:13px;margin-bottom:16px}
-.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.07)}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th{background:#7c2d12;color:#fff;text-align:left;padding:12px 14px}
-td{padding:12px 14px;border-bottom:1px solid #eee}
-.btn-buka{background:#7c2d12;color:#fff;padding:7px 16px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block}
-#error-box{display:none;background:#fdecea;color:#7c2d12;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px}
-@media(max-width:600px){ .logo{font-size:13px} th,td{padding:10px 8px;font-size:13px} }
-</style></head>
+*{box-sizing:border-box;font-family:system-ui,Arial} body{margin:0;background:#f1f5f9;color:#0f172a}
+header{background:#0f172a;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+header b{font-size:18px} button{cursor:pointer;border:0;border-radius:8px;padding:9px 14px;background:#2563eb;color:#fff;font-weight:600}
+button.ghost{background:#e2e8f0;color:#0f172a} button.green{background:#16a34a} button.red{background:#dc2626}
+.wrap{max-width:1000px;margin:0 auto;padding:16px} .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;margin:6px 0} label{font-size:13px;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media(max-width:650px){.grid{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:14px} th,td{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:top}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:12px;font-weight:700}.ok{background:#dcfce7;color:#166534}.warn{background:#fef9c3;color:#854d0e}.blue{background:#dbeafe;color:#1e40af}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tabs button{background:#e2e8f0;color:#0f172a}.tabs button.active{background:#0f172a;color:#fff}
+.hidden{display:none} .muted{color:#64748b;font-size:13px} h3{margin:4px 0 10px}
+</style>
+</head>
 <body>
-<header>
-  <a class="logo" href="/kuliah/"><img src="/logo-usahidsolo.png" onerror="this.style.display='none'"> USAHID SOLO - KULIAH</a>
-  <div class="user"><span id="user-info"></span><a class="btn-logout" href="#" onclick="logout()">Keluar</a></div>
-</header>
+<header><b>📚 E-Learning IF</b><span id="topUser"></span></header>
 <div class="wrap">
-  <h2>Daftar Mata Kuliah</h2>
-  <p class="sub"><a href="/" style="color:#7c2d12;text-decoration:none">← Beranda</a> • Silakan pilih mata kuliah untuk melihat materi dan tugas</p>
-  <p id="diag-nim" style="font-size:11px;color:#999">Memeriksa NIM login...</p>
-  <div id="error-box"></div>
-  <div class="card">
-    <table>
-      <thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>Keterangan</th><th>SKS</th><th>Semester</th><th>Aksi</th></tr></thead>
-      <tbody id="list-mk"><tr><td colspan="5" style="text-align:center;padding:20px">Memuat mata kuliah...</td></tr></tbody>
-    </table>
-  </div>
+
+<!-- LOGIN -->
+<div id="pageLogin" class="card" style="max-width:420px;margin:40px auto">
+<h2>Login</h2><p class="muted">Pakai NIM + Password dari sheet Mahasiswa</p>
+<label>NIM / Kode Dosen</label><input id="inNim" placeholder="2023001 / D01" value="2023001">
+<label>Password</label><input id="inPass" type="password" placeholder="mhs1 / DS123" value="mhs1">
+<button style="width:100%" onclick="doLogin()">Masuk</button>
+<p class="muted">Coba: D01 / DS123 (Dosen) • 2023001 / mhs1 (Eko) • 2023002 / mhs2 (Budi)</p>
+<p id="loginMsg" style="color:red"></p>
+</div>
+
+<!-- APP -->
+<div id="pageApp" class="hidden">
+<div class="card"><h2 id="hello"></h2><p id="helloSub" class="muted"></p><button class="red" onclick="logout()">Keluar</button></div>
+<div class="tabs" id="tabs"></div>
+<div id="content"></div>
+</div>
+
 </div>
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-function setText(id, txt){ var el=document.getElementById(id); if(el) el.innerText=txt; }
-function setHTML(id, html){ var el=document.getElementById(id); if(el) el.innerHTML=html; }
-let rawUser = JSON.parse(localStorage.getItem('kuliah_user')||'null');
-if(!rawUser){ location.href='/kuliah/login.html'; }
-let user = rawUser.user || rawUser;
-// Perbaikan: cari NIM dari semua kemungkinan nama kunci, huruf besar/kecil
-function cariNIM(obj){
-  if(!obj) return "";
-  for(let k in obj){
-    if(String(k).trim().toLowerCase()==="nim") return String(obj[k]||"").trim();
-  }
-  return String(obj.nim||obj.NIM||obj.nim_mahasiswa||"").trim();
+// ===== DATA AWAL - DARI SHEET BAPAK =====
+const DEFAULT_DB = {
+mahasiswa:[
+{npm:"D01",nim:"D01",nama:"Dahlan Susilo",password:"DS123",role:"dosen",angkatan:"2008"},
+{npm:"2023001",nim:"2023001",nama:"Eko",password:"mhs1",role:"mahasiswa",angkatan:"2023"},
+{npm:"2023002",nim:"2023002",nama:"Budi",password:"mhs2",role:"mahasiswa",angkatan:"2023"},
+],
+mataKuliah:[
+{kode_mk:"IF101",nama_mk:"Algoritma dan Pemrograman",sks:3,dosen:"D01"},
+{kode_mk:"IF102",nama_mk:"Basis Data",sks:3,dosen:"D01"},
+{kode_mk:"IF103",nama_mk:"Struktur Data",sks:3,dosen:"D01"},
+],
+peserta:[
+// nilai1=Kehadiran, nilai2=Tugas, nilai3=UTS, nilai4=UAS
+{npm:"2023001",nim:"2023001",kode_mk:"IF101",nilai1:90,nilai2:85,nilai3:0,nilai4:0},
+{npm:"2023002",nim:"2023002",kode_mk:"IF101",nilai1:80,nilai2:78,nilai3:0,nilai4:0},
+{npm:"2023001",nim:"2023001",kode_mk:"IF103",nilai1:88,nilai2:80,nilai3:0,nilai4:0},
+{npm:"2023002",nim:"2023002",kode_mk:"IF102",nilai1:85,nilai2:82,nilai3:0,nilai4:0},
+],
+materi:[
+{kode_mk:"IF101",id_tugas:"T1",judul:"Tugas 1 Algoritma",deskripsi:"Buat flowchart",tanggal:"",deadline:"2026-11-10"},
+{kode_mk:"IF101",id_tugas:"T2",judul:"Tugas 2 Algoritma",deskripsi:"Pseudocode",tanggal:"",deadline:"2026-11-12"},
+{kode_mk:"IF102",id_tugas:"P1",judul:"Praktikum 1 Basis Data",deskripsi:"Buat ERD",tanggal:"",deadline:"2026-11-11"},
+{kode_mk:"IF102",id_tugas:"P2",judul:"Praktikum 2 Basis Data",deskripsi:"Normalisasi",tanggal:"",deadline:"2026-11-13"},
+{kode_mk:"IF102",id_tugas:"P3",judul:"Praktikum 3 Basis Data",deskripsi:"SQL Query",tanggal:"",deadline:"2026-11-14"},
+{kode_mk:"IF101",id_tugas:"K1",judul:"Kuis 1",deskripsi:"Kuis Algoritma",tanggal:"",deadline:"2026-11-09"},
+],
+pengumpulan:[
+{kode_mk:"IF102",nim:"2023002",id_tugas:"P1",link:"https://drive.google.com/file/d/13PJJS106Y2NWmOhfJz3KK0AsK6LPPnZp/view",tanggal:"11/5/2026 15:52:38",ket:"Sudah dikumpulkan",nilai:""},
+{kode_mk:"IF102",nim:"2023001",id_tugas:"P2",link:"https://drive.google.com/file/d/13PJJS106Y2NWmOhfJz3KK0AsK6LPPnZp/view",tanggal:"11/5/2026 16:03:57",ket:"Sudah dikumpulkan",nilai:""},
+{kode_mk:"IF102",nim:"2023002",id_tugas:"P3",link:"https://drive.google.com/file/d/13PJJS106Y2NWmOhfJz3KK0AsK6LPPnZp/view",tanggal:"11/5/2026 16:04:09",ket:"Sudah dikumpulkan",nilai:""},
+{kode_mk:"IF101",nim:"2023001",id_tugas:"T1",link:"https://drive.google.com/file/d/13PJJS106Y2NWmOhfJz3KK0AsK6LPPnZp/view",tanggal:"11/5/2026 16:04:58",ket:"Sudah dikumpulkan",nilai:""},
+{kode_mk:"IF101",nim:"2023002",id_tugas:"T2",link:"https://drive.google.com/file/d/13PJJS106Y2NWmOhfJz3KK0AsK6LPPnZp/view",tanggal:"11/5/2026 23:20:31",ket:"Sudah dikumpulkan",nilai:""},
+],
+ujian:[
+{KodeUjian:"UTS-IF101-2026",KodeMK:"IF101",Judul:"UTS Algoritma",Jenis:"UTS",Tanggal:"2026-11-06",JamMulai:"10:00",JamSelesai:"20:00",Status:"Aktif"},
+{KodeUjian:"UTS-IF102-2026",KodeMK:"IF102",Judul:"UTS Basisdata",Jenis:"UTS",Tanggal:"2026-11-06",JamMulai:"13:00",JamSelesai:"20:00",Status:"Aktif"},
+],
+soal:[
+{KodeUjian:"UTS-IF101-2026",NoSoal:1,JenisSoal:"MC",Soal:"Apa itu algoritma?",PilihanA:"Langkah acak",PilihanB:"Langkah sistematis",PilihanC:"Tebakan",PilihanD:"Doa",Kunci:"B"},
+{KodeUjian:"UTS-IF101-2026",NoSoal:2,JenisSoal:"Esai",Soal:"Jelaskan perbedaan algoritma dan program!",PilihanA:"",PilihanB:"",PilihanC:"",PilihanD:"",Kunci:""},
+],
+jawaban:[
+{NIM:"2023001",KodeUjian:"UTS-IF101-2026",NoSoal:2,Jawaban:"Algoritma untuk membuat urutan perintah secara logis dan sistematis, sedangkan program adalah hasil penulisan kode sesuai algoritma",Status:"Dijawab",WaktuJawab:"2026-11-06 13:38:34",nilai:"",koreksi_dosen:""},
+{NIM:"2023001",KodeUjian:"UTS-IF101-2026",NoSoal:1,Jawaban:"B",Status:"Dijawab",WaktuJawab:"2026-11-06 13:42:06",nilai:100,koreksi_dosen:"Benar"},
+]
+};
+let DB = JSON.parse(localStorage.getItem('elearning_db') || 'null') || structuredClone(DEFAULT_DB);
+let user=null, tab='dashboard';
+function save(){localStorage.setItem('elearning_db',JSON.stringify(DB))}
+function doLogin(){
+  const nim=document.getElementById('inNim').value.trim(), pw=document.getElementById('inPass').value.trim();
+  const u=DB.mahasiswa.find(x=>x.nim===nim && x.password===pw);
+  if(!u){document.getElementById('loginMsg').innerText='NIM / Password salah';return}
+  user=u; document.getElementById('pageLogin').classList.add('hidden'); document.getElementById('pageApp').classList.remove('hidden');
+  document.getElementById('topUser').innerText=u.nama+' ('+u.role+')';
+  document.getElementById('hello').innerText='Halo, '+u.nama+' 👋';
+  document.getElementById('helloSub').innerText='NIM: '+u.nim+' • Role: '+u.role+' • Angkatan: '+u.angkatan;
+  renderTabs(); render();
 }
-function cariRole(obj){
-  if(!obj) return "";
-  for(let k in obj){
-    if(String(k).trim().toLowerCase()==="role") return String(obj[k]||"").trim();
-  }
-  return String(obj.role||obj.peran||"").trim();
+function logout(){location.reload()}
+function renderTabs(){
+  const t = user.role==='dosen' ? ['dashboard','mk','materi','pengumpulan','ujian','jawaban','nilai'] : ['dashboard','mk','materi','kumpul','ujian','nilai'];
+  document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';render()">${x.toUpperCase()}</button>`).join('');
 }
-let nimLogin = cariNIM(user);
-let roleLogin = cariRole(user).toLowerCase();
-if(!nimLogin){ location.href='/kuliah/login.html'; }
-setText('user-info', (user.nama||user.Nama||'')+' ('+(roleLogin||'')+')');
-setText('diag-nim', 'Login sebagai NIM: ['+nimLogin+'] | Role: ['+roleLogin+']');
-function logout(){ localStorage.removeItem('kuliah_user'); location.href='/kuliah/login.html'; }
-async function loadMatakuliah(){
-  try{
-    const rMK = await fetch(API+"?page=matakuliah&t="+Date.now());
-    if(!rMK.ok) throw new Error('Gagal terhubung ke server');
-    const dataMK = await rMK.json();
-    let list = Array.isArray(dataMK) ? dataMK : (dataMK.data || dataMK.matakuliah || []);
-    if(roleLogin === "mahasiswa" && nimLogin){
-      const rPeserta = await fetch(API+"?page=peserta&t="+Date.now());
-      const dataPeserta = await rPeserta.json();
-      const listPeserta = Array.isArray(dataPeserta) ? dataPeserta : (dataPeserta.data || []);
-      const kodeDiikuti = listPeserta.filter(function(p){
-          const kunci = {};
-          for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
-          return String(kunci["nim"] || "").trim() === nimLogin;
-        }).map(function(p){
-          const kunci = {};
-          for(let k in p){ kunci[String(k).trim().toLowerCase()] = p[k]; }
-          return String(kunci["kode_mk"] || "").trim();
-        });
-      setText('diag-nim', 'Login sebagai NIM: ['+nimLogin+'] | Role: ['+roleLogin+'] | Diikuti: ['+kodeDiikuti.join(', ')+'] | Total Peserta: '+listPeserta.length);
-      list = list.filter(function(x){ return kodeDiikuti.includes(String(x.kode_mk || "").trim()); });
+function mkNama(k){const m=DB.mataKuliah.find(x=>x.kode_mk===k);return m?m.nama_mk:k}
+function render(){
+  renderTabs(); const c=document.getElementById('content'); let h='';
+  const myPeserta = DB.peserta.filter(p=>p.nim===user.nim);
+  const myMK = user.role==='dosen' ? DB.mataKuliah : DB.mataKuliah.filter(m=>myPeserta.some(p=>p.kode_mk===m.kode_mk));
+
+  if(tab==='dashboard'){
+    h+=`<div class="card"><h3>Dashboard</h3><p>${user.role==='dosen'?'Anda mengajar '+DB.mataKuliah.length+' MK, total '+DB.peserta.length+' peserta.':'Anda mengambil '+myMK.length+' MK.'}</p></div>`;
+    h+=`<div class="grid">${myMK.map(m=>`<div class="card"><b>${m.kode_mk} - ${m.nama_mk}</b><p class="muted">${m.sks} SKS • Dosen ${m.dosen}</p></div>`).join('')}</div>`;
+    h+=`<div class="card"><h3>Ujian Aktif</h3>${DB.ujian.map(u=>`<p><b>${u.Judul}</b> - ${u.Tanggal} ${u.JamMulai}-${u.JamSelesai} <span class="badge ok">${u.Status}</span> <span class="badge blue">${u.KodeMK}</span></p>`).join('')}</div>`;
+  }
+  if(tab==='mk'){ h+=`<div class="card"><h3>Mata Kuliah</h3><table><tr><th>Kode</th><th>Nama</th><th>SKS</th><th>Dosen</th></tr>${myMK.map(m=>`<tr><td>${m.kode_mk}</td><td>${m.nama_mk}</td><td>${m.sks}</td><td>${m.dosen}</td></tr>`).join('')}</table></div>` }
+  if(tab==='materi'){
+    h+=`<div class="card"><h3>Materi & Tugas</h3><table><tr><th>MK</th><th>ID</th><th>Judul</th><th>Deskripsi</th><th>Deadline</th></tr>${DB.materi.filter(m=>user.role==='dosen'||myPeserta.some(p=>p.kode_mk===m.kode_mk)).map(m=>`<tr><td>${m.kode_mk}</td><td>${m.id_tugas}</td><td>${m.judul}</td><td>${m.deskripsi}</td><td>${m.deadline}</td></tr>`).join('')}</table></div>`;
+  }
+  if(tab==='kumpul' || tab==='pengumpulan'){
+    const list = user.role==='dosen' ? DB.pengumpulan : DB.pengumpulan.filter(p=>p.nim===user.nim);
+    h+=`<div class="card"><h3>Pengumpulan Tugas</h3><table><tr><th>MK</th><th>NIM</th><th>Tugas</th><th>Tanggal</th><th>Status</th><th>Nilai</th><th>Aksi</th></tr>${list.map((p,i)=>`<tr><td>${p.kode_mk}</td><td>${p.nim}</td><td>${p.id_tugas}</td><td>${p.tanggal}</td><td><span class="badge ok">${p.ket}</span></td><td>${p.nilai||'-'}</td><td>${user.role==='dosen'?`<input style="width:70px" value="${p.nilai}" onchange="setNilaiKumpul(${DB.pengumpulan.indexOf(p)},this.value)" placeholder="Nilai"> <a href="${p.link}" target="_blank">Link</a>`:`<a href="${p.link}" target="_blank">Link</a>`}</td></tr>`).join('')}</table></div>`;
+    if(user.role!=='dosen'){
+      h+=`<div class="card"><h3>Kumpul Tugas Baru</h3><label>Pilih Tugas</label><select id="kTugas">${DB.materi.filter(m=>myPeserta.some(p=>p.kode_mk===m.kode_mk)).map(m=>`<option value="${m.kode_mk}|${m.id_tugas}">${m.kode_mk} - ${m.id_tugas} ${m.judul}</option>`).join('')}</select><label>Link Google Drive</label><input id="kLink" placeholder="https://drive.google.com/..."><button class="green" onclick="kumpul()">Kumpulkan</button></div>`;
     }
-    if(!list.length){
-      setHTML('list-mk','<tr><td colspan="5" style="text-align:center">Tidak ada mata kuliah yang tersedia untuk Anda</td></tr>');
-      return;
-    }
-    setHTML('list-mk', list.map(x=>`<tr><td><b>${x.kode_mk}</b></td><td>${x.nama_mk}</td><td>${x.sks}</td><td>${x.semester}</td><td><a class="btn-buka" href="/kuliah/detail.html?mk=${x.kode_mk}">Buka</a></td></tr>`).join(''));
-  }catch(err){
-    setHTML('list-mk','<tr><td colspan="5" style="text-align:center">Gagal memuat</td></tr>');
-    var eb=document.getElementById('error-box');
-    if(eb){ eb.style.display='block'; eb.innerText='Terjadi kesalahan saat memuat. Detail: '+err.message; }
   }
+  if(tab==='ujian'){
+    const listU = user.role==='dosen' ? DB.ujian : DB.ujian.filter(u=>myPeserta.some(p=>p.kode_mk===u.KodeMK));
+    h+=`<div class="card"><h3>Ujian</h3>${listU.map(u=>{
+      const soals=DB.soal.filter(s=>s.KodeUjian===u.KodeUjian);
+      return `<div style="border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin-bottom:10px"><b>${u.Judul} (${u.KodeUjian})</b><p class="muted">${u.Tanggal} ${u.JamMulai}-${u.JamSelesai} • ${soals.length} soal</p>${user.role==='dosen'?'':`<button onclick="kerjakan('${u.KodeUjian}')">Kerjakan Ujian</button>`}<div id="ujian-${u.KodeUjian}"></div></div>`
+    }).join('')}</div>`;
+  }
+  if(tab==='jawaban'){
+    h+=`<div class="card"><h3>Jawaban Ujian - Koreksi Dosen (Esai)</h3><table><tr><th>NIM</th><th>Ujian</th><th>No</th><th>Jawaban</th><th>Nilai</th><th>Koreksi</th><th>Simpan</th></tr>${DB.jawaban.map((j,i)=>`<tr><td>${j.NIM}</td><td>${j.KodeUjian}</td><td>${j.NoSoal}</td><td>${j.Jawaban}</td><td><input style="width:60px" value="${j.nilai}" id="jn${i}"></td><td><input value="${j.koreksi_dosen}" id="jk${i}"></td><td><button onclick="saveKoreksi(${i})">Simpan</button></td></tr>`).join('')}</table><p class="muted">MC otomatis 100 jika jawaban = Kunci, 0 jika salah. Esai diisi dosen manual.</p></div>`;
+  }
+  if(tab==='nilai'){
+    const listN = user.role==='dosen' ? DB.peserta : myPeserta;
+    h+=`<div class="card"><h3>Nilai - Kehadiran / Tugas / UTS / UAS</h3><table><tr><th>NIM</th><th>MK</th><th>Kehadiran (nilai1)</th><th>Tugas (nilai2)</th><th>UTS (nilai3)</th><th>UAS (nilai4)</th><th>Rata-rata</th><th>${user.role==='dosen'?'Edit':''}</th></tr>${listN.map((p,i)=>{
+      const idx=DB.peserta.indexOf(p); const avg=((+p.nilai1||0)+(+p.nilai2||0)+(+p.nilai3||0)+(+p.nilai4||0))/4;
+      return `<tr><td>${p.nim}</td><td>${p.kode_mk} - ${mkNama(p.kode_mk)}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai1}" id="n1${idx}">` : p.nilai1}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai2}" id="n2${idx}">` : p.nilai2}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai3}" id="n3${idx}">` : p.nilai3}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai4}" id="n4${idx}">` : p.nilai4}</td><td><b>${avg.toFixed(1)}</b></td><td>${user.role==='dosen'?`<button onclick="saveNilai(${idx})">Simpan</button>`:''}</td></tr>`}).join('')}</table></div>`;
+    if(user.role!=='dosen'){
+      const myJaw=DB.jawaban.filter(j=>j.NIM===user.nim);
+      h+=`<div class="card"><h3>Nilai Esai Saya + Koreksi Dosen</h3>${myJaw.map(j=>`<p><b>${j.KodeUjian} No ${j.NoSoal}</b> - Jawaban: ${j.Jawaban}<br>Nilai: <b>${j.nilai||'Belum dinilai'}</b> • Koreksi: ${j.koreksi_dosen||'-'}</p>`).join('')||'<p>Belum ada jawaban.</p>'}</div>`;
+    }
+  }
+  c.innerHTML=h;
 }
-loadMatakuliah();
+function kumpul(){
+  const v=document.getElementById('kTugas').value.split('|'); const link=document.getElementById('kLink').value||'https://drive.google.com/file/d/contoh';
+  DB.pengumpulan.push({kode_mk:v[0],nim:user.nim,id_tugas:v[1],link,tanggal:new Date().toLocaleString('id-ID'),ket:'Sudah dikumpulkan',nilai:''}); save(); alert('Berhasil dikumpulkan!'); render();
+}
+function setNilaiKumpul(i,val){DB.pengumpulan[i].nilai=val; save(); render();}
+function saveNilai(i){DB.peserta[i].nilai1=document.getElementById('n1'+i).value; DB.peserta[i].nilai2=document.getElementById('n2'+i).value; DB.peserta[i].nilai3=document.getElementById('n3'+i).value; DB.peserta[i].nilai4=document.getElementById('n4'+i).value; save(); alert('Nilai tersimpan'); render();}
+function saveKoreksi(i){DB.jawaban[i].nilai=document.getElementById('jn'+i).value; DB.jawaban[i].koreksi_dosen=document.getElementById('jk'+i).value; save(); alert('Koreksi tersimpan'); render();}
+function kerjakan(kode){
+  const el=document.getElementById('ujian-'+kode); const soals=DB.soal.filter(s=>s.KodeUjian===kode);
+  el.innerHTML=soals.map((s,idx)=>{
+    if(s.JenisSoal==='MC') return `<div style="margin:10px 0"><b>${s.NoSoal}. ${s.Soal}</b><br><label><input type="radio" name="q${s.NoSoal}" value="A" style="width:auto"> A. ${s.PilihanA}</label><br><label><input type="radio" name="q${s.NoSoal}" value="B" style="width:auto"> B. ${s.PilihanB}</label><br><label><input type="radio" name="q${s.NoSoal}" value="C" style="width:auto"> C. ${s.PilihanC}</label><br><label><input type="radio" name="q${s.NoSoal}" value="D" style="width:auto"> D. ${s.PilihanD}</label></div>`;
+    return `<div style="margin:10px 0"><b>${s.NoSoal}. ${s.Soal} (Esai)</b><textarea id="esai${s.NoSoal}" placeholder="Tulis jawaban esai..."></textarea></div>`;
+  }).join('')+`<button class="green" onclick="submitUjian('${kode}')">Kirim Jawaban</button>`;
+}
+function submitUjian(kode){
+  const soals=DB.soal.filter(s=>s.KodeUjian===kode); let totalMC=0, cntMC=0;
+  soals.forEach(s=>{
+    let ans='';
+    if(s.JenisSoal==='MC'){ const r=document.querySelector(`input[name="q${s.NoSoal}"]:checked`); ans=r?r.value:''; cntMC++; if(ans===s.Kunci) totalMC+=100; }
+    else ans=document.getElementById('esai'+s.NoSoal).value;
+    // hapus jawaban lama untuk soal yang sama
+    DB.jawaban=DB.jawaban.filter(j=>!(j.NIM===user.nim && j.KodeUjian===kode && j.NoSoal===s.NoSoal));
+    DB.jawaban.push({NIM:user.nim,KodeUjian:kode,NoSoal:s.NoSoal,Jawaban:ans,Status:'Dijawab',WaktuJawab:new Date().toLocaleString('id-ID'),nilai: s.JenisSoal==='MC' ? (ans===s.Kunci?100:0) : '', koreksi_dosen: s.JenisSoal==='MC' ? (ans===s.Kunci?'Benar':'Salah') : ''});
+  });
+  // update nilai UTS (nilai3) = rata-rata MC
+  if(cntMC>0){ const p=DB.peserta.find(x=>x.nim===user.nim && x.kode_mk===DB.ujian.find(u=>u.KodeUjian===kode).KodeMK); if(p) p.nilai3=Math.round(totalMC/cntMC); }
+  save(); alert('Jawaban terkirim! MC auto-nilai, Esai menunggu koreksi dosen.'); render();
+}
 </script>
-</body></html>
+</body>
+</html>
