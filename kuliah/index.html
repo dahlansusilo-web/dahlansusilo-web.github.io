@@ -41,9 +41,9 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px
 <p class="muted">Kalau login gagal, cek NIM & Password di Sheet Mahasiswa di GS.</p>
 <p id="loginMsg" style="color:red"></p>
 //<button class="btn ghost small" onclick="muatUlangGS()">🔄 Muat Ulang Data dari GS</button>
-<button class="btn ghost small" onclick="muatUlangGS()">🔄 Muat Ulang Data dari GS</button>
-<button class="btn ghost small" style="width:100%;margin-top:8px" onclick="kembaliKeHalamanUtama()">🏠 Kembali ke Halaman Utama</button>  
-</div>
+<p id="loginMsg" style="color:red"></p>
+<button class="btn ghost small" style="width:100%" onclick="muatUlangGS()">🔄 Muat Ulang Data dari GS</button>
+<button class="btn ghost small" style="width:100%;margin-top:8px" onclick="kembaliKeHalamanUtama()">🏠 Kembali ke Halaman Utama</button></div>
 <div id="pageApp" class="hidden">
 <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 id="hello" style="margin:0"></h2><p id="helloSub" class="muted"></p><p><span id="statusGS2" class="sync ok">✅ Terhubung ke GS</span> <button class="btn ghost small" onclick="muatUlangGS()">🔄 Sync GS</button></p></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" onclick="toggleFormGantiPassword()">🔑 Ganti Password</button><button class="btn-logout" onclick="logout()"><span>🚪</span><span style="text-align:left">Keluar<small>Klik untuk logout</small></span></button></div></div>
@@ -138,15 +138,18 @@ function doLogin(){
   document.getElementById('helloSub').innerText='NIM: '+u.nim+' • Role: '+u.role+' • Angkatan: '+u.angkatan;
   renderTabs();render();
 }
-function logout(){if(timerInterval)clearInterval(timerInterval);if(confirm('Yakin mau keluar, '+user.nama+'?'))location.reload();}
+function logout(){
+  if(timerInterval) clearInterval(timerInterval);
+  if(confirm('Yakin mau keluar, '+user.nama+'?')) window.location.href = '../index.html';
+}
 function kembaliKeHalamanUtama(){
   // Kalau sudah login, balik ke dashboard saja, tidak usah keluar
-  if(user){
-    document.getElementById('pageLogin').classList.add('hidden');
-    document.getElementById('pageApp').classList.remove('hidden');
-    render();
-    return;
-  }
+//  if(user){
+//    document.getElementById('pageLogin').classList.add('hidden');
+ //   document.getElementById('pageApp').classList.remove('hidden');
+//    render();
+ //   return;
+ // }
   // Kalau belum login, balik ke halaman utama web Bapak
   // GANTI link ini dengan link halaman utama Bapak yang asli:
   window.location.href = 'index.html';
