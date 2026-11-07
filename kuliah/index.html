@@ -90,34 +90,15 @@ function normalisasiData(raw){
   };
 }
 
-async function muatDariGS(silent){
-  if(!silent) setStatus('⏳ Memuat dari GS...','load');
-  try{
-    // Coba 2 cara yang umum dipakai Apps Script: ?action=getAll dan tanpa action
-    let res = await fetch(API + '?page=Mahasiswa&t=' + Date.now());
-    let raw = await res.json().catch(()=>null);
-    if(!raw || (!raw.mahasiswa && !raw.data && !raw.Mahasiswa)){
-      res = await fetch(API + '?t=' + Date.now());
-      raw = await res.json().catch(()=>null);
-    }
-    if(!raw) throw new Error('API tidak mengembalikan JSON');
-    const baru = normalisasiData(raw);
-    // Kalau GS kosong total, jangan timpa cache yang masih ada
-    if(baru.mahasiswa.length===0 && DB.mahasiswa.length>0){
-      setStatus('⚠️ GS terbaca tapi Mahasiswa kosong - pakai cache','err');
-      return;
-    }
-    // Pertahankan resetRequests lokal kalau GS belum punya sheet itu
-    if(baru.resetRequests.length===0 && DB.resetRequests.length>0) baru.resetRequests = DB.resetRequests;
-    DB = baru;
-    saveLocal();
-    setStatus(`✅ Terhubung ke GS - ${DB.mahasiswa.length} mahasiswa, ${DB.mataKuliah.length} MK, ${DB.soal.length} soal`,'ok');
-    if(user) render();
-  }catch(e){
-    console.error(e);
-    setStatus('❌ Gagal hubungi GS - pakai data terakhir (cache)','err');
-  }
+async function muatDariGS(){
+  const r = await fetch(API + '?page=Mahasiswa');
+  const data = await r.json();
+  DB.mahasiswa = data; // langsung array
+  saveLocal();
+  setStatus(`✅ ${DB.mahasiswa.length} mahasiswa dari GS`,'ok');
+  if(user) render();
 }
+
 function muatUlangGS(){ muatDariGS(false); }
 function saveLocal(){ localStorage.setItem('elearning_db_final_gs', JSON.stringify(DB)); }
 
