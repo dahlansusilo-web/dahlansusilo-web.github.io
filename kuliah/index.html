@@ -94,7 +94,7 @@ async function muatDariGS(silent){
   if(!silent) setStatus('⏳ Memuat dari GS...','load');
   try{
     // Coba 2 cara yang umum dipakai Apps Script: ?action=getAll dan tanpa action
-    let res = await fetch(API + '?action=getAll&t=' + Date.now());
+    let res = await fetch(API + '?page=Mahasiswa&t=' + Date.now());
     let raw = await res.json().catch(()=>null);
     if(!raw || (!raw.mahasiswa && !raw.data && !raw.Mahasiswa)){
       res = await fetch(API + '?t=' + Date.now());
