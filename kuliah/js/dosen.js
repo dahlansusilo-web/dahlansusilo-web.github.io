@@ -72,7 +72,7 @@ function simpanMK(){
   if(!kode||!nama){alert('Kode MK dan Nama MK wajib diisi!');return}
   if(editMKCode){ const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(editMKCode)); m.kode_mk=kode; m.nama_mk=nama; m.sks=sks; save('MataKuliah',{kode_mk:kode,nama_mk:nama,sks,dosen:user.nim,action:'update',kodeLama:editMKCode}); }
   else { if(DB.mataKuliah.find(m=>String(m.kode_mk)===kode)){alert('Kode MK sudah ada di GS!');return} DB.mataKuliah.push({kode_mk:kode,nama_mk:nama,sks,dosen:user.nim}); save('MataKuliah',{kode_mk:kode,nama_mk:nama,sks,dosen:user.nim,action:'add'}); }
-  showFormMK=false; editMKCode=null; alert('MK berhasil disimpan ke GS!'); render();
+  showFormMK=false; editMKCode=null; alert('MK berhasil disimpan! Tunggu 5 detik lalu klik Sync GS untuk cek di Sheet.'); render();
 }
 function hapusMK(kode){
   const jmlPeserta=DB.peserta.filter(p=>String(p.kode_mk)===String(kode)).length, jmlMateri=DB.materi.filter(p=>String(p.kode_mk)===String(kode)).length;
