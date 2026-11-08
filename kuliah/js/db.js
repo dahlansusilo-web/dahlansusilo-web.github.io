@@ -56,9 +56,18 @@ function muatUlangGS(){ muatDariGS(false); }
 function saveLocal(){ localStorage.setItem('elearning_db_final_gs', JSON.stringify(DB)); }
 async function simpanKeGS(sheet, payload){
   saveLocal();
+  // Terjemahkan field kecil -> Header GS yang asli
+  let dataGS = {...payload};
+  if(sheet === 'Mahasiswa'){
+    dataGS = { NIM: payload.nim, Nama: payload.nama, Password: payload.password, Angkatan: payload.angkatan, Role: payload.role, nim: payload.nim, nama: payload.nama, password: payload.password, angkatan: payload.angkatan, role: payload.role };
+  }
+  if(sheet === 'MataKuliah'){
+    dataGS = { Kode_MK: payload.kode_mk, Nama_MK: payload.nama_mk, SKS: payload.sks, Dosen: payload.dosen, kode_mk: payload.kode_mk, nama_mk: payload.nama_mk, sks: payload.sks, dosen: payload.dosen };
+  }
   try{
-    await fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'save', sheet: sheet, data: payload, all: DB})});
-  }catch(e){ console.log('Simpan GS (no-cors)', e); }
+    await fetch(API, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({action:'save', sheet: sheet, data: dataGS, all: DB})});
+    console.log('Kirim ke GS:', sheet, dataGS);
+  }catch(e){ console.log('Simpan GS gagal', e); }
 }
 function save(sheet, payload){ simpanKeGS(sheet||'', payload||{}); }
 muatDariGS(false);
