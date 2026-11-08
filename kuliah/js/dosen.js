@@ -56,9 +56,24 @@ function bukaFormMhs(nim){
 function simpanMhsForm(){
   const nim=document.getElementById('f_mhs_nim').value.trim(), nama=document.getElementById('f_mhs_nama').value.trim(), pass=document.getElementById('f_mhs_pass').value.trim(), angk=document.getElementById('f_mhs_angk').value.trim(), role=document.getElementById('f_mhs_role').value;
   if(!nim||!nama||!pass){alert('NIM, Nama, dan Password wajib diisi!');return}
+  const mkDipilih=[...document.querySelectorAll('.cekMK:checked')].map(c=>c.value);
+  const nimLama=editMhsNim||nim;
+  const mkLama=DB.peserta.filter(p=>String(p.nim)===String(nimLama)).map(p=>String(p.kode_mk));
+
   if(editMhsNim){ const m=DB.mahasiswa.find(x=>String(x.nim)===String(editMhsNim)); m.nim=nim; m.nama=nama; m.password=pass; m.angkatan=angk; m.role=role; save('Mahasiswa',{nim,nama,password:pass,angkatan:angk,role,action:'update'}); }
   else { if(DB.mahasiswa.find(x=>String(x.nim)===nim)){alert('NIM '+nim+' sudah ada di GS!');return} DB.mahasiswa.push({nim,nama,password:pass,angkatan:angk||'2026',role}); save('Mahasiswa',{nim,nama,password:pass,angkatan:angk||'2026',role,action:'add'}); }
-  showFormMhs=false; editMhsNim=null; alert('Mahasiswa berhasil disimpan ke GS! Bisa langsung login.'); render();
+
+  // --- Sync MK: hapus yang tidak dicentang, tambah yang baru dicentang ---
+  if(nimLama!==nim){
+    // Kalau NIM diganti, pindahkan semua peserta lama ke NIM baru
+    mkLama.forEach(k=>{ DB.peserta=DB.peserta.filter(p=>!(String(p.nim)===String(nimLama)&&String(p.kode_mk)===String(k))); save('Peserta',{nim:nimLama,kode_mk:k,action:'delete'}); });
+    mkDipilih.forEach(k=>{ const payload={nim,kode_mk:k,nilai1:0,nilai2:0,nilai3:0,nilai4:0}; DB.peserta.push(payload); save('Peserta',{...payload,action:'add'}); });
+  } else {
+    mkLama.filter(k=>!mkDipilih.includes(k)).forEach(k=>{ DB.peserta=DB.peserta.filter(p=>!(String(p.nim)===String(nim)&&String(p.kode_mk)===String(k))); save('Peserta',{nim,kode_mk:k,action:'delete'}); });
+    mkDipilih.filter(k=>!mkLama.includes(k)).forEach(k=>{ const payload={nim,kode_mk:k,nilai1:0,nilai2:0,nilai3:0,nilai4:0}; DB.peserta.push(payload); save('Peserta',{...payload,action:'add'}); });
+  }
+
+  showFormMhs=false; editMhsNim=null; alert('Mahasiswa + MK berhasil disimpan ke GS! Bisa langsung login.'); render();
 }
 function hapusMhs(nim){
   const m=DB.mahasiswa.find(x=>String(x.nim)===String(nim)); if(m.role==='dosen'){alert('Tidak bisa hapus akun dosen!');return}
