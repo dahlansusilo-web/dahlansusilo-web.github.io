@@ -6,88 +6,77 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
 header{background:white;padding:10px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:99}
+header a{color:#7c2d12;text-decoration:none;font-weight:700}
 .wrap{max-width:1100px;margin:30px auto;padding:0 20px}
 .hero-card{background:white;border-radius:32px;overflow:hidden;box-shadow:0 20px 60px rgba(60,20,10,0.07);display:flex;flex-wrap:wrap}
 .left{flex:0 0 340px;background:#7c2d12;color:#f5e6d3;padding:36px 28px;text-align:center}
-.left img{width:180px;height:180px;border-radius:50%;object-fit:cover;border:6px solid #fff;background:#fff;display:block;margin:0 auto}
-.left h2{font-family:'Plus Jakarta Sans';margin:18px 0 6px;font-size:22px;color:white}
-.jabatan{font-size:13px;color:#f5d6c8;margin-bottom:16px}
-.tag{display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff8f0;padding:6px 14px;border-radius:20px;font-size:11px;margin:4px}
-.right{flex:1;padding:32px 36px}
-h2.title{font-family:'Plus Jakarta Sans';font-size:20px;color:#7c2d12;margin-bottom:16px;border-left:4px solid #7c2d12;padding-left:12px}
-.right p{line-height:1.8;color:#4a3a32;font-size:14px;white-space:pre-line}
-table{width:100%;border-collapse:collapse;margin-top:20px;font-size:14px}
-td{padding:12px;border-bottom:1px solid #f0e6d3}
-td:first-child{width:120px;color:#7a6e69}
-.card{margin-top:20px;background:white;border-radius:24px;box-shadow:0 10px 30px rgba(60,20,10,0.06);padding:26px}
-.btn-kembali{display:inline-block;margin-top:28px;background:#7c2d12;color:#fff;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(124,45,18,0.3)}
-.btn-kembali:hover{background:#5e2210}
-.btn-outline{display:inline-block;margin-top:28px;margin-left:10px;background:white;color:#7c2d12;border:1.5px solid #7c2d12;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px}
-footer{background:#7c2d12;color:#f5e6d3;text-align:center;padding:20px;font-size:12px;margin-top:40px}
-</style></head><body>
-<header>
-  <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12;font-size:14px">
-    <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain">
-    <div style="line-height:1.15">
-      <div style="font-size:16px;letter-spacing:.3px;">UNIVERSITAS SAHID SURAKARTA</div>
-    </div>
-  </div>
-  <nav id="autoNav" style="display:flex;gap:20px"></nav>
-</header>
-<div id="loading" style="text-align:center;padding:80px;color:#7c2d12">⏳ Memuat profil...</div>
-<div id="content" class="wrap" style="display:none">
-  <div class="hero-card">
-    <div class="left">
-      <img id="foto" src="/Foto%2011%20KB.jpeg" alt="Foto Profil" onerror="this.src='/Foto%2011%20KB.jpeg'">
-      <h2 id="namaLengkap"></h2>
-      <div class="jabatan" id="jabatan"></div>
-      <div id="bidang"></div>
-    </div>
-    <div class="right">
-      <h2 class="title">Tentang Saya</h2>
-      <p id="tentang"></p>
-      <table>
-        <tr><td>Email</td><td id="email"></td></tr>
-        <tr><td>Scholar</td><td><a id="scholar" target="_blank" style="color:#7c2d12;font-weight:700;text-decoration:none">Lihat Publikasi</a></td></tr>
-        <tr><td>GitHub</td><td><a id="github" target="_blank" style="color:#7c2d12;font-weight:600"></a></td></tr>
-      </table>
-    </div>
-  </div>
-  <div class="card">
-    <h2 class="title">Buku Terbaru</h2>
-    <div id="buku_terbaru" style="line-height:1.9;white-space:pre-line"></div>
-    <p style="margin-top:16px"><a href="/buku/" style="color:#7c2d12;font-weight:700;text-decoration:none">→ Lihat Katalog Buku Lengkap</a></p>
-  </div>
-  <div style="text-align:center">
-    <a href="/" class="btn-kembali">⬅ Kembali ke Beranda</a>
-    <a href="/buku/" class="btn-outline">Katalog Buku</a>
-  </div>
+.left img{width:180px;height:180px;border-radius:50%;object-fit:cover;border:6px solid #fff;background:#fff}
+.left h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;margin:16px 0 4px}
+.left p{opacity:.9}
+.right{flex:1;padding:36px}
+.right h2{font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:12px}
+.right p{line-height:1.7;margin-bottom:12px}
+.info{margin-top:20px;display:grid;gap:10px}
+.info div{background:#f9f5f0;padding:12px 14px;border-radius:12px}
+.info b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#7c2d12;margin-bottom:2px}
+.info a{color:#2563eb;word-break:break-all}
+.buku{margin-top:20px;background:#7c2d12;color:#fff;padding:16px;border-radius:16px}
+.buku b{font-size:18px}
+.muted{color:#888}
+</style></head>
+<body>
+<header><a href="index.html">← Kembali</a><b>Dahlan Susilo</b></header>
+<div class="wrap"><div class="hero-card">
+<div class="left">
+<img id="pFoto" src="" alt="Foto Profil">
+<h1 id="pNama">Memuat...</h1>
+<p id="pJabatan"></p>
+<p id="pBidang"></p>
 </div>
-<footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta | <a href="/profil.html" style="color:#f5e6d3;text-decoration:underline">Profil</a></footer>
+<div class="right">
+<h2>Tentang Saya</h2>
+<p id="pTentang"></p>
+<div class="info">
+<div id="rowEmail"><b>Email</b><a id="pEmail" href=""></a></div>
+<div id="rowScholar"><b>Google Scholar</b><a id="pScholar" href="" target="_blank"></a></div>
+<div id="rowGithub"><b>GitHub</b><a id="pGithub" href="" target="_blank"></a></div>
+</div>
+<div class="buku" id="rowBuku">📖 <b>Buku Terbaru:</b> <span id="pBuku"></span></div>
+</div>
+</div></div>
+
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-async function load(){
-  try{
-    let r = await fetch(SHEET_URL+"?page=profil&t="+Date.now());
-    let p = await r.json();
-    const get = k => { let key=Object.keys(p).find(x=>x.toLowerCase().replace(/\s/g,'')===k.toLowerCase().replace(/\s/g,'')); return key ? p[key] : ''; };
-    let full = `${get('gelardepan')?get('gelardepan')+' ':''}${get('nama')||'Dahlan Susilo'}${get('gelarbelakang')||get('gelar belakang')? ', '+(get('gelarbelakang')||get('gelar belakang')):''}`;
-    document.getElementById('namaLengkap').textContent = full;
-    let fotoGS = get('foto');
-    if(fotoGS && fotoGS.startsWith('http')) document.getElementById('foto').src = fotoGS;
-    document.getElementById('jabatan').textContent = get('jabatan')||'Lektor';
-    document.getElementById('tentang').textContent = get('tentang')||'Dosen Informatika';
-    document.getElementById('email').textContent = get('email')||'dahlan.susilo@usahidsolo.ac.id';
-    document.getElementById('scholar').href = get('scholar')||'#';
-    document.getElementById('github').href = get('github')||'#';
-    document.getElementById('github').textContent = get('github')||'';
-    document.getElementById('buku_terbaru').textContent = get('buku_terbaru')||'';
-    document.getElementById('bidang').innerHTML = (get('bidang')||'Ilmu Komputer').split(',').map(s=> s.trim()?`<span class="tag">${s.trim()}</span>`:'').join('');
-    document.getElementById('loading').style.display='none';
-    document.getElementById('content').style.display='block';
-  }catch(e){document.getElementById('loading').textContent="Gagal: "+e;}
+const API_URL = "PASTE_URL_APPS_SCRIPT_BAPAK_YANG_SAMA_SEPERTI_DI_INDEX_HTML";
+function fixFoto(u){
+  if(!u) return "";
+  u = String(u).trim();
+  // Kalau masih keisi judul halaman github, ubah ke raw
+  if(u.includes("github.io") && !u.includes("raw.githubusercontent") && !u.startsWith("http")) return "";
+  if(u.includes("github.com") && u.includes("/blob/")) return u.replace("github.com","raw.githubusercontent.com").replace("/blob/","/");
+  if(u.includes("Foto") && u.includes("github.io") && !u.startsWith("http")) return "https://raw.githubusercontent.com/dahlansusilo-web/dahlansusilo-web.github.io/main/Foto%2011%20KB.jpeg";
+  return u;
 }
-load();
+async function loadProfil(){
+  try{
+    const r = await fetch(API_URL + "?sheet=Profil");
+    const j = await r.json();
+    const d = Array.isArray(j) ? j[0] : (j.data ? j.data[0] : j.Profil[0]);
+    const namaLengkap = [d.gelardepan||"", d.nama||"", d["gelar belakang"]||d.gelar_belakang||""].join(" ").replace(/\s+/g," ").trim();
+    document.title = "Profil - " + namaLengkap;
+    document.getElementById("pNama").textContent = namaLengkap;
+    document.getElementById("pJabatan").textContent = d.jabatan||"";
+    document.getElementById("pBidang").textContent = d.bidang||"";
+    document.getElementById("pTentang").textContent = (d.tentang||"").replace("s=di","di").replace("dimualai","dimulai");
+    const foto = fixFoto(d.foto);
+    if(foto) document.getElementById("pFoto").src = foto;
+    const email = d.email||"";
+    const elE = document.getElementById("pEmail"); elE.textContent = email; elE.href = "mailto:"+email;
+    if(!email) document.getElementById("rowEmail").style.display="none";
+    if(d.scholar){ const s=document.getElementById("pScholar"); s.textContent=d.scholar; s.href=d.scholar; } else document.getElementById("rowScholar").style.display="none";
+    if(d.github){ const g=document.getElementById("pGithub"); g.textContent=d.github; g.href=d.github.startsWith("http")?d.github:"https://github.com/"+d.github; } else document.getElementById("rowGithub").style.display="none";
+    if(d.buku_terbaru){ document.getElementById("pBuku").textContent = d.buku_terbaru; } else document.getElementById("rowBuku").style.display="none";
+  }catch(e){ document.getElementById("pTentang").textContent = "Gagal memuat dari GS: " + e.message; }
+}
+loadProfil();
 </script>
-<script src="/menu.js"></script>
 </body></html>
