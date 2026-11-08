@@ -3,7 +3,7 @@ async function muatDariGS(){
 setStatus('⏳ Memuat...','load');
 async function getPage(p){try{let r=await fetch(API+'?page='+p+'&t='+Date.now());let j=await r.json();return Array.isArray(j)?j:[]}catch(e){return[]}}
 function pick(o,n){for(let x of n){let k=Object.keys(o).find(y=>y.toLowerCase().replace(/[^a-z0-9]/g,'')===x.toLowerCase().replace(/[^a-z0-9]/g,''));if(k)return o[k]}return''}
-DB.mahasiswa=await getPage('Mahasiswa');
+DB.mahasiswa=(await getPage('Mahasiswa')).map(o=>({nim:pick(o,['NIM']),nama:pick(o,['Nama']),password:pick(o,['Password']),angkatan:pick(o,['Angkatan']),role:pick(o,['Role'])}));
 DB.mataKuliah=(await getPage('MataKuliah')).map(o=>({kode_mk:pick(o,['Kode_MK']),nama_mk:pick(o,['Nama_MK']),sks:+pick(o,['SKS'])||3,dosen:pick(o,['Dosen'])}));
 DB.materi=(await getPage('materi')).map(o=>({kode_mk:pick(o,['Kode_MK']),id_tugas:pick(o,['ID_Tugas']),judul:pick(o,['Judul']),deskripsi:pick(o,['Deskripsi']),deadline:pick(o,['Deadline']),link_materi:pick(o,['Link_Materi']),link_tugas:pick(o,['Link_Tugas'])}));
 DB.peserta=(await getPage('peserta')).map(o=>({nim:pick(o,['NIM']),kode_mk:pick(o,['Kode_MK']),nilai1:+pick(o,['Nilai1'])||0,nilai2:+pick(o,['Nilai2'])||0,nilai3:+pick(o,['Nilai3'])||0,nilai4:+pick(o,['Nilai4'])||0}));
