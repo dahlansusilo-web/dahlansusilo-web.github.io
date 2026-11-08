@@ -1,5 +1,5 @@
 // RENDER.JS - Semua HTML yang digambar ke #content
-function renderTabs(){ const t=user.role==='dosen'?['dashboard','nilai','mahasiswa']:['dashboard','nilai']; const labels={dashboard:'🏠 Dashboard',nilai:user.role==='dosen'?'📊 Nilai Mahasiswa':'📊 Nilai Saya',mahasiswa:'👥 Mahasiswa'}; document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';if('${x}'!=='nilai')selectedMK=null;render()">${labels[x]}</button>`).join(''); }function mkNama(k){ const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(k)); return m?m.nama_mk:k }
+function renderTabs(){ const t=user.role==='dosen'?['dashboard','nilai','mahasiswa']:['dashboard','nilai']; const labels={dashboard:'🏠 Dashboard',nilai:user.role==='dosen'?'📊 Nilai Mahasiswa':'📊 Nilai Saya',mahasiswa:'👥 Mahasiswa'}; document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';selectedMK=null;render()">${labels[x]}</button>`).join(''); }
 function openMK(k){ selectedMK=k; subTab='materi'; subTabDosen='link'; showFormMateri=false; showFormSoal=false; showFormPeserta=false; showFormUjian=false; render(); }
 function backToDashboard(){ selectedMK=null; tab='dashboard'; if(timerInterval)clearInterval(timerInterval); render(); }
 function render(){
@@ -76,11 +76,13 @@ if(tab==='dashboard'){
   }
 }
 if(tab==='nilai'){
-  const listN=(user.role==='dosen'?DB.peserta:myPeserta).filter(p=>{
-    const mhs=DB.mahasiswa.find(m=>String(m.nim)===String(p.nim));
+  let listN = user.role==='dosen' ? DB.peserta.slice() : myPeserta.slice();
+  listN = listN.filter(function(p){
+    const mhs = DB.mahasiswa.find(function(m){ return String(m.nim)===String(p.nim); });
     if(mhs && mhs.role==='dosen') return false;
     if(user.role==='dosen' && selectedMK && String(p.kode_mk)!==String(selectedMK)) return false;
     return true;
   });
-  h+=`<div class="card"><label>Filter MK:</label><select onchange="selectedMK=this.value||null;render()"><option value="">-- Semua MK --</option>${DB.mataKuliah.map(m=>`<option value="${m.kode_mk}" ${String(selectedMK)===String(m.kode_mk)?'selected':''}>${m.kode_mk} - ${m.nama_mk}</option>`).join('')}</select><p class="muted">${selectedMK?'Menampilkan MK: <b>'+selectedMK+'</b> saja. Ganti di atas untuk lihat MK lain.':'Menampilkan semua MK.'}</p></div>`;c.innerHTML=h;
-}
+  let optMK = '<option value="">-- Semua MK --</option>';
+  for(let i=0;i<DB.mataKuliah.length;i++){ let mm=DB.mataKuliah[i]; let sel = String(selectedMK)===String(mm.kode_mk) ? ' selected' : ''; optMK += '<option value="'+mm.kode_mk+'"'+sel+'>'+mm.kode_mk+' - '+mm.nama_mk+'</option>'; }
+  h+='<div class="card"><label>Filter MK:</label><select onchange="selectedMK=this.value||null;render()">'+optMK+'</select><p class="muted">Kalau masih Semua MK, pilih salah satu MK di atas.</p></div>';
