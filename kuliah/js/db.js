@@ -13,8 +13,7 @@ let so=[];
 for(let u of DB.ujian){let s=await getPage('Soal&kodeUjian='+encodeURIComponent(u.KodeUjian)+'&showKunci=1');if(Array.isArray(s))so=so.concat(s);}
 DB.soal=so.map(o=>({KodeUjian:pick(o,['KodeUjian']),NoSoal:+pick(o,['NoSoal'])||0,JenisSoal:pick(o,['JenisSoal']),Soal:pick(o,['Soal']),PilihanA:pick(o,['PilihanA']),PilihanB:pick(o,['PilihanB']),PilihanC:pick(o,['PilihanC']),PilihanD:pick(o,['PilihanD']),Kunci:pick(o,['Kunci'])}));
 DB.jawaban=(await getPage('Jawaban')).map(o=>({NIM:pick(o,['NIM']),KodeUjian:pick(o,['KodeUjian']),NoSoal:+pick(o,['NoSoal'])||0,Jawaban:pick(o,['Jawaban']),Status:pick(o,['Status']),WaktuJawab:pick(o,['WaktuJawab']),nilai:pick(o,['Nilai']),koreksi_dosen:pick(o,['Koreksi_Dosen'])}));
-saveLocal();setStatus('✅ '+DB.mahasiswa.length+' mhs, '+DB.mataKuliah.length+' MK, '+DB.materi.length+' materi, '+DB.soal.length+' soal','ok');if(user)render();
-}
+saveLocal();setStatus('✅ '+DB.mahasiswa.length+' mhs, '+DB.mataKuliah.length+' MK, '+DB.materi.length+' materi, '+DB.soal.length+' soal','ok');let b=document.getElementById('btnLogin');if(b){b.disabled=false;b.innerText='Masuk';}if(user)render();}
 function muatUlangGS(){muatDariGS();}
 function saveLocal(){localStorage.setItem('elearning_db_final_gs',JSON.stringify(DB));}
 function save(s,p){simpanKeGS(s||'',p||{});}
