@@ -1,6 +1,5 @@
 // RENDER.JS - Semua HTML yang digambar ke #content
-function renderTabs(){ const t=user.role==='dosen'?['dashboard','nilai','mahasiswa']:['dashboard','nilai']; const labels={dashboard:'🏠 Dashboard',nilai:user.role==='dosen'?'📊 Nilai Mahasiswa':'📊 Nilai Saya',mahasiswa:'👥 Mahasiswa'}; document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';selectedMK=null;render()">${labels[x]}</button>`).join(''); }
-function mkNama(k){ const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(k)); return m?m.nama_mk:k }
+function renderTabs(){ const t=user.role==='dosen'?['dashboard','nilai','mahasiswa']:['dashboard','nilai']; const labels={dashboard:'🏠 Dashboard',nilai:user.role==='dosen'?'📊 Nilai Mahasiswa':'📊 Nilai Saya',mahasiswa:'👥 Mahasiswa'}; document.getElementById('tabs').innerHTML=t.map(x=>`<button class="${tab===x?'active':''}" onclick="tab='${x}';if('${x}'!=='nilai')selectedMK=null;render()">${labels[x]}</button>`).join(''); }function mkNama(k){ const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(k)); return m?m.nama_mk:k }
 function openMK(k){ selectedMK=k; subTab='materi'; subTabDosen='link'; showFormMateri=false; showFormSoal=false; showFormPeserta=false; showFormUjian=false; render(); }
 function backToDashboard(){ selectedMK=null; tab='dashboard'; if(timerInterval)clearInterval(timerInterval); render(); }
 function render(){
@@ -77,9 +76,11 @@ if(tab==='dashboard'){
   }
 }
 if(tab==='nilai'){
-  const listN=user.role==='dosen'?DB.peserta:myPeserta;
-  h+=`<div class="card"><h3>${user.role==='dosen'?'📊 Nilai Semua Mahasiswa':'📊 Nilai Saya'} - Kehadiran / Tugas / UTS / UAS (dari GS)</h3>${user.role==='dosen'?`<div class="row-actions" style="margin-bottom:12px"><button class="btn teal small" onclick="exportExcelMK('')">📗 Export Semua ke Excel</button><button class="btn purple small" onclick="exportPDFMK('')">📄 Export Semua ke PDF</button></div>`:''}<table><tr><th>NIM</th><th>MK</th><th>Kehadiran</th><th>Tugas</th><th>UTS</th><th>UAS</th><th>Rata-rata</th><th>${user.role==='dosen'?'Edit':''}</th></tr>${listN.map(p=>{const idx=DB.peserta.indexOf(p); const avg=((+p.nilai1||0)+(+p.nilai2||0)+(+p.nilai3||0)+(+p.nilai4||0))/4; return `<tr><td>${p.nim}</td><td>${p.kode_mk} - ${mkNama(p.kode_mk)}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai1}" id="n1${idx}">`:p.nilai1}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai2}" id="n2${idx}">`:p.nilai2}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai3}" id="n3${idx}">`:p.nilai3}</td><td>${user.role==='dosen'?`<input style="width:60px" value="${p.nilai4}" id="n4${idx}">`:p.nilai4}</td><td><b>${avg.toFixed(1)}</b></td><td>${user.role==='dosen'?`<button class="btn small" onclick="saveNilai(${idx})">Simpan</button>`:''}</td></tr>`}).join('')}</table></div>`;
-  if(user.role!=='dosen'){ const myJaw=DB.jawaban.filter(j=>String(j.NIM)===String(user.nim)); h+=`<div class="card"><h3>Nilai Esai Saya + Koreksi Dosen</h3>${myJaw.map(j=>`<p><b>${j.KodeUjian} No ${j.NoSoal}</b> - ${j.Jawaban}<br>Nilai: <b>${j.nilai||'Belum dinilai'}</b> • Koreksi: ${j.koreksi_dosen||'-'}</p>`).join('')||'<p>Belum ada jawaban di GS.</p>'}</div>`; }
-}
-c.innerHTML=h;
+  const listN=(user.role==='dosen'?DB.peserta:myPeserta).filter(p=>{
+    const mhs=DB.mahasiswa.find(m=>String(m.nim)===String(p.nim));
+    if(mhs && mhs.role==='dosen') return false;
+    if(user.role==='dosen' && selectedMK && String(p.kode_mk)!==String(selectedMK)) return false;
+    return true;
+  });
+  h+=`<div class="card"><label>Filter MK:</label><select onchange="selectedMK=this.value||null;render()"><option value="">-- Semua MK --</option>${DB.mataKuliah.map(m=>`<option value="${m.kode_mk}" ${String(selectedMK)===String(m.kode_mk)?'selected':''}>${m.kode_mk} - ${m.nama_mk}</option>`).join('')}</select><p class="muted">${selectedMK?'Menampilkan MK: <b>'+selectedMK+'</b> saja. Ganti di atas untuk lihat MK lain.':'Menampilkan semua MK.'}</p></div>`;c.innerHTML=h;
 }
