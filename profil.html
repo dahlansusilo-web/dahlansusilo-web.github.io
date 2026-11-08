@@ -5,12 +5,18 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
+/* HEADER BAKU - JANGAN DIHAPUS */
+header{background:white;padding:10px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);position:sticky;top:0;z-index:99}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#2d1a12}
+.brand img{width:40px;height:40px;object-fit:contain;border-radius:50%;background:#7c2d12}
+.brand b{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.2;color:#7c2d12}
+.brand small{display:block;font-weight:400;font-size:12px;color:#888}
 .wrap{max-width:1100px;margin:30px auto;padding:0 20px}
 .hero-card{background:white;border-radius:32px;overflow:hidden;box-shadow:0 20px 60px rgba(60,20,10,0.07);display:flex;flex-wrap:wrap}
-.left{flex:0 0 340px;background:#7c2d12;color:#f5e6d3;padding:36px 28px;text-align:center}
+.left{flex:0 0 380px;background:#7c2d12;color:#f5e6d3;padding:36px 20px;text-align:center}
 .left img{width:180px;height:180px;border-radius:50%;object-fit:cover;border:6px solid #fff;background:#fff}
-.left h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;margin:16px 0 4px}
-.left p{opacity:.9}
+.left h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;margin:16px 0 6px;white-space:nowrap}
+.left p{opacity:.9;line-height:1.5}
 .right{flex:1;padding:36px}
 .right h2{font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:12px}
 .right p{line-height:1.7;margin-bottom:12px}
@@ -22,8 +28,18 @@ body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
 .buku b{font-size:18px}
 .back-wrap{text-align:center;margin:24px 0 40px}
 .back-btn{display:inline-block;background:white;color:#7c2d12;text-decoration:none;font-weight:700;padding:12px 32px;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+@media(max-width:700px){.left{flex:1 1 100%}.left h1{white-space:normal;font-size:24px}}
 </style></head>
 <body>
+<!-- HEADER BAKU: Logo + Nama Univ kiri atas, kanan kosong -->
+<header>
+<a class="brand" href="index.html">
+<img src="logo-usahid.png" alt="Logo USAHID" onerror="this.style.display='none'">
+<span><b>Universitas Sahid Surakarta</b><small>Portal Akademik</small></span>
+</a>
+<span></span>
+</header>
+
 <div class="wrap"><div class="hero-card">
 <div class="left">
 <img id="pFoto" src="" alt="Foto Profil">
@@ -47,49 +63,27 @@ body{font-family:'Inter',sans-serif;background:#f9f5f0;color:#2d1a12}
 
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxOb93EOtRsz980tV-lWvDfadWdUnZMMMNj0yNnbtPkj5lXd5nTPse8CkmKKqxDV0KY/exec";
-
-function fixFoto(u){
-  if(!u) return "";
-  u = String(u).trim();
-  // Kalau di GS masih keisi judul halaman GitHub, paksa ke raw file
-  if(u.includes("Foto") && !u.startsWith("http")) return "https://raw.githubusercontent.com/dahlansusilo-web/dahlansusilo-web.github.io/main/Foto%2011%20KB.jpeg";
-  if(u.includes("github.com") && u.includes("/blob/")) return u.replace("github.com","raw.githubusercontent.com").replace("/blob/","/");
-  return u;
-}
 async function loadProfil(){
   try{
     const r = await fetch(API + "?page=profil");
-    const txt = await r.text();
-    if(txt.trim().startsWith("<")) throw new Error("Balikan HTML, cek deployment Apps Script");
-    const j = JSON.parse(txt);
+    const j = await r.json();
     const d = Array.isArray(j) ? j[0] : j;
-    if(!d || !d.nama) throw new Error("Data Profil kosong");
-
-    // Key persis header GS, gelar belakang pakai spasi
+    // Nama + gelar SATU BARIS: Ir. Dahlan Susilo M.Kom
     const nama = [d.gelardepan||"", d.nama||"", d["gelar belakang"]||""].join(" ").replace(/\s+/g," ").trim();
     document.getElementById("pNama").textContent = nama;
-    document.getElementById("pJabatan").textContent = d.jabatan || "";
-    document.getElementById("pBidang").textContent = d.bidang || "";
-    document.getElementById("pTentang").textContent = String(d.tentang||"").replace("s=di","di").replace("dimualai","dimulai");
-
-    const foto = fixFoto(d.foto);
-    if(foto) document.getElementById("pFoto").src = foto;
-
-    if(d.email){ const e=document.getElementById("pEmail"); e.textContent=d.email; e.href="mailto:"+d.email; }
-    else document.getElementById("rowEmail").style.display="none";
-
-    if(d.scholar){ const s=document.getElementById("pScholar"); s.textContent=d.scholar; s.href=d.scholar; }
-    else document.getElementById("rowScholar").style.display="none";
-
-    if(d.github){ const g=document.getElementById("pGithub"); g.textContent=d.github; g.href=String(d.github).startsWith("http")?d.github:"https://github.com/"+d.github; }
-    else document.getElementById("rowGithub").style.display="none";
-
-    if(d.buku_terbaru){ document.getElementById("pBuku").textContent=d.buku_terbaru; }
-    else document.getElementById("rowBuku").style.display="none";
-
-  }catch(e){
-    document.getElementById("pTentang").textContent = "Gagal memuat dari GS: " + e.message;
-  }
+    // Jabatan + Bidang dari GS
+    document.getElementById("pJabatan").textContent = d.jabatan || "Lektor";
+    document.getElementById("pBidang").textContent = d.bidang || "Ilmu Komputer";
+    // Bersihkan typo GS: s=di -> di, dimualai -> dimulai, Sukojarjo -> Sukoharjo
+    let t = String(d.tentang||"");
+    t = t.replace("s=di","di").replace("dimualai","dimulai").replace("Sukojarjo","Sukoharjo");
+    document.getElementById("pTentang").textContent = t;
+    if(d.foto) document.getElementById("pFoto").src = d.foto;
+    if(d.email){ const e=document.getElementById("pEmail"); e.textContent=d.email; e.href="mailto:"+d.email; } else document.getElementById("rowEmail").style.display="none";
+    if(d.scholar){ const s=document.getElementById("pScholar"); s.textContent=d.scholar; s.href=d.scholar; } else document.getElementById("rowScholar").style.display="none";
+    if(d.github){ const g=document.getElementById("pGithub"); g.textContent=d.github; g.href=d.github; } else document.getElementById("rowGithub").style.display="none";
+    if(d.buku_terbaru){ document.getElementById("pBuku").textContent=d.buku_terbaru; } else document.getElementById("rowBuku").style.display="none";
+  }catch(e){ document.getElementById("pTentang").textContent="Gagal memuat dari GS: "+e.message; }
 }
 loadProfil();
 </script>
