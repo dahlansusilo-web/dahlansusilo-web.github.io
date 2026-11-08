@@ -85,9 +85,23 @@ function toggleFormMK(editKode){ if(editKode){editMKCode=editKode; showFormMK=tr
 function simpanMK(){
   const kode=document.getElementById('f_mk_kode').value.trim(), nama=document.getElementById('f_mk_nama').value.trim(), sks=parseInt(document.getElementById('f_mk_sks').value)||3;
   if(!kode||!nama){alert('Kode MK dan Nama MK wajib diisi!');return}
+  const pesertaDipilih=[...document.querySelectorAll('.cekPeserta:checked')].map(c=>c.value);
+  const kodeLama=editMKCode||kode;
+  const pesertaLama=DB.peserta.filter(p=>String(p.kode_mk)===String(kodeLama)).map(p=>String(p.nim));
+
   if(editMKCode){ const m=DB.mataKuliah.find(x=>String(x.kode_mk)===String(editMKCode)); m.kode_mk=kode; m.nama_mk=nama; m.sks=sks; save('MataKuliah',{kode_mk:kode,nama_mk:nama,sks,dosen:user.nim,action:'update',kodeLama:editMKCode}); }
   else { if(DB.mataKuliah.find(m=>String(m.kode_mk)===kode)){alert('Kode MK sudah ada di GS!');return} DB.mataKuliah.push({kode_mk:kode,nama_mk:nama,sks,dosen:user.nim}); save('MataKuliah',{kode_mk:kode,nama_mk:nama,sks,dosen:user.nim,action:'add'}); }
-  showFormMK=false; editMKCode=null; alert('MK berhasil disimpan! Tunggu 5 detik lalu klik Sync GS untuk cek di Sheet.'); render();
+
+  // --- Sync Peserta: hapus yang tidak dicentang, tambah yang baru ---
+  if(kodeLama!==kode){
+    pesertaLama.forEach(nim=>{ DB.peserta=DB.peserta.filter(p=>!(String(p.nim)===String(nim)&&String(p.kode_mk)===String(kodeLama))); save('Peserta',{nim,kode_mk:kodeLama,action:'delete'}); });
+    pesertaDipilih.forEach(nim=>{ const payload={nim,kode_mk:kode,nilai1:0,nilai2:0,nilai3:0,nilai4:0}; DB.peserta.push(payload); save('Peserta',{...payload,action:'add'}); });
+  } else {
+    pesertaLama.filter(nim=>!pesertaDipilih.includes(nim)).forEach(nim=>{ DB.peserta=DB.peserta.filter(p=>!(String(p.nim)===String(nim)&&String(p.kode_mk)===String(kode))); save('Peserta',{nim,kode_mk:kode,action:'delete'}); });
+    pesertaDipilih.filter(nim=>!pesertaLama.includes(nim)).forEach(nim=>{ const payload={nim,kode_mk:kode,nilai1:0,nilai2:0,nilai3:0,nilai4:0}; DB.peserta.push(payload); save('Peserta',{...payload,action:'add'}); });
+  }
+
+  showFormMK=false; editMKCode=null; alert('MK + Peserta berhasil disimpan!'); render();
 }
 function hapusMK(kode){
   const jmlPeserta=DB.peserta.filter(p=>String(p.kode_mk)===String(kode)).length, jmlMateri=DB.materi.filter(p=>String(p.kode_mk)===String(kode)).length;
