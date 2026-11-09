@@ -5,24 +5,11 @@
 <title>Profil - Dahlan Susilo</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<style>
-/* Khusus Profil, tetap pakai gaya index.html */
-.profil-hero{flex:1;display:flex;justify-content:center}
-.profil-card{background:white;border-radius:32px;max-width:900px;width:100%;padding:60px 30px 40px;text-align:center;box-shadow:0 20px 60px rgba(60,20,10,0.07);position:relative;margin-top:80px}
-.profil-card h1{font-size:32px;white-space:nowrap}
-.profil-tentang{margin-top:24px;text-align:left;line-height:1.8;color:#4a3a32;border-top:1px solid #f0e6d3;padding-top:24px}
-.profil-tentang h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;color:#7c2d12;margin-bottom:10px;text-align:left}
-.profil-info{margin-top:20px;display:grid;gap:10px;text-align:left}
-.profil-info div{background:#f9f5f0;padding:12px 14px;border-radius:12px}
-.profil-info b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#7c2d12;margin-bottom:2px}
-.profil-info a{color:#2563eb;word-break:break-all}
-@media(max-width:700px){.profil-card h1{white-space:normal;font-size:26px}}
-</style>
 </head>
 <body>
 <header>
   <div style="display:flex;align-items:center;gap:10px;font-weight:700;color:#7c2d12;font-size:14px">
-    <img src="/logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain" alt="Logo USAHID">
+    <img src="logo-usahidsolo.png" style="width:42px;height:42px;object-fit:contain" alt="Logo USAHID">
     <div style="line-height:1.15"><div style="font-size:16px;letter-spacing:.3px;">UNIVERSITAS SAHID SURAKARTA</div></div>
   </div>
   <div style="display:flex;align-items:center;gap:18px">
@@ -30,35 +17,31 @@
     <img id="fotoTop" src="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #f5e6d3;display:none" alt="Foto">
   </div>
 </header>
-<script src="/menu.js"></script>
+<script src="menu.js"></script>
 
-<div class="main-wrap" style="align-items:flex-start">
+<div class="main-wrap">
   <div class="profil-hero">
     <div class="profil-card">
-      <!-- FOTO NONGOL DI ATAS KARTU, SAMA SEPERTI INDEX -->
       <div class="avatar-wrap"><img id="pFoto" src="Foto 11 KB.jpeg" alt="Dahlan Susilo"></div>
       <h1 id="pNama">IR. DAHLAN SUSILO M.KOM</h1>
       <div class="badge" id="pBadge">Lektor • Ilmu Komputer</div>
       <div class="sub">Universitas Sahid Surakarta</div>
       <div class="desc" id="pDesc">Pengajar & Peneliti — Ilmu Komputer</div>
-
       <div class="profil-tentang">
         <h2>Tentang Saya</h2>
         <p id="pTentang">Memuat...</p>
         <div class="profil-info">
-          <div id="rowEmail"><b>Email</b><a id="pEmail" href=""></a></div>
-          <div id="rowScholar"><b>Google Scholar</b><a id="pScholar" href="" target="_blank"></a></div>
-          <div id="rowGithub"><b>GitHub</b><a id="pGithub" href="" target="_blank"></a></div>
+          <div><b>Email</b><a id="pEmail" href=""></a></div>
+          <div><b>Google Scholar</b><a id="pScholar" href="" target="_blank"></a></div>
+          <div><b>GitHub</b><a id="pGithub" href="" target="_blank"></a></div>
         </div>
       </div>
-
-      <div class="btns" style="margin-top:28px">
+      <div class="btns">
         <a class="btn btn-primary" href="buku/">📚 Lihat Semua Buku</a>
         <a class="btn btn-outline" href="index.html">← Kembali</a>
       </div>
     </div>
   </div>
-
   <div class="grid-section">
     <h2 class="grid-title">Akses Cepat</h2>
     <div class="grid">
@@ -71,28 +54,5 @@
 </div>
 
 <footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta | <a href="profil.html" style="color:#f5e6d3;text-decoration:underline">Profil</a></footer>
-
-<script>
-async function loadProfil(){
-  try{
-    const r = await fetch("profil.json");
-    const d = await r.json();
-    // Nama 1 baris, huruf besar seperti di index
-    const nama = [d.gelardepan||"", d.nama||"", d.gelar_belakang||""].join(" ").replace(/\s+/g," ").trim();
-    document.getElementById("pNama").textContent = nama.toUpperCase();
-    document.getElementById("pBadge").textContent = (d.jabatan||"Lektor") + " • " + (d.bidang||"Ilmu Komputer");
-    document.getElementById("pDesc").textContent = "Pengajar & Peneliti — " + (d.bidang||"Ilmu Komputer");
-    document.getElementById("pTentang").textContent = d.tentang || "";
-    if(d.foto){
-      document.getElementById("pFoto").src = d.foto;
-      const top = document.getElementById("fotoTop");
-      if(top){ top.src = d.foto; top.style.display = "block"; }
-    }
-    if(d.email){ const e=document.getElementById("pEmail"); e.textContent=d.email; e.href="mailto:"+d.email; }
-    if(d.scholar){ const s=document.getElementById("pScholar"); s.textContent=d.scholar; s.href=d.scholar; }
-    if(d.github){ const g=document.getElementById("pGithub"); g.textContent=d.github; g.href=d.github; }
-  }catch(e){ document.getElementById("pTentang").textContent="Gagal memuat profil.json: "+e.message; }
-}
-loadProfil();
-</script>
+<script src="script.js"></script>
 </body></html>
