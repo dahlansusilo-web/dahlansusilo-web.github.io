@@ -1,5 +1,5 @@
 // profil.js - DATA PROFIL, JANGAN DARI GS
-const PROFIL = {
+window.PROFIL = {
   "gelardepan": "Ir.",
   "nama": "Dahlan Susilo",
   "gelar_belakang": "M.Kom",
