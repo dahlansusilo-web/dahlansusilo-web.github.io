@@ -19,40 +19,34 @@
 </header>
 <script src="menu.js"></script>
 
-<div class="main-wrap">
-  <div class="profil-hero">
-    <div class="profil-card">
-      <div class="avatar-wrap"><img id="pFoto" src="Foto 11 KB.jpeg" alt="Dahlan Susilo"></div>
-      <h1 id="pNama">IR. DAHLAN SUSILO M.KOM</h1>
-      <div class="badge" id="pBadge">Lektor • Ilmu Komputer</div>
-      <div class="sub">Universitas Sahid Surakarta</div>
-      <div class="desc" id="pDesc">Pengajar & Peneliti — Ilmu Komputer</div>
-      <div class="profil-tentang">
-        <h2>Tentang Saya</h2>
-        <p id="pTentang">Memuat...</p>
-        <div class="profil-info">
-          <div><b>Email</b><a id="pEmail" href=""></a></div>
-          <div><b>Google Scholar</b><a id="pScholar" href="" target="_blank"></a></div>
-          <div><b>GitHub</b><a id="pGithub" href="" target="_blank"></a></div>
-        </div>
-      </div>
-      <div class="btns">
-        <a class="btn btn-primary" href="buku/">📚 Lihat Semua Buku</a>
-        <a class="btn btn-outline" href="index.html">← Kembali</a>
+<!-- AKSES CEPAT DIBUANG, KARTU JADI DI TENGAH SAJA -->
+<div style="max-width:900px;margin:0 auto;padding:40px 20px">
+  <div class="profil-card" style="margin-top:80px">
+    <div class="avatar-wrap"><img id="pFoto" src="Foto 11 KB.jpeg" alt="Dahlan Susilo"></div>
+    <h1 id="pNama">IR. DAHLAN SUSILO M.KOM</h1>
+    <div class="badge" id="pBadge">Lektor</div>
+    <div class="sub">Universitas Sahid Surakarta</div>
+    <div class="desc" id="pDesc">Pengajar & Peneliti — Ilmu Komputer</div>
+    <div class="profil-tentang">
+      <h2>Tentang Saya</h2>
+      <p id="pTentang">Memuat...</p>
+      <div class="profil-info">
+        <div><b>Email</b><a id="pEmail" href=""></a></div>
+        <div><b>Google Scholar</b><a id="pScholar" href="" target="_blank"></a></div>
+        <div><b>GitHub</b><a id="pGithub" href="" target="_blank"></a></div>
       </div>
     </div>
-  </div>
-  <div class="grid-section">
-    <h2 class="grid-title">Akses Cepat</h2>
-    <div class="grid">
-      <a class="card" href="profil.html" style="background:#7c2d12;color:white;border-color:#7c2d12">👤 Profil</a>
-      <a class="card" href="buku/">📚 Buku</a>
-      <a class="card" href="karya/">💡 Karya</a>
-      <a class="card" href="kuliah/">🎓 LMS</a>
+    <div class="btns">
+      <a class="btn btn-primary" href="buku/">📚 Lihat Semua Buku</a>
+      <a class="btn btn-outline" href="index.html">← Kembali</a>
     </div>
   </div>
 </div>
 
-<footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta | <a href="profil.html" style="color:#f5e6d3;text-decoration:underline">Profil</a></footer>
+<!-- LINK PROFIL DI FOOTER DIBUANG -->
+<footer>© 2026 Dahlan Susilo • Universitas Sahid Surakarta</footer>
+
+<!-- URUTAN INI PENTING: profil.js DULU, BARU script.js -->
+<script src="profil.js"></script>
 <script src="script.js"></script>
 </body></html>
